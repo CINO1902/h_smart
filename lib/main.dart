@@ -1,3 +1,5 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -16,8 +18,7 @@ import 'package:h_smart/features/chat/presentation/pages/chatUi.dart';
 import 'package:h_smart/features/doctorRecord/presentation/pages/aboutDoctor.dart';
 import 'package:h_smart/features/doctorRecord/presentation/provider/doctorprovider.dart';
 import 'package:h_smart/features/firstAid/presentation/pages/firstaid.dart';
-import 'package:h_smart/features/firstAid/presentation/pages/firstaiddesc.dart';
-import 'package:h_smart/features/medical_record/presentation/pages/HomePage.dart';
+
 import 'package:h_smart/features/medical_record/presentation/pages/medicalinfo.dart';
 import 'package:h_smart/features/medical_record/presentation/pages/medicalrecord.dart';
 import 'package:h_smart/features/medical_record/presentation/pages/medicine_and_prescription.dart';
@@ -47,11 +48,18 @@ import 'features/medical_record/presentation/pages/index.dart';
 import 'features/medical_record/presentation/pages/reportsanddocu.dart';
 import 'features/myAppointment/presentation/pages/changepassword.dart';
 
+Future<void> _firebasebackgroundhandler(RemoteMessage message) async {
+  Firebase.initializeApp();
+  print("handling message in ${message.messageId}");
+}
+
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   final pref = await SharedPreferences.getInstance();
   String? logtoken = pref.getString('jwt_token');
+  await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(_firebasebackgroundhandler);
   print(logtoken);
   runApp(MyApp(
     token: logtoken,

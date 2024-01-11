@@ -34,7 +34,7 @@ class _ChangePasswordState extends State<ChangePassword> {
           child: ListView(
             children: [
               const Text('Current Password'),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               SizedBox(
@@ -61,7 +61,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                                     Theme.of(context).colorScheme.onBackground,
                               ),
                       ),
-                      contentPadding: EdgeInsets.only(top: 5, left: 10),
+                      contentPadding: const EdgeInsets.only(top: 5, left: 10),
                       hintText: "Enter your password",
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -74,9 +74,9 @@ class _ChangePasswordState extends State<ChangePassword> {
                       }
                     }),
               ),
-              Gap(20),
+              const Gap(20),
               const Text('New Password'),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               SizedBox(
@@ -103,7 +103,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                                     Theme.of(context).colorScheme.onBackground,
                               ),
                       ),
-                      contentPadding: EdgeInsets.only(top: 5, left: 10),
+                      contentPadding: const EdgeInsets.only(top: 5, left: 10),
                       hintText: "Enter new password",
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -116,9 +116,9 @@ class _ChangePasswordState extends State<ChangePassword> {
                       }
                     }),
               ),
-              Gap(20),
+              const Gap(20),
               const Text('Confirm New Password'),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               SizedBox(
@@ -145,7 +145,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                                     Theme.of(context).colorScheme.onBackground,
                               ),
                       ),
-                      contentPadding: EdgeInsets.only(top: 5, left: 10),
+                      contentPadding: const EdgeInsets.only(top: 5, left: 10),
                       hintText: "Confirm New Passwordd",
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),

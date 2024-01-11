@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:gap/gap.dart';
 import 'package:h_smart/features/auth/presentation/provider/auth_provider.dart';
-import 'package:h_smart/features/doctorRecord/presentation/provider/doctorprovider.dart';
 import 'package:provider/provider.dart';
 
 import '../../../Hospital/presentation/provider/getHospitalProvider.dart';

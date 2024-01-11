@@ -85,7 +85,35 @@ class _ListDoctorsState extends State<ListDoctors> {
                     );
                   } else if (value.error == true) {
                     return Center(
-                      child: Text('Something Went Wrong'),
+                      child: Column(
+                        children: [
+                          const Text('Something Went Wrong'),
+                          InkWell(
+                            onTap: () {
+                              context
+                                  .read<doctorprpvider>()
+                                  .calldoctorcatergory();
+                              context.read<doctorprpvider>().callmydoctor();
+                            },
+                            child: Container(
+                              width: 110,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(16),
+                                  color: Theme.of(context).primaryColor),
+                              margin: const EdgeInsets.symmetric(
+                                  horizontal: 16.0, vertical: 8.0),
+                              child: const Center(
+                                child: Text("Try Again",
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600)),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     );
                   } else {
                     return SizedBox(

@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'package:h_smart/features/auth/domain/entities/completeprofileRes.dart';
@@ -19,6 +21,7 @@ class authprovider extends ChangeNotifier {
   bool error = false;
 
   String message = '';
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   File? image;
   bool loading = false;
   bool getinfo1 = false;
@@ -50,6 +53,7 @@ class authprovider extends ChangeNotifier {
     notifyListeners();
 
     final response = await authReposity.login(login);
+    logoutuser = false;
     if (response[0].contains('1')) {
       error = true;
       message = response[1];
@@ -61,6 +65,10 @@ class authprovider extends ChangeNotifier {
       pref.setString('jwt_token', token);
     }
     loading = false;
+    _firestore
+        .collection('users')
+        .doc(email)
+        .set({'id': email}, SetOptions(merge: true));
     notifyListeners();
   }
 

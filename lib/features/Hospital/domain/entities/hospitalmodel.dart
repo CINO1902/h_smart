@@ -46,7 +46,7 @@ class HospitalsDetail {
   String country;
   String phoneNumber;
   String email;
-  String website;
+  String? website;
   DateTime createdAt;
   DateTime updatedAt;
 
@@ -61,7 +61,7 @@ class HospitalsDetail {
     required this.country,
     required this.phoneNumber,
     required this.email,
-    required this.website,
+    this.website,
     required this.createdAt,
     required this.updatedAt,
   });

@@ -32,8 +32,8 @@ class _prescription1State extends State<prescription1> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        margin: EdgeInsets.only(bottom: 20),
-        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+        margin: const EdgeInsets.only(bottom: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
         //  height: 195,
         decoration: BoxDecoration(
             border: Border.all(color: Color.fromARGB(255, 172, 197, 255)),
@@ -110,7 +110,7 @@ class _prescription1State extends State<prescription1> {
                         children: [
                           Text(
                             'Prescribed by: Dr. ${widget.drfistname} ${widget.drlastname}',
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontWeight: FontWeight.w600, fontSize: 11),
                           ),
                           if (showdetails)
@@ -168,7 +168,6 @@ class _prescription1State extends State<prescription1> {
                                               child: CachedNetworkImage(
                                                 progressIndicatorBuilder:
                                                     (context, url, progress) {
-                                                  print(progress.progress);
                                                   return Center(
                                                     child: SizedBox(
                                                       height: 20,
@@ -186,7 +185,7 @@ class _prescription1State extends State<prescription1> {
                                                 fit: BoxFit.cover,
                                                 errorWidget:
                                                     (context, url, error) =>
-                                                        Icon(
+                                                        const Icon(
                                                   Icons.error,
                                                   color: Colors.red,
                                                 ),
@@ -226,7 +225,7 @@ class _prescription1State extends State<prescription1> {
                                   ]),
                             ],
                           )
-                        : SizedBox(),
+                        : const SizedBox(),
                     const Gap(5),
                     const Text(
                       '20 June, 2023',

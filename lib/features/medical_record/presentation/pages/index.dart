@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:h_smart/features/chat/presentation/pages/chat.dart';
@@ -25,9 +23,9 @@ class _indexpageState extends State<indexpage> {
       HomePage(
         scrollcontroller: scrollcontroller,
       ),
-      MyAppointment(),
-      Chat(),
-      Profile(),
+      const MyAppointment(),
+      const Chat(),
+      const Profile(),
     ];
     return PopScope(
       canPop: canpop,
@@ -55,12 +53,13 @@ class _indexpageState extends State<indexpage> {
                 gap: 8,
                 activeColor: Theme.of(context).primaryColor,
                 iconSize: 24,
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                duration: Duration(milliseconds: 400),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                duration: const Duration(milliseconds: 400),
                 tabBackgroundColor: Colors.grey[100]!,
                 color: Colors.black,
                 tabs: [
-                  GButton(
+                  const GButton(
                     icon: LineIcons.home,
                     text: 'Home',
                   ),
@@ -72,11 +71,11 @@ class _indexpageState extends State<indexpage> {
                         color: Theme.of(context).primaryColor,
                         fontWeight: FontWeight.bold),
                   ),
-                  GButton(
+                  const GButton(
                     icon: LineIcons.rocketChat,
                     text: 'Chat',
                   ),
-                  GButton(
+                  const GButton(
                     icon: LineIcons.user,
                     text: 'Profile',
                   ),

@@ -50,6 +50,7 @@ class doctorprpvider extends ChangeNotifier {
   }
 
   void calldoctorcatergory() async {
+    error = false;
     final response = await doctorRepository.getDoctorCategory();
     loading = false;
     if (response[0].contains('1')) {
@@ -121,7 +122,9 @@ class doctorprpvider extends ChangeNotifier {
   }
 
   Future<void> callmydoctor() async {
+    error = false;
     mydocloading = true;
+    notifyListeners();
     final response = await doctorRepository.mydoctor();
     mydocloading = false;
     if (response[0].contains('1')) {
