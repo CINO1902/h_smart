@@ -43,6 +43,8 @@ class _LoginPageState extends State<LoginPage>
     return Scaffold(
         appBar: AppBar(
           elevation: 0,
+          surfaceTintColor: Colors.transparent,
+          centerTitle: true,
           title: Image.asset(
             'images/logo1.png',
             width: 200,

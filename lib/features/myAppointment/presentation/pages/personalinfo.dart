@@ -52,16 +52,18 @@ class _PersonalInfoState extends State<PersonalInfo> {
               fontWeight: FontWeight.w600,
               fontFamily: 'Poppins'),
           actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 20.0),
-              child: InkWell(
-                  onTap: () {
-                    setState(() {
-                      updatechange = true;
-                    });
-                  },
-                  child: Icon(Icons.edit_outlined)),
-            )
+            updatechange
+                ? SizedBox()
+                : Padding(
+                    padding: const EdgeInsets.only(right: 20.0),
+                    child: InkWell(
+                        onTap: () {
+                          setState(() {
+                            updatechange = true;
+                          });
+                        },
+                        child: Icon(Icons.edit_outlined)),
+                  )
           ],
           title: const Text(
             'Personal Info',
@@ -269,9 +271,9 @@ class _PersonalInfoState extends State<PersonalInfo> {
                 child: TextFormField(
                   controller: email,
                   cursorHeight: 20,
-                  readOnly: !updatechange,
+                  readOnly: true,
                   decoration: InputDecoration(
-                    fillColor: updatechange ? Colors.white : Color(0xffEAECF0),
+                    fillColor: Color(0xffEAECF0),
                     filled: true,
                     contentPadding: EdgeInsets.only(
                       top: 5,

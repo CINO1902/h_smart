@@ -15,6 +15,7 @@ import 'package:h_smart/features/auth/presentation/pages/setUpHealthDetails.dart
 import 'package:h_smart/features/auth/presentation/pages/verifyemail.dart';
 import 'package:h_smart/features/chat/presentation/pages/chat.dart';
 import 'package:h_smart/features/chat/presentation/pages/chatUi.dart';
+import 'package:h_smart/features/chat/presentation/provider/chatservice.dart';
 import 'package:h_smart/features/doctorRecord/presentation/pages/aboutDoctor.dart';
 import 'package:h_smart/features/doctorRecord/presentation/provider/doctorprovider.dart';
 import 'package:h_smart/features/firstAid/presentation/pages/firstaid.dart';
@@ -41,6 +42,7 @@ import 'features/SymptomsChecker/presentation/pages/symptomschecker.dart';
 import 'features/TestAndResport/presentation/pages/testandreport.dart';
 import 'features/auth/presentation/pages/Login.dart';
 import 'features/auth/presentation/provider/auth_provider.dart';
+import 'firebase_options.dart';
 import 'features/doctorRecord/presentation/pages/Doctor.dart';
 import 'features/doctorRecord/presentation/pages/appointscheduled.dart';
 import 'features/doctorRecord/presentation/pages/rateexperience.dart';
@@ -58,7 +60,9 @@ void main() async {
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   final pref = await SharedPreferences.getInstance();
   String? logtoken = pref.getString('jwt_token');
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   FirebaseMessaging.onBackgroundMessage(_firebasebackgroundhandler);
   print(logtoken);
   runApp(MyApp(
@@ -99,6 +103,13 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(
           create: (context) => MedicalRecordprovider(locator()),
         ),
+        ChangeNotifierProxyProvider<authprovider, ChatService>(
+            create: (context) => ChatService(),
+            update: (BuildContext context, authprovider authprovider,
+                ChatService? chatService) {
+              chatService!.update(authprovider);
+              return ChatService();
+            }),
         ChangeNotifierProxyProvider<authprovider, mydashprovider>(
             create: (context) => mydashprovider(locator()),
             update: (BuildContext context, authprovider authprovider,
@@ -161,7 +172,7 @@ class _MyAppState extends State<MyApp> {
                 '/viewhospitaldetail': (context) => const viewhospitaldetail(),
                 '/governmenthospital': (context) => const GovermentHospital(),
                 '/privatehospital': (context) => const PrivateHosptal(),
-                '/ChatUi': (context) => const ChatUI(),
+                //  '/ChatUi': (context) => const ChatUI(),
               },
 
               // home: isLoggedIn ? const MainPage(title: 'Home') : const WelcomePage(),

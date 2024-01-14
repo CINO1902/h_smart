@@ -1,4 +1,4 @@
-package com.example.h_smart
+package com.caleboruta.hsmart
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -65,10 +65,7 @@ class authprovider extends ChangeNotifier {
       pref.setString('jwt_token', token);
     }
     loading = false;
-    _firestore
-        .collection('users')
-        .doc(email)
-        .set({'id': email}, SetOptions(merge: true));
+
     notifyListeners();
   }
 
@@ -90,7 +87,7 @@ class authprovider extends ChangeNotifier {
 
   Future<void> getinfo() async {
     final pref = await SharedPreferences.getInstance();
-
+    email = pref.getString('email') ?? '';
     error = false;
     message = '';
     infoloading = true;
@@ -126,6 +123,12 @@ class authprovider extends ChangeNotifier {
       phone = getData.contactNumber;
 
       dob = getData.dateOfBirth;
+      _firestore.collection('users').doc(email).set({
+        'id': email,
+        'profile_pic': getData.profilePicture,
+        'first_name': getData.firstName,
+        'last_name': getData.lastName
+      }, SetOptions(merge: true));
     }
     infoloading = false;
     setstaticinfo();
