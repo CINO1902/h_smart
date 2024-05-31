@@ -19,6 +19,7 @@ class _FirstAidDescState extends State<FirstAidDesc> {
       appBar: AppBar(
           centerTitle: true,
           elevation: 0,
+          surfaceTintColor: Colors.transparent,
           titleSpacing: 0.1,
           foregroundColor: Colors.black,
           titleTextStyle: const TextStyle(

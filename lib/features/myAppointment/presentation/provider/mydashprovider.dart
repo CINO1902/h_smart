@@ -1,5 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
-
+import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:h_smart/features/auth/domain/entities/completeProfile.dart';
 import 'package:h_smart/features/auth/presentation/provider/auth_provider.dart';
@@ -13,6 +14,7 @@ class mydashprovider extends ChangeNotifier {
   mydashprovider(this.userRepository);
   bool loading = false;
   bool error = false;
+  bool uploadimageerror = false;
   String message = '';
   String email = '';
   String profilepic = '';
@@ -23,20 +25,43 @@ class mydashprovider extends ChangeNotifier {
   String lastname = '';
   String address = '';
   String phone = '';
+  String imageurl = '';
 
   Future<void> pickimageupdate() async {
     try {
       final result = await ImagePicker().pickImage(source: ImageSource.gallery);
-      if (result == null) {
-        return;
-      }
-      final ImageTemporary = File(result.path);
+      // if (result == null) {
+      //   return;
+      // }
+      final ImageTemporary = File(result!.path);
 
       image = ImageTemporary;
-      print(image);
     } catch (e) {
       error = true;
       es = e.toString();
+      print(es);
+    }
+    notifyListeners();
+  }
+
+  Future<void> uploadbook() async {
+    uploadimageerror = false;
+    final url = Uri.parse('https://api.cloudinary.com/v1_1/dlsavisdq/upload');
+    final request = http.MultipartRequest('POST', url)
+      ..fields['upload_preset'] = 'image_preset_hSmart'
+      ..files.add(await http.MultipartFile.fromPath('file', image!.path));
+    final response = await request.send();
+    print(response.statusCode);
+
+    if (response.statusCode == 200) {
+      final responseData = await response.stream.toBytes();
+      final responseString = String.fromCharCodes(responseData);
+      final jsonMap = jsonDecode(responseString);
+
+      final url = jsonMap['url'];
+      imageurl = url;
+    } else {
+      uploadimageerror = true;
     }
     notifyListeners();
   }
@@ -45,7 +70,7 @@ class mydashprovider extends ChangeNotifier {
     loading = true;
 
     final response = await userRepository.edit_profile(
-        firstname, lastname, phone, email, address, image);
+        firstname, lastname, phone, email, address, image, imageurl);
     if (response[0].contains('1')) {
       error = false;
       message = response[1];

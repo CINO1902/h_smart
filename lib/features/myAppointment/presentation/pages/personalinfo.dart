@@ -31,6 +31,7 @@ class _PersonalInfoState extends State<PersonalInfo> {
 
   @override
   Widget build(BuildContext context) {
+    final uploadprovider = context.watch<mydashprovider>();
     TextEditingController _firstname =
         TextEditingController(text: context.watch<authprovider>().firstname);
     TextEditingController lastname =
@@ -103,7 +104,7 @@ class _PersonalInfoState extends State<PersonalInfo> {
                 updatechange
                     ? InkWell(
                         onTap: () {
-                          context.read<mydashprovider>().pickimageupdate();
+                          uploadprovider.pickimageupdate();
                         },
                         child: Container(
                           padding: EdgeInsets.only(left: 70),
@@ -311,18 +312,14 @@ class _PersonalInfoState extends State<PersonalInfo> {
                                 return;
                               }
                               SmartDialog.showLoading();
-                              await value.editprofile(
-                                  _firstname.text,
-                                  lastname.text,
-                                  phone.text,
-                                  email.text,
-                                  address.text);
-                              if (value.error == true) {
+                              await value.uploadbook();
+                              if (value.uploadimageerror == true) {
                                 ScaffoldMessenger.of(context)
                                     .showSnackBar(SnackBar(
                                   content: CustomeSnackbar(
                                     topic: 'Oh Snap!',
-                                    msg: value.message,
+                                    msg:
+                                        'There is an issue uploading the image',
                                     color1: Color.fromARGB(255, 171, 51, 42),
                                     color2: Color.fromARGB(255, 127, 39, 33),
                                   ),
@@ -330,22 +327,45 @@ class _PersonalInfoState extends State<PersonalInfo> {
                                   backgroundColor: Colors.transparent,
                                   elevation: 0,
                                 ));
-                              } else {
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(SnackBar(
-                                  content: CustomeSnackbar(
-                                    topic: 'Great!',
-                                    msg: value.message,
-                                    color1: Color.fromARGB(255, 25, 107, 52),
-                                    color2: Color.fromARGB(255, 19, 95, 40),
-                                  ),
-                                  behavior: SnackBarBehavior.floating,
-                                  backgroundColor: Colors.transparent,
-                                  elevation: 0,
-                                ));
-                                await context.read<authprovider>().getinfo();
                                 SmartDialog.dismiss();
-                                Navigator.pop(context);
+                              } else {
+                                await value.editprofile(
+                                    _firstname.text,
+                                    lastname.text,
+                                    phone.text,
+                                    email.text,
+                                    address.text);
+                                if (value.error == true) {
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(SnackBar(
+                                    content: CustomeSnackbar(
+                                      topic: 'Oh Snap!',
+                                      msg: value.message,
+                                      color1: Color.fromARGB(255, 171, 51, 42),
+                                      color2: Color.fromARGB(255, 127, 39, 33),
+                                    ),
+                                    behavior: SnackBarBehavior.floating,
+                                    backgroundColor: Colors.transparent,
+                                    elevation: 0,
+                                  ));
+                                  SmartDialog.dismiss();
+                                } else {
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(SnackBar(
+                                    content: CustomeSnackbar(
+                                      topic: 'Great!',
+                                      msg: value.message,
+                                      color1: Color.fromARGB(255, 25, 107, 52),
+                                      color2: Color.fromARGB(255, 19, 95, 40),
+                                    ),
+                                    behavior: SnackBarBehavior.floating,
+                                    backgroundColor: Colors.transparent,
+                                    elevation: 0,
+                                  ));
+                                  await context.read<authprovider>().getinfo();
+                                  SmartDialog.dismiss();
+                                  Navigator.pop(context);
+                                }
                               }
                             },
                             child: InkButton(title: 'Update Changes')),

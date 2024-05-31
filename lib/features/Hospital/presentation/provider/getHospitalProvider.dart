@@ -14,11 +14,11 @@ class GetHospitalProvider extends ChangeNotifier {
   bool error = false;
   int private1 = 0;
   String errormessage = '';
-  List<HospitalsDetail> hospitalData = [];
-  List<HospitalsDetail> governmenthospital = [];
-  List<HospitalsDetail> privatehospital = [];
-  List<HospitalsDetail> governmenthospitalall = [];
-  List<HospitalsDetail> privatehospitalall = [];
+  List<Result> hospitalData = [];
+  List<Result> governmenthospital = [];
+  List<Result> privatehospital = [];
+  List<Result> governmenthospitalall = [];
+  List<Result> privatehospitalall = [];
   String imagetag = '';
   String imagetag1 = '';
   bool enablehero = false;
@@ -29,14 +29,17 @@ class GetHospitalProvider extends ChangeNotifier {
     loading = true;
 
     final response = await hospitalRepo.getHospital();
+
     if (response[0].contains('2')) {
       error = true;
       errormessage = response[1][0];
+      loading = false;
     } else {
       error = false;
+
       final decodedres =
           HospitalModel.fromJson(response[1][0] as Map<String, dynamic>);
-      hospitalData = decodedres.hospitalsDetail;
+      hospitalData = decodedres.results;
       governmenthospital = hospitalData
           .where((element) => element.type == 'government')
           .take(4)
@@ -50,10 +53,10 @@ class GetHospitalProvider extends ChangeNotifier {
           .toList();
       privatehospitalall =
           hospitalData.where((element) => element.type == 'private').toList();
+      loading = false;
+      print(loading);
+      notifyListeners();
     }
-
-    loading = false;
-    notifyListeners();
   }
 
   void getClickedHospital(index, private, name, city) {

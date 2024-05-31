@@ -1,10 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-
+import 'package:http/http.dart' as http;
 import 'package:h_smart/features/auth/domain/entities/completeprofileRes.dart';
 import 'package:h_smart/features/auth/domain/entities/createaccount.dart';
 import 'package:h_smart/features/auth/domain/entities/setuphealthissue.dart';
@@ -24,6 +25,7 @@ class authprovider extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   File? image;
   bool loading = false;
+  bool uploadimageerror = false;
   bool getinfo1 = false;
   String email = '';
   String profilepic = '';
@@ -34,16 +36,18 @@ class authprovider extends ChangeNotifier {
   String lastname = '';
   String address = '';
   String phone = '';
+  String imageurl = '';
   String es = '';
   Data getData = Data(
       id: '',
       user: '',
       firstName: '',
+      couldinaryFileField: '',
       lastName: '',
       dateOfBirth: DateTime.now(),
       address: '',
       contactNumber: '',
-      profilePicture: '',
+      hospital: '',
       createdAt: DateTime.now(),
       updatedAt: DateTime.now());
   final dio = Dio();
@@ -55,6 +59,7 @@ class authprovider extends ChangeNotifier {
     final response = await authReposity.login(login);
     logoutuser = false;
     if (response[0].contains('1')) {
+      print('error is here');
       error = true;
       message = response[1];
     } else {
@@ -95,7 +100,9 @@ class authprovider extends ChangeNotifier {
     final response = await authReposity.getinfo();
     if (response[0].contains('1')) {
       error = true;
-      if (response[1].contains('Given token not valid')) {
+
+      if (response[1].contains('Given token not valid') ||
+          response[1].contains('User not found')) {
         logoutuser = true;
       }
     } else {
@@ -110,8 +117,8 @@ class authprovider extends ChangeNotifier {
       pref.setString('email', getData.user);
       email = getData.user;
 
-      pref.setString('profilepic', getData.profilePicture);
-      profilepic = getData.profilePicture;
+      pref.setString('profilepic', getData.couldinaryFileField);
+      profilepic = getData.couldinaryFileField;
 
       pref.setString('first_name', getData.firstName);
       firstname = getData.firstName;
@@ -125,7 +132,7 @@ class authprovider extends ChangeNotifier {
       dob = getData.dateOfBirth;
       _firestore.collection('users').doc(email).set({
         'id': email,
-        'profile_pic': getData.profilePicture,
+        'profile_pic': getData.couldinaryFileField,
         'first_name': getData.firstName,
         'last_name': getData.lastName
       }, SetOptions(merge: true));
@@ -220,6 +227,28 @@ class authprovider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> uploadbook() async {
+    uploadimageerror = false;
+    final url = Uri.parse('https://api.cloudinary.com/v1_1/dlsavisdq/upload');
+    final request = http.MultipartRequest('POST', url)
+      ..fields['upload_preset'] = 'image_preset_hSmart'
+      ..files.add(await http.MultipartFile.fromPath('file', image!.path));
+    final response = await request.send();
+    print(response.statusCode);
+
+    if (response.statusCode == 200) {
+      final responseData = await response.stream.toBytes();
+      final responseString = String.fromCharCodes(responseData);
+      final jsonMap = jsonDecode(responseString);
+
+      final url = jsonMap['url'];
+      imageurl = url;
+    } else {
+      uploadimageerror = true;
+    }
+    notifyListeners();
+  }
+
   Future<void> continueRegistration(String firstname, String lastname,
       String phone, DateTime dob, String address) async {
     error = false;
@@ -228,7 +257,7 @@ class authprovider extends ChangeNotifier {
     notifyListeners();
 
     final response = await authReposity.continueRegistration(
-        firstname, lastname, phone, dob, address, image!);
+        firstname, lastname, phone, dob, address, image!, imageurl);
     if (response[0].contains('2')) {
       error = true;
       message = response[1];

@@ -33,7 +33,7 @@ class Datum {
   String id;
   DoctorName doctorName;
   PatientName patientName;
-  Drug drug;
+  List<Specializations> drugs;
   DateTime prescriptionDate;
   String description;
   String dosage;
@@ -45,7 +45,7 @@ class Datum {
     required this.id,
     required this.doctorName,
     required this.patientName,
-    required this.drug,
+    required this.drugs,
     required this.prescriptionDate,
     required this.description,
     required this.dosage,
@@ -58,7 +58,8 @@ class Datum {
         id: json["id"],
         doctorName: DoctorName.fromJson(json["doctor_name"]),
         patientName: PatientName.fromJson(json["patient_name"]),
-        drug: Drug.fromJson(json["drug"]),
+        drugs: List<Specializations>.from(
+            json["drugs"].map((x) => Specializations.fromJson(x))),
         prescriptionDate: DateTime.parse(json["prescription_date"]),
         description: json["description"],
         dosage: json["dosage"],
@@ -71,7 +72,7 @@ class Datum {
         "id": id,
         "doctor_name": doctorName.toJson(),
         "patient_name": patientName.toJson(),
-        "drug": drug.toJson(),
+        "drugs": List<dynamic>.from(drugs.map((x) => x.toJson())),
         "prescription_date":
             "${prescriptionDate.year.toString().padLeft(4, '0')}-${prescriptionDate.month.toString().padLeft(2, '0')}-${prescriptionDate.day.toString().padLeft(2, '0')}",
         "description": description,
@@ -85,13 +86,14 @@ class Datum {
 class DoctorName {
   String id;
   User user;
-  Drug specialization;
+  Specializations specialization;
   Hospital hospital;
-  String docProfilePicture;
+  dynamic docProfilePicture;
   String firstName;
   String lastName;
   String phoneNumber;
   String bio;
+  String couldinaryFileField;
   DateTime createdAt;
   DateTime updatedAt;
 
@@ -100,11 +102,12 @@ class DoctorName {
     required this.user,
     required this.specialization,
     required this.hospital,
-    required this.docProfilePicture,
+    this.docProfilePicture,
     required this.firstName,
     required this.lastName,
     required this.phoneNumber,
     required this.bio,
+    required this.couldinaryFileField,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -112,13 +115,14 @@ class DoctorName {
   factory DoctorName.fromJson(Map<String, dynamic> json) => DoctorName(
         id: json["id"],
         user: User.fromJson(json["user"]),
-        specialization: Drug.fromJson(json["specialization"]),
+        specialization: Specializations.fromJson(json["specialization"]),
         hospital: Hospital.fromJson(json["hospital"]),
         docProfilePicture: json["doc_profile_picture"],
         firstName: json["first_name"],
         lastName: json["last_name"],
         phoneNumber: json["phone_number"],
         bio: json["bio"],
+        couldinaryFileField: json["couldinary_file_field"],
         createdAt: DateTime.parse(json["created_at"]),
         updatedAt: DateTime.parse(json["updated_at"]),
       );
@@ -133,6 +137,7 @@ class DoctorName {
         "last_name": lastName,
         "phone_number": phoneNumber,
         "bio": bio,
+        "couldinary_file_field": couldinaryFileField,
         "created_at": createdAt.toIso8601String(),
         "updated_at": updatedAt.toIso8601String(),
       };
@@ -159,7 +164,7 @@ class Hospital {
     required this.address,
     required this.city,
     required this.state,
-    required this.coverImage,
+    this.coverImage,
     required this.type,
     required this.country,
     required this.phoneNumber,
@@ -202,7 +207,7 @@ class Hospital {
       };
 }
 
-class Drug {
+class Specializations {
   String id;
   List<Doctor>? doctors;
   String name;
@@ -210,7 +215,7 @@ class Drug {
   DateTime createdAt;
   DateTime updatedAt;
 
-  Drug({
+  Specializations({
     required this.id,
     this.doctors,
     required this.name,
@@ -219,7 +224,7 @@ class Drug {
     required this.updatedAt,
   });
 
-  factory Drug.fromJson(Map<String, dynamic> json) => Drug(
+  factory Specializations.fromJson(Map<String, dynamic> json) => Specializations(
         id: json["id"],
         doctors: json["doctors"] == null
             ? []
@@ -249,7 +254,7 @@ class Doctor {
   String lastName;
   String phoneNumber;
   String bio;
-  String docProfilePicture;
+  dynamic docProfilePicture;
 
   Doctor({
     required this.user,
@@ -302,12 +307,13 @@ class User {
 class PatientName {
   String id;
   String user;
-  String profilePicture;
+  dynamic profilePicture;
   String firstName;
   String lastName;
   DateTime dateOfBirth;
   String address;
   String contactNumber;
+  String couldinaryFileField;
   DateTime createdAt;
   DateTime updatedAt;
   dynamic hospital;
@@ -315,12 +321,13 @@ class PatientName {
   PatientName({
     required this.id,
     required this.user,
-    required this.profilePicture,
+    this.profilePicture,
     required this.firstName,
     required this.lastName,
     required this.dateOfBirth,
     required this.address,
     required this.contactNumber,
+    required this.couldinaryFileField,
     required this.createdAt,
     required this.updatedAt,
     required this.hospital,
@@ -335,6 +342,7 @@ class PatientName {
         dateOfBirth: DateTime.parse(json["date_of_birth"]),
         address: json["address"],
         contactNumber: json["contact_number"],
+        couldinaryFileField: json["couldinary_file_field"],
         createdAt: DateTime.parse(json["created_at"]),
         updatedAt: DateTime.parse(json["updated_at"]),
         hospital: json["hospital"],
@@ -350,6 +358,7 @@ class PatientName {
             "${dateOfBirth.year.toString().padLeft(4, '0')}-${dateOfBirth.month.toString().padLeft(2, '0')}-${dateOfBirth.day.toString().padLeft(2, '0')}",
         "address": address,
         "contact_number": contactNumber,
+        "couldinary_file_field": couldinaryFileField,
         "created_at": createdAt.toIso8601String(),
         "updated_at": updatedAt.toIso8601String(),
         "hospital": hospital,

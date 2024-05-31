@@ -96,6 +96,7 @@ class _ChatState extends State<Chat> {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Center(child: CircularProgressIndicator());
               }
+              print(snapshot.data!.docs[0]['id']);
 
               // context.read<ChatService>().getListFromFireBase(
               //     context.watch<authprovider>().email, snapshot.data!.docs);

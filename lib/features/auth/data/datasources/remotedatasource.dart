@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -7,7 +8,7 @@ import 'package:h_smart/features/auth/domain/entities/completeProfile.dart';
 import 'package:h_smart/features/auth/domain/entities/loginmodel.dart';
 import 'package:h_smart/features/auth/domain/entities/setuphealthissue.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:http/http.dart' as http;
 import '../../../../constant/enum.dart';
 import '../../domain/entities/createaccount.dart';
 
@@ -69,32 +70,44 @@ class AuthDatasourceImp implements AuthDatasource {
 
   @override
   Future<List<dynamic>> continueRegistration(
-      firstname, lastname, phone, dob, address, File image) async {
+      firstname, lastname, phone, dob, address, File image, imageurl) async {
     String result = '';
     String msg = '';
     Map<String, dynamic> data = {};
     List<dynamic> returnvalue = [];
     final pref = await SharedPreferences.getInstance();
     String token = pref.getString('jwt_token') ?? '';
+    // final url = Uri.parse('https://api.cloudinary.com/v1_1/dlsavisdq/upload');
+    // final request = http.MultipartRequest('POST', url)
+    //   ..fields['upload_preset'] = 'image_preset_hSmart'
+    //   ..files.add(await http.MultipartFile.fromPath('file', image.path));
+    // final response1 = await request.send();
 
-    final content = await MultipartFile.fromFile(image.path);
+    // final responseData = await response1.stream.toBytes();
+    // final responseString = String.fromCharCodes(responseData);
+    // final jsonMap = jsonDecode(responseString);
+
+    // final url1 = jsonMap['url'];
+
+    // final content = await MultipartFile.fromFile(image.path);
     httpService.header = {
       'Authorization': 'Bearer $token',
       'content-Type': "multipart/form-data",
       "Accept": "*/*",
       "connection": "keep-alive"
     };
+
     final response = await httpService.request(
       url: '/User-Profile/',
       methodrequest: RequestMethod.post,
       data: FormData.fromMap({
-        'profile_picture': content,
+        'couldinary_file_field': imageurl,
         'first_name': firstname,
         'last_name': lastname,
         'date_of_birth':
             "${dob.year.toString().padLeft(4, '0')}-${dob.month.toString().padLeft(2, '0')}-${dob.day.toString().padLeft(2, '0')}",
         'address': address,
-        'contact_number': phone
+        'contact_number': phone,
       }),
     );
 

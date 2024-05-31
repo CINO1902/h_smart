@@ -11,7 +11,7 @@ abstract class AuthRepository {
   Future<List<dynamic>> getinfo();
   Future<List<String>> setuphealthissues(setup);
   Future<List<dynamic>> continueRegistration(
-      firstname, lastname, phone, dob, address, File image);
+      firstname, lastname, phone, dob, address, File image, imageurl);
 }
 
 class AuthRepositoryImp implements AuthRepository {
@@ -52,12 +52,12 @@ class AuthRepositoryImp implements AuthRepository {
 
   @override
   Future<List<dynamic>> continueRegistration(
-      firstname, lastname, phone, dob, address, File image) async {
+      firstname, lastname, phone, dob, address, File image, imageurl) async {
     List<dynamic> returnresponse = [];
 
     try {
       returnresponse = await authDatasource.continueRegistration(
-          firstname, lastname, phone, dob, address, image);
+          firstname, lastname, phone, dob, address, image, imageurl);
     } catch (e) {
       NetworkException exp = e as NetworkException;
       print(e);

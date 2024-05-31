@@ -56,7 +56,10 @@ NetworkException parseNetworkException(DioException e) {
         case 403:
           networkException = NetworkException(
             NetworkExceptionType.unauthorizedRequest,
-            errorMessage: e.response!.data['detail'],
+            errorMessage: e.response!.data['detail'] ??
+                e.response!.data['errors'] ??
+                e.response!.data['message'] ??
+                e.response!.data['detail'],
           );
           break;
         case 404:
@@ -69,25 +72,34 @@ NetworkException parseNetworkException(DioException e) {
         case 408:
           networkException = NetworkException(
             NetworkExceptionType.requestTimeOut,
-            errorMessage: e.response!.data['error_message'],
+            errorMessage: e.response!.data['error_message'] ??
+                e.response!.data['errors'] ??
+                e.response!.data['message'] ??
+                e.response!.data['detail'],
           );
           break;
         case 409:
           networkException = NetworkException(
             NetworkExceptionType.conflict,
-            errorMessage: e.response!.data['msg'],
+            errorMessage: e.response!.data['errors'] ??
+                e.response!.data['message'] ??
+                e.response!.data['detail'],
           );
           break;
         case 500:
           networkException = NetworkException(
             NetworkExceptionType.internalServerError,
-            errorMessage: e.response!.data['message'],
+            errorMessage: e.response!.data['errors'] ??
+                e.response!.data['message'] ??
+                e.response!.data['detail'],
           );
           break;
         case 400:
           networkException = NetworkException(
             NetworkExceptionType.internalServerError,
-            errorMessage: e.response!.data['errors'],
+            errorMessage: e.response!.data['errors'] ??
+                e.response!.data['message'] ??
+                e.response!.data['detail'],
           );
           break;
         case 503:

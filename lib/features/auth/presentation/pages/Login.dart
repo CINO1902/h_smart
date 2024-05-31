@@ -34,7 +34,7 @@ class _LoginPageState extends State<LoginPage>
   }
 
   bool isRememberMeChecked = false;
-  bool passvisible = false;
+  bool passvisible = true;
   TextEditingController emailcontroller = TextEditingController();
   TextEditingController passwordcontroller = TextEditingController();
 

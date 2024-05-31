@@ -21,7 +21,7 @@ class _indexpageState extends State<indexpage> {
   Widget build(BuildContext context) {
     List<Widget> _widgetOptions = <Widget>[
       HomePage(
-        scrollcontroller: scrollcontroller,
+        scrollcontroller1: scrollcontroller,
       ),
       const MyAppointment(),
       const Chat(),

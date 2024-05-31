@@ -42,7 +42,6 @@ class _ProfileState extends State<Profile> {
                     imageFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                     child: CachedNetworkImage(
                       progressIndicatorBuilder: (context, url, progress) {
-                        print(progress.progress);
                         return Center(
                           child: SizedBox(
                             height: 20,
@@ -65,14 +64,32 @@ class _ProfileState extends State<Profile> {
                   ),
                 ),
               ),
-              const Padding(
+              Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
                 child: SafeArea(
-                  child: Text(
-                    'Profile',
-                    style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
-                  ),
-                ),
+                    child: Stack(
+                  children: <Widget>[
+                    // Stroked text as border.
+                    Text(
+                      'Profile',
+                      style: TextStyle(
+                        fontSize: 16,
+                        foreground: Paint()
+                          ..style = PaintingStyle.stroke
+                          ..strokeWidth = 4
+                          ..color = Colors.white,
+                      ),
+                    ),
+                    // Solid text as fill.
+                    const Text(
+                      'Profile',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                )),
               ),
               Center(
                 child: Container(

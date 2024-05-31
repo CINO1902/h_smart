@@ -149,12 +149,15 @@ class _MedicineAndPresState extends State<MedicineAndPres>
                       itemCount: value.pres.length,
                       itemBuilder: (context, index) {
                         return prescription1(
-                            drfistname: value.pres[index].doctorName.firstName,
-                            drlastname: value.pres[index].doctorName.lastName,
-                            bio: value.pres[index].doctorName.bio,
-                            pic: value.pres[index].doctorName.docProfilePicture,
-                            number: value.pres[index].doctorName.phoneNumber,
-                            index: index);
+                          drfistname: value.pres[index].doctorName.firstName,
+                          drlastname: value.pres[index].doctorName.lastName,
+                          bio: value.pres[index].doctorName.bio,
+                          pic:
+                              'https://res.cloudinary.com/dlsavisdq/image/upload/v1700454717/afroread/book_image/zlpsw7apuj0wuriavtbu.jpg',
+                          number: value.pres[index].doctorName.phoneNumber,
+                          index: index,
+                          drug: value.pres[index].drugs,
+                        );
                       },
                     );
                   }

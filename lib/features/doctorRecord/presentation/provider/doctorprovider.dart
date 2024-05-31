@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:h_smart/features/doctorRecord/domain/entities/SpecialisedDoctor.dart';
 import 'package:h_smart/features/doctorRecord/domain/entities/mydoctor.dart';
@@ -124,7 +126,7 @@ class doctorprpvider extends ChangeNotifier {
   Future<void> callmydoctor() async {
     error = false;
     mydocloading = true;
-    notifyListeners();
+
     final response = await doctorRepository.mydoctor();
     mydocloading = false;
     if (response[0].contains('1')) {
@@ -142,4 +144,5 @@ class doctorprpvider extends ChangeNotifier {
     }
     notifyListeners();
   }
+
 }

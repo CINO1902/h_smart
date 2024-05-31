@@ -1,37 +1,46 @@
+import 'dart:io';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:gap/gap.dart';
+import 'package:h_smart/constant/SchimmerWidget.dart';
 import 'package:h_smart/features/auth/presentation/provider/auth_provider.dart';
+import 'package:h_smart/features/medical_record/presentation/provider/medicalRecord.dart';
 import 'package:provider/provider.dart';
 
-import '../../../Hospital/presentation/provider/getHospitalProvider.dart';
-
 class HomePage extends StatefulWidget {
-  HomePage({super.key, required this.scrollcontroller});
-  ScrollController scrollcontroller;
+  HomePage({super.key, required this.scrollcontroller1});
+  ScrollController scrollcontroller1;
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
-  // ScrollController scrollcontroller = ScrollController();
   @override
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      double minscrollextent = widget.scrollcontroller.position.minScrollExtent;
-      double maxscrollextent = widget.scrollcontroller.position.maxScrollExtent;
-
-      animateToMaxmin(maxscrollextent, minscrollextent, maxscrollextent, 4,
-          widget.scrollcontroller);
-    });
     verifyuser();
-    context.read<GetHospitalProvider>().getHospital();
+
+    // context.read<GetHospitalProvider>().getHospital();
+    // requestpermission();
+//  gettoken();
+    // makerequest();
     // context.read<doctorprpvider>().calldoctorlist();
   }
 
+  // void gettoken() async {
+  //   await FirebaseMessaging.instance.getToken().then((value) {
+  //     setState(() {
+  //       mtoken = value ?? '';
+  //       print(value);
+  //     });
+  //   });
+  // }
+  ScrollController scrollcontroller = ScrollController();
   animateToMaxmin(double max, double min, double direction, int seconds,
       ScrollController scrollController) {
     if (scrollController.hasClients) {
@@ -49,11 +58,21 @@ class _HomePageState extends State<HomePage>
     if (Provider.of<authprovider>(context, listen: false).getinfo1 == false) {
       await context.read<authprovider>().getinfo();
     }
-
     if (Provider.of<authprovider>(context, listen: false).logoutuser) {
       Navigator.pushNamed(context, '/login');
       SmartDialog.showToast('Session Closed, Log in Again');
       context.read<authprovider>().logout();
+    } else {
+      await context.read<MedicalRecordprovider>().getprescription();
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        double minscrollextent =
+            widget.scrollcontroller1.position.minScrollExtent;
+        double maxscrollextent =
+            widget.scrollcontroller1.position.maxScrollExtent;
+
+        animateToMaxmin(maxscrollextent, minscrollextent, maxscrollextent, 3,
+            widget.scrollcontroller1);
+      });
     }
   }
 
@@ -101,17 +120,49 @@ class _HomePageState extends State<HomePage>
                   ],
                 ),
               ),
-              Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 20, 0, 20),
-                  child: Container(
-                      height: 25,
-                      child: ListView(
-                          controller: widget.scrollcontroller,
-                          scrollDirection: Axis.horizontal,
-                          children: [
-                            Padding(
-                                padding: const EdgeInsets.only(left: 20),
-                                child: Container(
+              context.watch<MedicalRecordprovider>().loading
+                  ? Padding(
+                      padding: const EdgeInsets.fromLTRB(25, 20, 0, 20),
+                      child: Container(
+                          height: 25,
+                          child: ListView(
+                            controller: widget.scrollcontroller1,
+                            children: [
+                              ShimmerWidget.rectangle(width: 100, height: 25)
+                            ],
+                          )),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 20, 0, 20),
+                      child: Container(
+                          height: 25,
+                          child: ListView(
+                              controller: widget.scrollcontroller1,
+                              scrollDirection: Axis.horizontal,
+                              children: [
+                                Padding(
+                                    padding: const EdgeInsets.only(left: 20),
+                                    child: Container(
+                                        height: 25,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(15),
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .inverseSurface,
+                                        ),
+                                        child: const Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 10.0, vertical: 5),
+                                          child: Text(
+                                            "Arthocare Forte: One caplet 2 times /day ",
+                                            style: TextStyle(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ))),
+                                Gap(10),
+                                Container(
                                     height: 25,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(15),
@@ -123,32 +174,13 @@ class _HomePageState extends State<HomePage>
                                       padding: EdgeInsets.symmetric(
                                           horizontal: 10.0, vertical: 5),
                                       child: Text(
-                                        "Arthocare Forte: One caplet 2 times /day ",
+                                        "Paracetamol: Two tablet 2 times /day ",
                                         style: TextStyle(
                                             fontSize: 11,
                                             fontWeight: FontWeight.bold),
                                       ),
-                                    ))),
-                            Gap(10),
-                            Container(
-                                height: 25,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(15),
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .inverseSurface,
-                                ),
-                                child: const Padding(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 10.0, vertical: 5),
-                                  child: Text(
-                                    "Paracetamol: Two tablet 2 times /day ",
-                                    style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                )),
-                          ]))),
+                                    )),
+                              ]))),
               Padding(
                 padding: const EdgeInsets.only(left: 20.0, top: 10, right: 20),
                 child: Stack(children: [

@@ -11,41 +11,39 @@ String completeProfileResToJson(CompleteProfileRes data) =>
     json.encode(data.toJson());
 
 class CompleteProfileRes {
-  bool success;
-  String message;
-  Data data;
+  String status;
+  List<Data> data;
 
   CompleteProfileRes({
-    required this.success,
-    required this.message,
+    required this.status,
     required this.data,
   });
 
   factory CompleteProfileRes.fromJson(Map<String, dynamic> json) =>
       CompleteProfileRes(
-        success: json["success"],
-        message: json["message"],
-        data: Data.fromJson(json["data"]),
+        status: json["status"],
+        data: List<Data>.from(json["data"].map((x) => Data.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
-        "success": success,
-        "message": message,
-        "data": data.toJson(),
+        "status": status,
+        "data": List<dynamic>.from(data.map((x) => x.toJson())),
       };
 }
 
 class Data {
   String id;
   String user;
+
   String firstName;
   String lastName;
   DateTime dateOfBirth;
   String address;
   String contactNumber;
-  String profilePicture;
+  dynamic couldinaryFileField;
   DateTime createdAt;
   DateTime updatedAt;
+  dynamic hospital;
 
   Data({
     required this.id,
@@ -55,9 +53,10 @@ class Data {
     required this.dateOfBirth,
     required this.address,
     required this.contactNumber,
-    required this.profilePicture,
+    required this.couldinaryFileField,
     required this.createdAt,
     required this.updatedAt,
+    required this.hospital,
   });
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
@@ -68,9 +67,10 @@ class Data {
         dateOfBirth: DateTime.parse(json["date_of_birth"]),
         address: json["address"],
         contactNumber: json["contact_number"],
-        profilePicture: json["profile_picture"],
+        couldinaryFileField: json["couldinary_file_field"],
         createdAt: DateTime.parse(json["created_at"]),
         updatedAt: DateTime.parse(json["updated_at"]),
+        hospital: json["hospital"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -82,8 +82,9 @@ class Data {
             "${dateOfBirth.year.toString().padLeft(4, '0')}-${dateOfBirth.month.toString().padLeft(2, '0')}-${dateOfBirth.day.toString().padLeft(2, '0')}",
         "address": address,
         "contact_number": contactNumber,
-        "profile_picture": profilePicture,
+        "couldinary_file_field": couldinaryFileField,
         "created_at": createdAt.toIso8601String(),
         "updated_at": updatedAt.toIso8601String(),
+        "hospital": hospital,
       };
 }

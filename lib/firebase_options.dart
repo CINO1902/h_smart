@@ -17,7 +17,10 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      return web;
+      throw UnsupportedError(
+        'DefaultFirebaseOptions have not been configured for web - '
+        'you can reconfigure this by running the FlutterFire CLI again.',
+      );
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -25,7 +28,10 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        return macos;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for macos - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -43,16 +49,6 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBLqba3D_juCUIrfXpLwfB11ArrkhmjeTA',
-    appId: '1:323302255274:web:fdae242404dce5f158fed3',
-    messagingSenderId: '323302255274',
-    projectId: 'hsmart-bb867',
-    authDomain: 'hsmart-bb867.firebaseapp.com',
-    storageBucket: 'hsmart-bb867.appspot.com',
-    measurementId: 'G-HEJV1J6GEZ',
-  );
-
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBLiFynk3R1yFWbE0gLPoSr3USV1v9nJ2o',
     appId: '1:323302255274:android:4f73394ae8c3a57858fed3',
@@ -63,19 +59,10 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDis5U0fHGjoi5AhcpfA8MdD85PnuWPnJs',
-    appId: '1:323302255274:ios:ccd2601d23cf3f1458fed3',
+    appId: '1:323302255274:ios:338d809dde6f613658fed3',
     messagingSenderId: '323302255274',
     projectId: 'hsmart-bb867',
     storageBucket: 'hsmart-bb867.appspot.com',
-    iosBundleId: 'com.example.hSmart',
-  );
-
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDis5U0fHGjoi5AhcpfA8MdD85PnuWPnJs',
-    appId: '1:323302255274:ios:f166437f06020dec58fed3',
-    messagingSenderId: '323302255274',
-    projectId: 'hsmart-bb867',
-    storageBucket: 'hsmart-bb867.appspot.com',
-    iosBundleId: 'com.example.hSmart.RunnerTests',
+    iosBundleId: 'com.caleboruta.hsmart',
   );
 }

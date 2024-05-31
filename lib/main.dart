@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:h_smart/core/api/firebaseinit.dart';
 import 'package:h_smart/features/Hospital/presentation/pages/allGovernmentHospital.dart';
 import 'package:h_smart/features/Hospital/presentation/pages/allprivatehospital.dart';
 import 'package:h_smart/features/Hospital/presentation/pages/hospital.dart';
@@ -14,7 +17,7 @@ import 'package:h_smart/features/auth/presentation/pages/WelcomePage.dart';
 import 'package:h_smart/features/auth/presentation/pages/setUpHealthDetails.dart';
 import 'package:h_smart/features/auth/presentation/pages/verifyemail.dart';
 import 'package:h_smart/features/chat/presentation/pages/chat.dart';
-import 'package:h_smart/features/chat/presentation/pages/chatUi.dart';
+
 import 'package:h_smart/features/chat/presentation/provider/chatservice.dart';
 import 'package:h_smart/features/doctorRecord/presentation/pages/aboutDoctor.dart';
 import 'package:h_smart/features/doctorRecord/presentation/provider/doctorprovider.dart';
@@ -51,20 +54,27 @@ import 'features/medical_record/presentation/pages/reportsanddocu.dart';
 import 'features/myAppointment/presentation/pages/changepassword.dart';
 
 Future<void> _firebasebackgroundhandler(RemoteMessage message) async {
-  Firebase.initializeApp();
   print("handling message in ${message.messageId}");
 }
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+
+  Platform.isAndroid
+      ? await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        )
+      : await Firebase.initializeApp(
+          name: 'hsmart-bb867',
+          options: DefaultFirebaseOptions.currentPlatform,
+        );
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   final pref = await SharedPreferences.getInstance();
   String? logtoken = pref.getString('jwt_token');
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+
+  await Future.delayed(Duration(seconds: 1));
   FirebaseMessaging.onBackgroundMessage(_firebasebackgroundhandler);
-  print(logtoken);
+  await FirebaseApi().requestpermission();
   runApp(MyApp(
     token: logtoken,
   ));

@@ -41,7 +41,6 @@ class _ChatUIState extends State<ChatUI> {
         loaded = true;
       });
       _scrollDown();
-      //_scrollDown();
     }
   }
 
@@ -116,45 +115,49 @@ class _ChatUIState extends State<ChatUI> {
                       margin: EdgeInsets.only(top: 70),
                       child: _buildmessageList()),
                 ),
-                Container(
-                  margin: EdgeInsets.only(left: 20, right: 20, bottom: 10),
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Color(0xffEDEDED))),
-                  padding: EdgeInsets.all(10),
-                  child: Row(
-                    children: [
-                      Image.asset(
-                        'images/attachment.png',
-                        height: 20,
-                        width: 20,
-                      ),
-                      Gap(5),
-                      Expanded(
-                          child: TextField(
-                        controller: messagecontroller,
-                        minLines: 1,
-                        maxLines: 3,
-                        style: TextStyle(fontSize: 14),
-                        decoration: InputDecoration(
-                            constraints: BoxConstraints(minHeight: 20),
-                            contentPadding: EdgeInsets.symmetric(
-                                horizontal: 5, vertical: 0),
-                            border: InputBorder.none),
-                      )),
-                      Gap(5),
-                      InkWell(
-                        onTap: sendmessage,
-                        child: Image.asset(
-                          'images/send.png',
-                          height: 20,
-                          width: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                chatInput(
+                  sendmessages: sendmessage,
+                )
+                // Container(
+                //   height: 47,
+                //   margin: EdgeInsets.only(left: 20, right: 20, bottom: 10),
+                //   decoration: BoxDecoration(
+                //       color: Colors.white,
+                //       borderRadius: BorderRadius.circular(10),
+                //       border: Border.all(color: Color(0xffEDEDED))),
+                //   padding: EdgeInsets.all(10),
+                //   child: Row(
+                //     children: [
+                //       Image.asset(
+                //         'images/attachment.png',
+                //         height: 20,
+                //         width: 20,
+                //       ),
+                //       Gap(5),
+                //       Expanded(
+                //           child: TextField(
+                //         controller: messagecontroller,
+                //         minLines: 1,
+                //         maxLines: 3,
+                //         style: TextStyle(fontSize: 14),
+                //         decoration: InputDecoration(
+                //             constraints: BoxConstraints(minHeight: 20),
+                //             contentPadding: EdgeInsets.symmetric(
+                //                 horizontal: 5, vertical: 0),
+                //             border: InputBorder.none),
+                //       )),
+                //       Gap(5),
+                // InkWell(
+                //   onTap: sendmessage,
+                //   child: Image.asset(
+                //     'images/send.png',
+                //     height: 20,
+                //     width: 20,
+                //   ),
+                // ),
+                //     ],
+                //   ),
+                // ),
               ],
             ),
           ),
@@ -406,5 +409,68 @@ class _ChatUIState extends State<ChatUI> {
                       )
                     ],
                   ));
+  }
+}
+
+class chatInput extends StatelessWidget {
+  chatInput({super.key, required this.sendmessages});
+
+  final VoidCallback sendmessages;
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(
+          vertical: MediaQuery.of(context).size.height * .01,
+          horizontal: MediaQuery.of(context).size.width * .025),
+      child: Row(
+        children: [
+          //input field & buttons
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Color(0xffEDEDED))),
+              child: Row(
+                children: [
+                  //emoji button
+                  SizedBox(width: MediaQuery.of(context).size.width * .04),
+                  Image.asset(
+                    'images/attachment.png',
+                    height: 20,
+                    width: 20,
+                  ),
+                  SizedBox(width: MediaQuery.of(context).size.width * .02),
+                  Expanded(
+                      child: TextField(
+                    //  controller: _textController,
+                    keyboardType: TextInputType.multiline,
+                    maxLines: 3,
+                    minLines: 1,
+                    onTap: () {},
+                    decoration: const InputDecoration(
+                        hintText: 'Type Something...',
+                        hintStyle: TextStyle(fontSize: 14),
+                        border: InputBorder.none),
+                  )),
+                  SizedBox(width: MediaQuery.of(context).size.width * .02),
+                  InkWell(
+                    onTap: sendmessages,
+                    child: Image.asset(
+                      'images/send.png',
+                      height: 20,
+                      width: 20,
+                    ),
+                  ),
+                  SizedBox(width: MediaQuery.of(context).size.width * .04),
+                ],
+              ),
+            ),
+          ),
+
+          //send message button
+        ],
+      ),
+    );
   }
 }

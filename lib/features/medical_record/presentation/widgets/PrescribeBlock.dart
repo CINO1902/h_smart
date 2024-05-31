@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:h_smart/features/doctorRecord/domain/entities/mydoctor.dart';
+import 'package:h_smart/features/medical_record/domain/entities/prescription.dart';
 import 'package:h_smart/features/medical_record/presentation/provider/medicalRecord.dart';
 import 'package:h_smart/features/medical_record/presentation/widgets/separator.dart';
 import 'package:provider/provider.dart';
@@ -14,6 +16,7 @@ class prescription1 extends StatefulWidget {
     required this.number,
     required this.index,
     required this.pic,
+    required this.drug,
   });
 
   String drfistname = '';
@@ -21,6 +24,7 @@ class prescription1 extends StatefulWidget {
   String bio = '';
   String number = '';
   int index = 0;
+  List<Specializations> drug = [];
   String pic = '';
   @override
   State<prescription1> createState() => _prescription1State();
@@ -40,60 +44,41 @@ class _prescription1State extends State<prescription1> {
             borderRadius: BorderRadius.circular(16)),
         child: Column(
           children: [
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Arthocare Forte',
-                      style:
-                          TextStyle(fontWeight: FontWeight.w600, fontSize: 11),
+            ListView.builder(
+                shrinkWrap: true,
+                itemCount: widget.drug.length,
+                itemBuilder: (context, index) {
+                  return Container(
+                    margin: EdgeInsets.only(bottom: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.drug[index].name,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w600, fontSize: 11),
+                            ),
+                            Gap(5),
+                            Text(
+                              'One Caplet daily',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w400, fontSize: 11),
+                            )
+                          ],
+                        ),
+                        Text(
+                          'Capsule, 20mg',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w400, fontSize: 11),
+                        )
+                      ],
                     ),
-                    Gap(5),
-                    Text(
-                      'One Caplet daily',
-                      style:
-                          TextStyle(fontWeight: FontWeight.w400, fontSize: 11),
-                    )
-                  ],
-                ),
-                Text(
-                  'Capsule, 20mg',
-                  style: TextStyle(fontWeight: FontWeight.w400, fontSize: 11),
-                )
-              ],
-            ),
-            const Gap(10),
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Paracetamol',
-                      style:
-                          TextStyle(fontWeight: FontWeight.w600, fontSize: 11),
-                    ),
-                    Gap(5),
-                    Text(
-                      'One Caplet, Twice daily',
-                      style:
-                          TextStyle(fontWeight: FontWeight.w400, fontSize: 11),
-                    )
-                  ],
-                ),
-                Text(
-                  'Tablet, 500mg',
-                  style: TextStyle(fontWeight: FontWeight.w400, fontSize: 11),
-                )
-              ],
-            ),
-            const Gap(15),
+                  );
+                }),
             const MySeparator(),
             const Gap(10),
             Row(

@@ -22,13 +22,6 @@ class MedicalRecordprovider extends ChangeNotifier {
       bio: '',
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
-      specialization: Drug(
-        createdAt: DateTime.now(),
-        id: '',
-        name: '',
-        description: '',
-        updatedAt: DateTime.now(),
-      ),
       hospital: Hospital(
         address: '',
         name: '',
@@ -43,7 +36,14 @@ class MedicalRecordprovider extends ChangeNotifier {
         website: '',
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
-      ));
+      ),
+      specialization: Specializations(
+          id: '',
+          name: '',
+          description: '',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now()),
+      couldinaryFileField: '');
   Future<void> getprescription() async {
     final response = await medicalRecordRepo.getprescription();
 

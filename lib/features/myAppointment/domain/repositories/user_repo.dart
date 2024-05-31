@@ -7,7 +7,7 @@ import '../../../../core/exceptions/network_exception.dart';
 
 abstract class UserRepository {
   Future<List<String>> edit_profile(
-      firstname, lastname, phone, email, address, File? image);
+      firstname, lastname, phone, email, address, File? image, imagelink);
 }
 
 class UserRepositoryImp implements UserRepository {
@@ -17,12 +17,12 @@ class UserRepositoryImp implements UserRepository {
 
   @override
   Future<List<String>> edit_profile(
-      firstname, lastname, phone, email, address, File? image) async {
+      firstname, lastname, phone, email, address, File? image, imagelink) async {
     List<String> returnresponse = [];
 
     try {
       returnresponse = await userDataSource.edit_profile(
-          firstname, lastname, phone, email, address, image);
+          firstname, lastname, phone, email, address, image, imagelink);
     } catch (e) {
       log(e.toString());
       NetworkException exp = e as NetworkException;

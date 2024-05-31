@@ -314,7 +314,7 @@ class _RegisterPageState extends State<RegisterPage>
                               textAlign: TextAlign.left),
                           Flexible(
                             child: GestureDetector(
-                              child: Text(" Login",
+                              child: Text("Login",
                                   overflow: TextOverflow.visible,
                                   textAlign: TextAlign.left,
                                   style: TextStyle(

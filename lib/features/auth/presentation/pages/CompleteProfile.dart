@@ -134,6 +134,7 @@ class _CompleteProfilePage extends State<CompleteProfilePage>
       return;
     }
     SmartDialog.showLoading();
+    await context.read<authprovider>().uploadbook();
     await context.read<authprovider>().continueRegistration(
         firstNameController.text,
         lastNameController.text,

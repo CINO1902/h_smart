@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:h_smart/constant/SchimmerWidget.dart';
+import 'package:h_smart/features/Hospital/domain/entities/hospitalmodel.dart';
 
 import 'package:h_smart/features/Hospital/presentation/provider/getHospitalProvider.dart';
 import 'package:provider/provider.dart';
@@ -24,6 +25,7 @@ class _HospitalState extends State<Hospital> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    context.read<GetHospitalProvider>().getHospital();
   }
 
   @override
@@ -34,6 +36,7 @@ class _HospitalState extends State<Hospital> {
           elevation: 0,
           titleSpacing: 0.1,
           foregroundColor: Colors.black,
+          surfaceTintColor: Colors.transparent,
           titleTextStyle: const TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.w600,
@@ -202,6 +205,7 @@ class _HospitalState extends State<Hospital> {
               height: 330,
               child: Consumer<GetHospitalProvider>(
                   builder: (context, value, child) {
+                print(value.loading);
                 if (value.loading) {
                   return GridView.builder(
                       gridDelegate:

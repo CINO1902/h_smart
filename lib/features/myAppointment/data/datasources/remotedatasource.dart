@@ -14,8 +14,8 @@ class UserDatasourceImpl implements UserDataSource {
   UserDatasourceImpl(this.httpService);
 
   @override
-  Future<List<String>> edit_profile(
-      firstname, lastname, phone, email, address, File? image) async {
+  Future<List<String>> edit_profile(firstname, lastname, phone, email, address,
+      File? image, imagelink) async {
     String result = '';
     String msg = '';
 
@@ -45,13 +45,14 @@ class UserDatasourceImpl implements UserDataSource {
       'first_name': firstname,
       'last_name': lastname,
       'address': address,
-      'contact_number': phone
+      'contact_number': phone,
+      'couldinary_file_field': imagelink,
     });
 
     final response = await httpService.request(
       url: '/User-Profile/$profile_id/',
       methodrequest: RequestMethod.patch,
-      data: image != null ? form : form1,
+      data: form1,
     );
 
     if (response.statusCode == 200) {
