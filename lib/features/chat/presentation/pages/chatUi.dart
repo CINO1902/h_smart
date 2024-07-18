@@ -1,15 +1,9 @@
-import 'dart:io';
-import 'dart:math';
-
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
 import 'package:h_smart/features/chat/presentation/provider/chatservice.dart';
 import 'package:h_smart/features/chat/presentation/widgets/ChatBubble.dart';
-import 'package:h_smart/features/doctorRecord/presentation/provider/doctorprovider.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatUI extends StatefulWidget {
@@ -117,47 +111,47 @@ class _ChatUIState extends State<ChatUI> {
                 ),
                 chatInput(
                   sendmessages: sendmessage,
-                )
-                // Container(
-                //   height: 47,
-                //   margin: EdgeInsets.only(left: 20, right: 20, bottom: 10),
-                //   decoration: BoxDecoration(
-                //       color: Colors.white,
-                //       borderRadius: BorderRadius.circular(10),
-                //       border: Border.all(color: Color(0xffEDEDED))),
-                //   padding: EdgeInsets.all(10),
-                //   child: Row(
-                //     children: [
-                //       Image.asset(
-                //         'images/attachment.png',
-                //         height: 20,
-                //         width: 20,
-                //       ),
-                //       Gap(5),
-                //       Expanded(
-                //           child: TextField(
-                //         controller: messagecontroller,
-                //         minLines: 1,
-                //         maxLines: 3,
-                //         style: TextStyle(fontSize: 14),
-                //         decoration: InputDecoration(
-                //             constraints: BoxConstraints(minHeight: 20),
-                //             contentPadding: EdgeInsets.symmetric(
-                //                 horizontal: 5, vertical: 0),
-                //             border: InputBorder.none),
-                //       )),
-                //       Gap(5),
-                // InkWell(
-                //   onTap: sendmessage,
-                //   child: Image.asset(
-                //     'images/send.png',
-                //     height: 20,
-                //     width: 20,
-                //   ),
-                // ),
-                //     ],
-                //   ),
-                // ),
+                ),
+                Container(
+                  height: 47,
+                  margin: EdgeInsets.only(left: 20, right: 20, bottom: 10),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Color(0xffEDEDED))),
+                  padding: EdgeInsets.all(10),
+                  child: Row(
+                    children: [
+                      Image.asset(
+                        'images/attachment.png',
+                        height: 20,
+                        width: 20,
+                      ),
+                      Gap(5),
+                      Expanded(
+                          child: TextField(
+                        controller: messagecontroller,
+                        minLines: 1,
+                        maxLines: 3,
+                        style: TextStyle(fontSize: 14),
+                        decoration: InputDecoration(
+                            constraints: BoxConstraints(minHeight: 20),
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 5, vertical: 0),
+                            border: InputBorder.none),
+                      )),
+                      Gap(5),
+                InkWell(
+                  onTap: sendmessage,
+                  child: Image.asset(
+                    'images/send.png',
+                    height: 20,
+                    width: 20,
+                  ),
+                ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),

@@ -21,7 +21,7 @@ class _DoctorState extends State<Doctor> {
     // TODO: implement initState
     super.initState();
     context.read<doctorprpvider>().calldoctorcatergory();
-    context.read<doctorprpvider>().callmydoctor();
+   // context.read<doctorprpvider>().callmydoctor();
   }
 
   @override

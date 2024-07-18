@@ -143,13 +143,13 @@ class _ListDoctorsState extends State<ListDoctors> {
                                   height: 56,
                                   width: 56,
                                   child: Hero(
-                                      tag: 'doctorimage',
+                                      tag: value.doctorcategory[widget.index]
+                                          .doctors[index].firstName,
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(50),
                                         child: CachedNetworkImage(
                                           progressIndicatorBuilder:
                                               (context, url, progress) {
-                                            print(progress.progress);
                                             return Center(
                                               child: SizedBox(
                                                 height: 20,

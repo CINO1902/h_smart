@@ -59,7 +59,8 @@ class _HomePageState extends State<HomePage>
       await context.read<authprovider>().getinfo();
     }
     if (Provider.of<authprovider>(context, listen: false).logoutuser) {
-      Navigator.pushNamed(context, '/login');
+      Navigator.pushNamedAndRemoveUntil(
+          context, '/login', (Route<dynamic> route) => false);
       SmartDialog.showToast('Session Closed, Log in Again');
       context.read<authprovider>().logout();
     } else {

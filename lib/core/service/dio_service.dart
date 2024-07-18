@@ -15,7 +15,7 @@ class DioService implements HttpService {
   DioService(this.dio) {
     dio.options.baseUrl = baseUrl;
 
-    dio.options.connectTimeout = const Duration(milliseconds: 15000);
+    dio.options.connectTimeout = const Duration(milliseconds: 10000);
 
     dio.options.headers.addAll({'Content-Type': 'application/json'});
 

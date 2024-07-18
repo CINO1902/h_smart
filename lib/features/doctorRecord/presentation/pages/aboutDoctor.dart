@@ -45,7 +45,21 @@ class _AboutDoctorState extends State<AboutDoctor> {
                         bottomLeft: Radius.circular(20),
                         bottomRight: Radius.circular(20)),
                     child: Hero(
-                      tag: 'doctorimage',
+                      tag: context.watch<doctorprpvider>().doctorclicked
+                          ? context
+                              .watch<doctorprpvider>()
+                              .clickeddoctorcategory
+                              .firstName
+                          : context.watch<doctorprpvider>().mydoctorclicked
+                              ? context
+                                  .watch<doctorprpvider>()
+                                  .mydoctorlist[0]
+                                  .doctor
+                                  .firstName
+                              : context
+                                  .watch<MedicalRecordprovider>()
+                                  .clickeddoctorcategory
+                                  .firstName,
                       child: CachedNetworkImage(
                         progressIndicatorBuilder: (context, url, progress) {
                           print(progress.progress);

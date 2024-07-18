@@ -98,6 +98,7 @@ class authprovider extends ChangeNotifier {
     infoloading = true;
 
     final response = await authReposity.getinfo();
+    print(response);
     if (response[0].contains('1')) {
       error = true;
 
