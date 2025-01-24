@@ -56,7 +56,7 @@ class PayloadDoc {
 class PayloadDoctor {
   String id;
   UserDoc user;
-  String docProfilePicture;
+  String? docProfilePicture;
   Specialization specialization;
   Hospital hospital;
   String firstName;
@@ -69,7 +69,7 @@ class PayloadDoctor {
   PayloadDoctor({
     required this.id,
     required this.user,
-    required this.docProfilePicture,
+     this.docProfilePicture,
     required this.specialization,
     required this.hospital,
     required this.firstName,

@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:h_smart/core/exceptions/network_exception.dart';
 import 'package:h_smart/features/auth/data/repositories/auth_repo.dart';
 
+import '../../../../constant/enum.dart';
+
 abstract class AuthRepository {
   Future<List<String>> createacount(createaccount);
   Future<List<String>> login(login);
@@ -39,13 +41,33 @@ class AuthRepositoryImp implements AuthRepository {
 
     try {
       returnresponse = await authDatasource.login(login);
+    } on NetworkException catch (e) {
+      // This block will catch the `NetworkException`
+      if (e.type == NetworkExceptionType.requestTimeOut) {
+        returnresponse.add('1');
+        returnresponse.add(e.message);
+        // Handle the timeout specifically
+        print('Timeout occurred: ${e.errorMessage}');
+      } else {
+        returnresponse.add('1');
+        returnresponse.add(e.message);
+        // Handle other types of NetworkException
+        print('Network Exception: ${e.errorMessage}');
+      }
     } catch (e) {
-      NetworkException exp = e as NetworkException;
-      print(e);
+      if (e is NetworkException) {
+        log('Network exception: ${e.errorMessage}');
+        NetworkException exp = e;
+        print(e);
 
-      returnresponse.add('1');
-      returnresponse.add(exp.message);
-      log(e.toString());
+        returnresponse.add('1');
+        returnresponse.add(exp.message);
+        log(e.toString());
+        // Handle the network error message here in the UI or show an alert
+      } else {
+        log('Unhandled exception: $e');
+        // Handle other exceptions
+      }
     }
     return returnresponse;
   }

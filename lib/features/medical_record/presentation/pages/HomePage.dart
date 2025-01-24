@@ -58,22 +58,25 @@ class _HomePageState extends State<HomePage>
     if (Provider.of<authprovider>(context, listen: false).getinfo1 == false) {
       await context.read<authprovider>().getinfo();
     }
-    if (Provider.of<authprovider>(context, listen: false).logoutuser) {
-      Navigator.pushNamedAndRemoveUntil(
-          context, '/login', (Route<dynamic> route) => false);
-      SmartDialog.showToast('Session Closed, Log in Again');
-      context.read<authprovider>().logout();
-    } else {
-      await context.read<MedicalRecordprovider>().getprescription();
-      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        double minscrollextent =
-            widget.scrollcontroller1.position.minScrollExtent;
-        double maxscrollextent =
-            widget.scrollcontroller1.position.maxScrollExtent;
-
-        animateToMaxmin(maxscrollextent, minscrollextent, maxscrollextent, 3,
-            widget.scrollcontroller1);
-      });
+    if (mounted) {
+      if (Provider.of<authprovider>(context, listen: false).logoutuser) {
+        Navigator.pushNamedAndRemoveUntil(
+            context, '/login', (Route<dynamic> route) => false);
+        SmartDialog.showToast('Session Closed, Log in Again');
+        context.read<authprovider>().logout();
+      } else {
+        await context.read<MedicalRecordprovider>().getprescription();
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+          if (widget.scrollcontroller1.hasClients) {
+            double minscrollextent =
+                widget.scrollcontroller1.position.minScrollExtent;
+            double maxscrollextent =
+                widget.scrollcontroller1.position.maxScrollExtent;
+            animateToMaxmin(maxscrollextent, minscrollextent, maxscrollextent,
+                3, widget.scrollcontroller1);
+          }
+        });
+      }
     }
   }
 

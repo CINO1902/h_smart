@@ -20,6 +20,12 @@ NetworkException parseNetworkException(DioException e) {
         errorMessage: 'Unexpected Error',
       );
       break;
+    case DioExceptionType.receiveTimeout:
+      networkException = NetworkException(
+        NetworkExceptionType.requestTimeOut,
+        errorMessage: 'Receive Timed Out', // Corrected typo
+      );
+      break;
     case DioExceptionType.connectionTimeout:
       networkException = NetworkException(
         NetworkExceptionType.requestTimeOut,
@@ -30,12 +36,6 @@ NetworkException parseNetworkException(DioException e) {
       networkException = NetworkException(
         NetworkExceptionType.sendTimeOut,
         errorMessage: 'Request Timed Out',
-      );
-      break;
-    case DioExceptionType.receiveTimeout:
-      networkException = NetworkException(
-        NetworkExceptionType.requestTimeOut,
-        errorMessage: 'Recieve Timed Out',
       );
       break;
     case DioExceptionType.cancel:

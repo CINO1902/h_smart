@@ -30,9 +30,9 @@ class _ChatState extends State<Chat> {
               color: Colors.black,
               fontWeight: FontWeight.w600,
               fontFamily: 'Poppins'),
-          title: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: const Text(
+          title: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12.0),
+            child: Text(
               'Chat',
               style: TextStyle(fontSize: 20),
             ),
@@ -41,7 +41,7 @@ class _ChatState extends State<Chat> {
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: ListView(children: [
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
             height: 60,
             decoration: BoxDecoration(
                 border: Border.all(color: Color(0xffEBF1FF)),
@@ -61,7 +61,7 @@ class _ChatState extends State<Chat> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
+                    const Text(
                       'Talk to Lola',
                       style:
                           TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
@@ -72,8 +72,8 @@ class _ChatState extends State<Chat> {
                             height: 15,
                             width: 15,
                             child: Image.asset('images/Brain.png')),
-                        Gap(5),
-                        Text(
+                        const Gap(5),
+                        const Text(
                           'Chat with AI for health tips',
                           style: TextStyle(fontSize: 13, color: Colors.blue),
                         ),
@@ -89,14 +89,13 @@ class _ChatState extends State<Chat> {
             stream: FirebaseFirestore.instance.collection('users').snapshots(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                return Center(
+                return const Center(
                   child: Text('Something Went Wrong'),
                 );
               }
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
+                return const Center(child: CircularProgressIndicator());
               }
-              print(snapshot.data!.docs[0]['id']);
 
               // context.read<ChatService>().getListFromFireBase(
               //     context.watch<authprovider>().email, snapshot.data!.docs);
@@ -144,11 +143,11 @@ class _ChatState extends State<Chat> {
               ));
         },
         child: Container(
-          margin: EdgeInsets.only(bottom: 10),
-          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
           height: 60,
           decoration: BoxDecoration(
-              border: Border.all(color: Color(0xffEBF1FF)),
+              border: Border.all(color: const Color(0xffEBF1FF)),
               borderRadius: BorderRadius.circular(16)),
           child: Row(
             children: [
@@ -173,21 +172,22 @@ class _ChatState extends State<Chat> {
                     },
                     imageUrl: doc[index]['profile_pic'],
                     fit: BoxFit.cover,
-                    errorWidget: (context, url, error) => Icon(
+                    errorWidget: (context, url, error) => const Icon(
                       Icons.error,
                       color: Colors.red,
                     ),
                   ),
                 ),
               ),
-              Gap(20),
+              const Gap(20),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     doc[index]['first_name'] + ' ' + doc[index]['last_name'],
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 13, fontWeight: FontWeight.bold),
                   ),
                   Row(
                     children: [
@@ -195,8 +195,8 @@ class _ChatState extends State<Chat> {
                           height: 15,
                           width: 15,
                           child: Image.asset('images/ChatCircle.png')),
-                      Gap(5),
-                      Text(
+                      const Gap(5),
+                      const Text(
                         'New Chat',
                         style: TextStyle(fontSize: 13, color: Colors.blue),
                       ),
@@ -209,7 +209,7 @@ class _ChatState extends State<Chat> {
         ),
       );
     } else {
-      return SizedBox();
+      return const SizedBox();
     }
   }
 }

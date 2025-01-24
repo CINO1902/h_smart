@@ -17,12 +17,10 @@ import 'package:h_smart/features/auth/presentation/pages/WelcomePage.dart';
 import 'package:h_smart/features/auth/presentation/pages/setUpHealthDetails.dart';
 import 'package:h_smart/features/auth/presentation/pages/verifyemail.dart';
 import 'package:h_smart/features/chat/presentation/pages/chat.dart';
-
 import 'package:h_smart/features/chat/presentation/provider/chatservice.dart';
 import 'package:h_smart/features/doctorRecord/presentation/pages/aboutDoctor.dart';
 import 'package:h_smart/features/doctorRecord/presentation/provider/doctorprovider.dart';
 import 'package:h_smart/features/firstAid/presentation/pages/firstaid.dart';
-
 import 'package:h_smart/features/medical_record/presentation/pages/medicalinfo.dart';
 import 'package:h_smart/features/medical_record/presentation/pages/medicalrecord.dart';
 import 'package:h_smart/features/medical_record/presentation/pages/medicine_and_prescription.dart';
@@ -38,7 +36,6 @@ import 'package:h_smart/features/support/presentation/pages/support.dart';
 import 'package:h_smart/themeprovider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'core/service/locator.dart';
 import 'features/Hospital/presentation/pages/viewhospistaldetail.dart';
 import 'features/SymptomsChecker/presentation/pages/symptomschecker.dart';
@@ -78,7 +75,7 @@ void main() async {
   runApp(MyApp(
     token: logtoken,
   ));
-  setup();
+   setup();
 }
 
 class MyApp extends StatefulWidget {
@@ -94,7 +91,6 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     // TODO: implement initState
     super.initState();
-
     FlutterNativeSplash.remove();
   }
 
@@ -152,10 +148,8 @@ class _MyAppState extends State<MyApp> {
                 '/verifyemail': (context) => const verifyemail(),
                 '/CompleteProfilePage': (context) =>
                     const CompleteProfilePage(),
-                '/setuphealth': (context) => const setuphealth(),
-                // '/HomePage': (context) => const HomePage(),
-                '/indexpage': (context) => const indexpage(),
-                //'/DoctorsPage': (context) => const DoctorPage(),
+                '/setuphealth': (context) => const setuphealth(),          
+                '/indexpage': (context) => const indexpage(),        
                 '/Doctor': (context) => const Doctor(),
                 '/aboutDoctor': (context) => const AboutDoctor(),
                 '/AppointmentScheduled': (context) =>
@@ -181,8 +175,7 @@ class _MyAppState extends State<MyApp> {
                 '/Hospital': (context) => const Hospital(),
                 '/viewhospitaldetail': (context) => const viewhospitaldetail(),
                 '/governmenthospital': (context) => const GovermentHospital(),
-                '/privatehospital': (context) => const PrivateHosptal(),
-                //  '/ChatUi': (context) => const ChatUI(),
+                '/privatehospital': (context) => const PrivateHosptal(),          
               },
 
               // home: isLoggedIn ? const MainPage(title: 'Home') : const WelcomePage(),
