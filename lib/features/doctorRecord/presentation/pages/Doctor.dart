@@ -21,7 +21,7 @@ class _DoctorState extends State<Doctor> {
     // TODO: implement initState
     super.initState();
     context.read<doctorprpvider>().calldoctorcatergory();
-    // context.read<doctorprpvider>().callmydoctor();
+    context.read<doctorprpvider>().callmydoctor();
   }
 
   @override
@@ -162,7 +162,7 @@ class _DoctorState extends State<Doctor> {
                                                             .mydoctorlist[0]
                                                             .doctor
                                                             .docProfilePicture ??
-                                                        'https://png.pngtree.com/png-clipart/20231002/original/pngtree-young-afro-professional-doctor-png-image_13227671.png',
+                                                        'https://t4.ftcdn.net/jpg/02/60/04/09/360_F_260040900_oO6YW1sHTnKxby4GcjCvtypUCWjnQRg5.jpg',
                                                     fit: BoxFit.cover,
                                                     errorWidget:
                                                         (context, url, error) =>

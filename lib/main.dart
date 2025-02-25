@@ -75,7 +75,7 @@ void main() async {
   runApp(MyApp(
     token: logtoken,
   ));
-   setup();
+  setup();
 }
 
 class MyApp extends StatefulWidget {
@@ -144,12 +144,11 @@ class _MyAppState extends State<MyApp> {
                     : const indexpage(),
                 '/login': (context) => const LoginPage(),
                 '/register': (context) => const RegisterPage(),
-
                 '/verifyemail': (context) => const verifyemail(),
                 '/CompleteProfilePage': (context) =>
                     const CompleteProfilePage(),
-                '/setuphealth': (context) => const setuphealth(),          
-                '/indexpage': (context) => const indexpage(),        
+                '/setuphealth': (context) => const setuphealth(),
+                '/indexpage': (context) => const indexpage(),
                 '/Doctor': (context) => const Doctor(),
                 '/aboutDoctor': (context) => const AboutDoctor(),
                 '/AppointmentScheduled': (context) =>
@@ -175,7 +174,7 @@ class _MyAppState extends State<MyApp> {
                 '/Hospital': (context) => const Hospital(),
                 '/viewhospitaldetail': (context) => const viewhospitaldetail(),
                 '/governmenthospital': (context) => const GovermentHospital(),
-                '/privatehospital': (context) => const PrivateHosptal(),          
+                '/privatehospital': (context) => const PrivateHosptal(),
               },
 
               // home: isLoggedIn ? const MainPage(title: 'Home') : const WelcomePage(),

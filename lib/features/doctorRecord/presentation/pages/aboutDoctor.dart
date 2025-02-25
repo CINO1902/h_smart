@@ -81,10 +81,11 @@ class _AboutDoctorState extends State<AboutDoctor> {
                                 .docProfilePicture
                             : context.watch<doctorprpvider>().mydoctorclicked
                                 ? context
-                                    .watch<doctorprpvider>()
-                                    .mydoctorlist[0]
-                                    .doctor
-                                    .docProfilePicture
+                                        .watch<doctorprpvider>()
+                                        .mydoctorlist[0]
+                                        .doctor
+                                        .docProfilePicture ??
+                                    'https://t4.ftcdn.net/jpg/02/60/04/09/360_F_260040900_oO6YW1sHTnKxby4GcjCvtypUCWjnQRg5.jpg'
                                 : context
                                     .watch<MedicalRecordprovider>()
                                     .clickeddoctorcategory
@@ -263,7 +264,7 @@ class _AboutDoctorState extends State<AboutDoctor> {
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: Color(0xffC1D3FF)),
                       color: Color(0xffF3F7FF)),
-                  child: Align(
+                  child: const Align(
                     alignment: Alignment.center,
                     child: Text(
                       '22 June 2023, 10:00am',
