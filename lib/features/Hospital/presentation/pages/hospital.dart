@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:h_smart/constant/SchimmerWidget.dart';
 import 'package:h_smart/features/Hospital/domain/entities/hospitalmodel.dart';
@@ -7,14 +8,17 @@ import 'package:h_smart/features/Hospital/presentation/provider/getHospitalProvi
 import 'package:provider/provider.dart';
 import 'package:text_scroll/text_scroll.dart';
 
-class Hospital extends StatefulWidget {
+import '../../domain/states/hospitalStates.dart';
+import '../../widgets/hospitalBox.dart';
+
+class Hospital extends ConsumerStatefulWidget {
   const Hospital({super.key});
 
   @override
-  State<Hospital> createState() => _HospitalState();
+  ConsumerState<Hospital> createState() => _HospitalState();
 }
 
-class _HospitalState extends State<Hospital> {
+class _HospitalState extends ConsumerState<Hospital> {
   List HospitalName = [
     'Lagos University Teaching Hospital (LUTH)',
     'Ikorodu General Hospital',
@@ -25,7 +29,7 @@ class _HospitalState extends State<Hospital> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    context.read<GetHospitalProvider>().getHospital();
+    ref.read(hospitalprovider).getHospital();
   }
 
   @override
@@ -194,7 +198,7 @@ class _HospitalState extends State<Hospital> {
                 ),
                 InkWell(
                     onTap: () {
-                      context.read<GetHospitalProvider>().disablehero();
+                      ref.watch(hospitalprovider).disablehero();
                       Navigator.pushNamed(context, '/governmenthospital');
                     },
                     child: const Text('See All'))
@@ -203,10 +207,9 @@ class _HospitalState extends State<Hospital> {
             Gap(20),
             SizedBox(
               height: 330,
-              child: Consumer<GetHospitalProvider>(
-                  builder: (context, value, child) {
-                print(value.loading);
-                if (value.loading) {
+              child: Builder(builder: (context) {
+                if (ref.watch(hospitalprovider).hospitalResult.state ==
+                    HospitalResultStates.isLoading) {
                   return GridView.builder(
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
@@ -219,9 +222,15 @@ class _HospitalState extends State<Hospital> {
                         return ShimmerWidget.rectangle(width: 130, height: 158);
                       });
                 }
-                if (value.error) {
+                if (ref.watch(hospitalprovider).hospitalResult.state ==
+                    HospitalResultStates.isError) {
                   return Center(
-                    child: Text('Something Went Wrong'),
+                    child: Text(ref
+                            .watch(hospitalprovider)
+                            .hospitalResult
+                            .response
+                            .msg ??
+                        'Something Went Wrong'),
                   );
                 }
                 return GridView.builder(
@@ -231,190 +240,37 @@ class _HospitalState extends State<Hospital> {
                       childAspectRatio: 6 / 5,
                       crossAxisSpacing: 20,
                       mainAxisSpacing: 20),
-                  itemCount: value.governmenthospital.length,
+                  itemCount:
+                      ref.watch(hospitalprovider).governmenthospital.length,
                   itemBuilder: (context, index) {
-                    var span1 =
-                        TextSpan(text: value.governmenthospital[index].name);
-                    var tp1 = TextPainter(
-                      maxLines: 1,
-                      textAlign: TextAlign.left,
-                      textDirection: TextDirection.ltr,
-                      text: span1,
-                    );
-
-                    tp1.layout(
-                      maxWidth: MediaQuery.of(context).size.width * .4,
-                    );
-
-                    var exceeded1 = tp1.didExceedMaxLines;
-
                     return InkWell(
                       onTap: () {
-                        context.read<GetHospitalProvider>().getClickedHospital(
+                        ref.read(hospitalprovider).getClickedHospital(
                               index,
                               0,
-                              value.governmenthospital[index].name,
-                              value.governmenthospital[index].city,
+                              ref
+                                  .watch(hospitalprovider)
+                                  .governmenthospital[index]
+                                  .name,
+                              ref
+                                  .watch(hospitalprovider)
+                                  .governmenthospital[index]
+                                  .city,
                             );
-                        context.read<GetHospitalProvider>().createimagetag();
+                        ref.read(hospitalprovider).createimagetag();
                         Navigator.pushNamed(context, '/viewhospitaldetail');
                       },
-                      child: SizedBox(
-                        height: 158,
-                        child: Stack(
-                          children: [
-                            Align(
-                              alignment: Alignment.bottomCenter,
-                              child: Container(
-                                margin: EdgeInsets.symmetric(horizontal: 1),
-                                padding: EdgeInsets.only(
-                                    left: 10, bottom: 10, right: 10),
-                                height: 100.0,
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    border: Border.all(color: Colors.blue),
-                                    borderRadius: BorderRadius.circular(16)),
-                                child: Align(
-                                  alignment: Alignment.bottomCenter,
-                                  child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        exceeded1
-                                            ? SizedBox(
-                                                width: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    .5,
-                                                child: Align(
-                                                    alignment:
-                                                        Alignment.centerLeft,
-                                                    child: TextScroll(
-                                                      value
-                                                          .governmenthospital[
-                                                              index]
-                                                          .name,
-                                                      mode: TextScrollMode
-                                                          .bouncing,
-                                                      velocity: Velocity(
-                                                          pixelsPerSecond:
-                                                              Offset(10, 0)),
-                                                      delayBefore: Duration(
-                                                          milliseconds: 200),
-                                                      numberOfReps: 30,
-                                                      pauseBetween: Duration(
-                                                          milliseconds: 50),
-                                                      style: TextStyle(
-                                                          fontSize: 11,
-                                                          fontWeight:
-                                                              FontWeight.w600),
-                                                      textAlign:
-                                                          TextAlign.right,
-                                                      selectable: true,
-                                                    )),
-                                              )
-                                            : SizedBox(
-                                                height: 20,
-                                                width: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    .5,
-                                                child: Text(
-                                                  value
-                                                      .governmenthospital[index]
-                                                      .name,
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 13,
-                                                      fontWeight:
-                                                          FontWeight.w700),
-                                                ),
-                                              ),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            SizedBox(
-                                              height: 15,
-                                              width: 15,
-                                              child: Image.asset(
-                                                  'images/MapPin.png'),
-                                            ),
-                                            Gap(5),
-                                            SizedBox(
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  .2,
-                                              child: Text(
-                                                value.governmenthospital[index]
-                                                    .city,
-                                                style: const TextStyle(
-                                                    fontSize: 11,
-                                                    fontWeight:
-                                                        FontWeight.w400),
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            SizedBox(
-                                              height: 15,
-                                              width: 15,
-                                              child: Image.asset(
-                                                  'images/Clock.png'),
-                                            ),
-                                            Gap(5),
-                                            SizedBox(
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  .2,
-                                              child: const Text(
-                                                '10am-3pm',
-                                                style: TextStyle(
-                                                    fontSize: 11,
-                                                    fontWeight:
-                                                        FontWeight.w400),
-                                              ),
-                                            )
-                                          ],
-                                        )
-                                      ]),
-                                ),
-                              ),
-                            ),
-                            Align(
-                              alignment: Alignment.topCenter,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(16),
-                                    topRight: Radius.circular(16)),
-                                child: SizedBox(
-                                  height: 75,
-                                  child: HeroMode(
-                                    enabled: context
-                                        .watch<GetHospitalProvider>()
-                                        .enablehero,
-                                    child: Hero(
-                                      tag: '${value.imagetag}' '${index}' '0',
-                                      child: Image.asset(
-                                        'images/hospital1.png',
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                      child: HospitalWidget(
+                        ref: ref,
+                        index: index,
+                        hospitalCity: ref
+                            .watch(hospitalprovider)
+                            .governmenthospital[index]
+                            .city!,
+                        hospitalName: ref
+                            .watch(hospitalprovider)
+                            .governmenthospital[index]
+                            .name!,
                       ),
                     );
                   },
@@ -422,27 +278,30 @@ class _HospitalState extends State<Hospital> {
               }),
             ),
             const Gap(30),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Private Hospitals',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-                InkWell(
-                    onTap: () {
-                      context.read<GetHospitalProvider>().disablehero();
-                      Navigator.pushNamed(context, '/privatehospital');
-                    },
-                    child: const Text('See All'))
-              ],
-            ),
+            ref.watch(hospitalprovider).privatehospital.isEmpty
+                ? const SizedBox()
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Private Hospitals',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
+                      InkWell(
+                          onTap: () {
+                            ref.watch(hospitalprovider).disablehero();
+                            Navigator.pushNamed(context, '/privatehospital');
+                          },
+                          child: const Text('See All'))
+                    ],
+                  ),
             Gap(20),
             SizedBox(
               height: 330,
-              child: Consumer<GetHospitalProvider>(
-                  builder: (context, value, child) {
-                if (value.loading) {
+              child: Builder(builder: (context) {
+                if (ref.watch(hospitalprovider).hospitalResult.state ==
+                    HospitalResultStates.isLoading) {
                   return GridView.builder(
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
@@ -456,9 +315,15 @@ class _HospitalState extends State<Hospital> {
                             width: 130, height: 158);
                       });
                 }
-                if (value.error) {
+                if (ref.watch(hospitalprovider).hospitalResult.state ==
+                    HospitalResultStates.isError) {
                   return Center(
-                    child: Text('Something Went Wrong'),
+                    child: Text(ref
+                            .watch(hospitalprovider)
+                            .hospitalResult
+                            .response
+                            .msg ??
+                        'Something Went Wrong'),
                   );
                 }
                 return GridView.builder(
@@ -468,188 +333,36 @@ class _HospitalState extends State<Hospital> {
                       childAspectRatio: 6 / 5,
                       crossAxisSpacing: 20,
                       mainAxisSpacing: 20),
-                  itemCount: value.privatehospital.length,
+                  itemCount: ref.watch(hospitalprovider).privatehospital.length,
                   itemBuilder: (context, index) {
-                    var span1 =
-                        TextSpan(text: value.privatehospital[index].name);
-                    var tp1 = TextPainter(
-                      maxLines: 1,
-                      textAlign: TextAlign.left,
-                      textDirection: TextDirection.ltr,
-                      text: span1,
-                    );
-
-                    tp1.layout(
-                      maxWidth: MediaQuery.of(context).size.width * .4,
-                    );
-
-                    var exceeded1 = tp1.didExceedMaxLines;
-
                     return InkWell(
                       onTap: () {
-                        context.read<GetHospitalProvider>().getClickedHospital(
+                        ref.read(hospitalprovider).getClickedHospital(
                               index,
                               1,
-                              value.privatehospital[index].name,
-                              value.governmenthospital[index].city,
+                              ref
+                                  .watch(hospitalprovider)
+                                  .privatehospital[index]
+                                  .name,
+                              ref
+                                  .watch(hospitalprovider)
+                                  .governmenthospital[index]
+                                  .city,
                             );
-                        context.read<GetHospitalProvider>().createimagetag();
+                        ref.watch(hospitalprovider).createimagetag();
                         Navigator.pushNamed(context, '/viewhospitaldetail');
                       },
-                      child: SizedBox(
-                        height: 158,
-                        child: Stack(
-                          children: [
-                            Align(
-                              alignment: Alignment.bottomCenter,
-                              child: Container(
-                                margin: EdgeInsets.symmetric(horizontal: 1),
-                                padding: EdgeInsets.only(
-                                    left: 10, bottom: 10, right: 10),
-                                height: 100.0,
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    border: Border.all(color: Colors.blue),
-                                    borderRadius: BorderRadius.circular(16)),
-                                child: Align(
-                                  alignment: Alignment.bottomCenter,
-                                  child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        exceeded1
-                                            ? SizedBox(
-                                                width: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    .5,
-                                                child: Align(
-                                                    alignment:
-                                                        Alignment.centerLeft,
-                                                    child: TextScroll(
-                                                      value
-                                                          .privatehospital[
-                                                              index]
-                                                          .name,
-                                                      mode: TextScrollMode
-                                                          .bouncing,
-                                                      velocity: Velocity(
-                                                          pixelsPerSecond:
-                                                              Offset(10, 0)),
-                                                      delayBefore: Duration(
-                                                          milliseconds: 200),
-                                                      numberOfReps: 30,
-                                                      pauseBetween: Duration(
-                                                          milliseconds: 50),
-                                                      style: TextStyle(
-                                                          fontSize: 11,
-                                                          fontWeight:
-                                                              FontWeight.w600),
-                                                      textAlign:
-                                                          TextAlign.right,
-                                                      selectable: true,
-                                                    )),
-                                              )
-                                            : SizedBox(
-                                                height: 20,
-                                                width: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    .5,
-                                                child: Text(
-                                                  HospitalName[index],
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 13,
-                                                      fontWeight:
-                                                          FontWeight.w700),
-                                                ),
-                                              ),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            SizedBox(
-                                              height: 15,
-                                              width: 15,
-                                              child: Image.asset(
-                                                  'images/MapPin.png'),
-                                            ),
-                                            Gap(5),
-                                            SizedBox(
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  .2,
-                                              child: Text(
-                                                value.privatehospital[index]
-                                                    .city,
-                                                style: const TextStyle(
-                                                    fontSize: 11,
-                                                    fontWeight:
-                                                        FontWeight.w400),
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            SizedBox(
-                                              height: 15,
-                                              width: 15,
-                                              child: Image.asset(
-                                                  'images/Clock.png'),
-                                            ),
-                                            Gap(5),
-                                            SizedBox(
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  .2,
-                                              child: const Text(
-                                                '10am-3pm',
-                                                style: TextStyle(
-                                                    fontSize: 11,
-                                                    fontWeight:
-                                                        FontWeight.w400),
-                                              ),
-                                            )
-                                          ],
-                                        )
-                                      ]),
-                                ),
-                              ),
-                            ),
-                            Align(
-                              alignment: Alignment.topCenter,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(16),
-                                    topRight: Radius.circular(16)),
-                                child: SizedBox(
-                                  height: 75,
-                                  child: HeroMode(
-                                    enabled: context
-                                        .watch<GetHospitalProvider>()
-                                        .enablehero,
-                                    child: Hero(
-                                      tag: '${value.imagetag}' '${index}' '1',
-                                      child: Image.asset(
-                                        'images/hospital1.png',
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                      child: HospitalWidget(
+                        ref: ref,
+                        index: index,
+                        hospitalCity: ref
+                            .watch(hospitalprovider)
+                            .privatehospital[index]
+                            .city!,
+                        hospitalName: ref
+                            .watch(hospitalprovider)
+                            .privatehospital[index]
+                            .name!,
                       ),
                     );
                   },

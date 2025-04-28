@@ -54,7 +54,6 @@ dependencies:
   flutter_launcher_icons: ^0.13.1
   flutter_advanced_switch: ^3.0.1
   flutter_smart_dialog: ^4.9.5+1
-  file_picker: ^6.1.1
   firebase_messaging: ^14.6.1
   firebase_database: ^10.2.4
   firebase_core: ^2.13.0
@@ -66,6 +65,9 @@ dependencies:
   sticky_headers: ^0.3.0+2
   cloud_firestore: ^4.15.8
   flutter_riverpod: ^2.5.1
+  intl_phone_field: ^3.2.0
+  marquee: ^2.3.0
+  socket_io_client: ^3.1.1
 
 dev_dependencies:
   flutter_test:
@@ -123,7 +125,7 @@ flutter:
     - family: Noto_Sans
       fonts:
         - asset: assests/Noto_Sans/NotoSans-Regular.ttf
-  #   - family: Trajan Pro
+  #   - family: Traja n Pro
   #     fonts:
   #       - asset: fonts/TrajanPro.ttf
   #       - asset: fonts/TrajanPro_Bold.ttf

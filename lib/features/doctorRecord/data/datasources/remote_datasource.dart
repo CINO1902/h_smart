@@ -7,17 +7,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../constant/enum.dart';
 import '../../../../core/service/http_service.dart';
+import '../../domain/entities/SpecialisedDoctor.dart';
+import '../../domain/entities/mydoctor.dart';
+import '../../domain/usecases/doctorStates.dart';
 
 class DoctorDatasourceImp implements DoctorDatasource {
   final HttpService httpService;
   DoctorDatasourceImp(this.httpService);
 
   @override
-  Future<List> getDoctorList() async {
-    String result = '';
-    String msg = '';
-    Map<String, dynamic> data = {};
-    List<dynamic> returnvalue = [];
+  Future<GetDoctorListResult> getDoctorList() async {
+    GetDoctorListResult getDoctorListResult = GetDoctorListResult(
+        GetDoctorListResultStates.isLoading, SpecializeDoctor());
     final pref = await SharedPreferences.getInstance();
     String token = pref.getString('jwt_token') ?? '';
     httpService.header = {
@@ -27,18 +28,14 @@ class DoctorDatasourceImp implements DoctorDatasource {
       url: '/Doctor-List/',
       methodrequest: RequestMethod.get,
     );
-    print(response);
-    if (response.statusCode == 200) {
-      result = '1';
-      msg = response.data['message'];
-      data = response.data['data'];
 
-      returnvalue.add(result);
-      returnvalue.add(msg);
-      returnvalue.add(data);
+    if (response.statusCode == 200) {
+      final decodedres = SpecializeDoctor.fromJson(response.data);
+      getDoctorListResult =
+          GetDoctorListResult(GetDoctorListResultStates.isData, decodedres);
     }
 
-    return returnvalue;
+    return getDoctorListResult;
   }
 
   @override
@@ -88,10 +85,9 @@ class DoctorDatasourceImp implements DoctorDatasource {
   }
 
   @override
-  Future<List> mydoctor() async {
-    String result = '';
-
-    List<dynamic> returnvalue = [];
+  Future<CallMyDoctorResult> mydoctor() async {
+    CallMyDoctorResult callMyDoctorResult =
+        CallMyDoctorResult(CallMyDoctorResultState.isLoading, Mydoctor());
     final pref = await SharedPreferences.getInstance();
     String token = pref.getString('jwt_token') ?? '';
     httpService.header = {
@@ -103,13 +99,16 @@ class DoctorDatasourceImp implements DoctorDatasource {
     );
 
     if (response.statusCode == 200) {
-      result = '2';
+      // result = '2';
 
-      returnvalue.add(result);
-      returnvalue.add(response.data);
+      // returnvalue.add(result);
+      // returnvalue.add(response.data);
+      final decodedresponse = mydoctorFromJson(response.data);
+      callMyDoctorResult =
+          CallMyDoctorResult(CallMyDoctorResultState.isData, decodedresponse);
     }
 
-    return returnvalue;
+    return callMyDoctorResult;
   }
 
   @override

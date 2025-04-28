@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:h_smart/features/Hospital/presentation/provider/getHospitalProvider.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../constant/Inkbutton.dart';
+import '../provider/getHospitalProvider.dart';
 
-class viewhospitaldetail extends StatefulWidget {
+class viewhospitaldetail extends ConsumerStatefulWidget {
   const viewhospitaldetail({super.key});
 
   @override
-  State<viewhospitaldetail> createState() => _viewhospitaldetailState();
+  ConsumerState<viewhospitaldetail> createState() => _viewhospitaldetailState();
 }
 
-class _viewhospitaldetailState extends State<viewhospitaldetail> {
+class _viewhospitaldetailState extends ConsumerState<viewhospitaldetail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,7 +32,7 @@ class _viewhospitaldetailState extends State<viewhospitaldetail> {
                           bottomLeft: Radius.circular(20),
                           bottomRight: Radius.circular(20)),
                       child: Hero(
-                        tag: context.watch<GetHospitalProvider>().imagetag1,
+                        tag: ref.watch(hospitalprovider).imagetag1,
                         child: Image.asset(
                           'images/hospital1.png',
                           fit: BoxFit.cover,
@@ -61,9 +62,7 @@ class _viewhospitaldetailState extends State<viewhospitaldetail> {
                             SizedBox(
                               width: 235,
                               child: Text(
-                                context
-                                    .watch<GetHospitalProvider>()
-                                    .clickedHospital[2],
+                                ref.watch(hospitalprovider).clickedHospital[2],
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                     fontSize: 16, fontWeight: FontWeight.w600),
@@ -82,8 +81,8 @@ class _viewhospitaldetailState extends State<viewhospitaldetail> {
                                 ),
                                 Gap(5),
                                 Text(
-                                  context
-                                      .watch<GetHospitalProvider>()
+                                  ref
+                                      .watch(hospitalprovider)
                                       .clickedHospital[3],
                                   style: TextStyle(
                                       fontSize: 11,

@@ -1,21 +1,62 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:h_smart/features/auth/presentation/provider/auth_provider.dart';
 import 'package:h_smart/features/chat/presentation/pages/chatUi.dart';
-import 'package:h_smart/features/chat/presentation/provider/chatservice.dart';
-import 'package:provider/provider.dart';
+import '../../domains/utils/DatabaseHelper.dart';
 
-class Chat extends StatefulWidget {
+class Chat extends ConsumerStatefulWidget {
   const Chat({super.key});
 
   @override
-  State<Chat> createState() => _ChatState();
+  ConsumerState<Chat> createState() => _ChatState();
 }
 
-class _ChatState extends State<Chat> {
-  List<DocumentSnapshot> document = [];
+class _ChatState extends ConsumerState<Chat> {
+  final DatabaseHelper _dbHelper = DatabaseHelper();
+  final Set<String> _syncedConvoIds = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadConversations();
+  }
+
+  Future<void> _loadConversations() async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _dbHelper.initializeConversations();
+      await callconvo();
+    });
+  }
+
+  Future<void> _syncMessages(String conversationId) async {
+    if (_syncedConvoIds.contains(conversationId)) return; // already synced
+
+    _syncedConvoIds.add(conversationId); // mark as synced
+    debugPrint('Conversation id: $conversationId');
+    bool exists = await DatabaseHelper().hasLocalMessages(conversationId);
+    debugPrint('Local messages exist: $exists');
+    if (!exists) {
+      debugPrint('Fetching all messages for conversation: $conversationId');
+      await DatabaseHelper().getAllMessage(conversationId, ref);
+    } else {
+      await DatabaseHelper().incrementalSync(conversationId, ref);
+    }
+  }
+
+  Future<void> callconvo() async {
+    bool exists = await DatabaseHelper().hasLocalConvo();
+    if (!exists) {
+      await _dbHelper.initializeMessage();
+      await DatabaseHelper().getAllConvo(ref);
+    } else {
+      await _dbHelper.initializeMessage();
+      // await DatabaseHelper().getAllConvoIncrement(ref);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,8 +126,8 @@ class _ChatState extends State<Chat> {
             ),
           ),
           Gap(20),
-          StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance.collection('users').snapshots(),
+          StreamBuilder<List<Map<String, dynamic>>>(
+            stream: _dbHelper.conversationStream,
             builder: (context, snapshot) {
               if (snapshot.hasError) {
                 return const Center(
@@ -96,24 +137,22 @@ class _ChatState extends State<Chat> {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               }
+              final conversations = snapshot.data!;
+              if (conversations.isEmpty) {
+                return const Center(child: Text('No conversations yet.'));
+              }
 
               // context.read<ChatService>().getListFromFireBase(
               //     context.watch<authprovider>().email, snapshot.data!.docs);
-              document.clear();
-              for (var i = 0; i < snapshot.data!.docs.length; i++) {
-                Map<String, dynamic> data =
-                    snapshot.data!.docs[i].data()! as Map<String, dynamic>;
 
-                if (context.watch<authprovider>().email != data['id']) {
-                  document.add(snapshot.data!.docs[i]);
-                }
-              }
               return ListView.builder(
                 shrinkWrap: true,
-                itemCount: document.length,
+                itemCount: conversations.length,
                 physics: const NeverScrollableScrollPhysics(),
                 itemBuilder: (context, index) {
-                  return chatlist(context, document, index);
+                  final convo = conversations[index];
+                  _syncMessages(convo['conversationId']);
+                  return chatlist(context, convo);
                 },
               );
             },
@@ -124,92 +163,88 @@ class _ChatState extends State<Chat> {
     );
   }
 
-  Widget chatlist(BuildContext context, List<DocumentSnapshot> doc, index) {
-    Map<String, dynamic> data = doc[index].data()! as Map<String, dynamic>;
-    print(data['id']);
-    if (context.watch<authprovider>().email != data['id']) {
-      return InkWell(
-        onTap: () {
-          //  Navigator.pushNamed(context, '/ChatUi');
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ChatUI(
-                  firstname: doc[index]['first_name'],
-                  profile_pic: doc[index]['profile_pic'],
-                  lastname: doc[index]['last_name'],
-                  email: doc[index]['id'],
-                ),
-              ));
-        },
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 10),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-          height: 60,
-          decoration: BoxDecoration(
-              border: Border.all(color: const Color(0xffEBF1FF)),
-              borderRadius: BorderRadius.circular(16)),
-          child: Row(
-            children: [
-              SizedBox(
-                height: 40,
-                width: 40,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(50),
-                  child: CachedNetworkImage(
-                    progressIndicatorBuilder: (context, url, progress) {
-                      return Center(
-                        child: SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            color: Theme.of(context).primaryColor,
-                            value: progress.progress,
-                            strokeWidth: 2,
-                          ),
+  Widget chatlist(BuildContext context, Map<dynamic, dynamic> doc) {
+    return InkWell(
+      onTap: () {
+        //  Navigator.pushNamed(context, '/ChatUi');
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChatUI(
+                firstname: doc['first_name'],
+                profile_pic: doc['profile_pic'],
+                lastname: doc['last_name'],
+                email: doc['id'],
+                conversationID: doc['conversationId'],
+              ),
+            ));
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+        height: 60,
+        decoration: BoxDecoration(
+            border: Border.all(color: const Color(0xffEBF1FF)),
+            borderRadius: BorderRadius.circular(16)),
+        child: Row(
+          children: [
+            SizedBox(
+              height: 40,
+              width: 40,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(50),
+                child: CachedNetworkImage(
+                  progressIndicatorBuilder: (context, url, progress) {
+                    return Center(
+                      child: SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Theme.of(context).primaryColor,
+                          value: progress.progress,
+                          strokeWidth: 2,
                         ),
-                      );
-                    },
-                    imageUrl: doc[index]['profile_pic'],
-                    fit: BoxFit.cover,
-                    errorWidget: (context, url, error) => const Icon(
-                      Icons.error,
-                      color: Colors.red,
-                    ),
+                      ),
+                    );
+                  },
+                  imageUrl: doc['profile_pic'],
+                  fit: BoxFit.cover,
+                  errorWidget: (context, url, error) => const Icon(
+                    Icons.error,
+                    color: Colors.red,
                   ),
                 ),
               ),
-              const Gap(20),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    doc[index]['first_name'] + ' ' + doc[index]['last_name'],
-                    style: const TextStyle(
-                        fontSize: 13, fontWeight: FontWeight.bold),
-                  ),
-                  Row(
-                    children: [
-                      SizedBox(
-                          height: 15,
-                          width: 15,
-                          child: Image.asset('images/ChatCircle.png')),
-                      const Gap(5),
-                      const Text(
-                        'New Chat',
-                        style: TextStyle(fontSize: 13, color: Colors.blue),
-                      ),
-                    ],
-                  ),
-                ],
-              )
-            ],
-          ),
+            ),
+            const Gap(20),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  // ignore: prefer_interpolation_to_compose_strings
+                  doc['first_name'] + ' ' + doc['last_name'],
+                  style: const TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.bold),
+                ),
+                Row(
+                  children: [
+                    SizedBox(
+                        height: 15,
+                        width: 15,
+                        child: Image.asset('images/ChatCircle.png')),
+                    const Gap(5),
+                    const Text(
+                      'New Chat',
+                      style: TextStyle(fontSize: 13, color: Colors.blue),
+                    ),
+                  ],
+                ),
+              ],
+            )
+          ],
         ),
-      );
-    } else {
-      return const SizedBox();
-    }
+      ),
+    );
   }
 }

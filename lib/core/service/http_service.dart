@@ -16,5 +16,6 @@ abstract class HttpService {
     Map<String, dynamic>? params,
     CancelToken cancelToken,
     dynamic data,
+    String? authtoken,
   });
 }

@@ -3,9 +3,11 @@ import 'dart:developer';
 import 'package:h_smart/features/Hospital/data/repositories/hospital_repo.dart';
 
 import '../../../../core/exceptions/network_exception.dart';
+import '../entities/hospitalmodel.dart';
+import '../states/hospitalStates.dart';
 
 abstract class HospitalRepo {
-  Future<List<List>> getHospital();
+  Future<HospitalResult> getHospital();
 }
 
 class HospaitalRepoImp implements HospitalRepo {
@@ -14,18 +16,24 @@ class HospaitalRepoImp implements HospitalRepo {
   HospaitalRepoImp(this.hospitalDataSource);
 
   @override
-  Future<List<List>> getHospital() async {
-    List<List> returnresponse = [];
+  Future<HospitalResult> getHospital() async {
+    HospitalResult hospitalResult =
+        HospitalResult(HospitalResultStates.isLoading, HospitalModel());
 
     try {
-      returnresponse = await hospitalDataSource.getHospital();
+      hospitalResult = await hospitalDataSource.getHospital();
     } catch (e) {
       log(e.toString());
-      NetworkException exp = e as NetworkException;
-
-      returnresponse.add(['2']);
-      returnresponse.add([exp.errorMessage!]);
+      if (e.runtimeType == NetworkException) {
+        NetworkException exp = e as NetworkException;
+        final message = exp.errorMessage ?? e.message;
+        hospitalResult = HospitalResult(
+            HospitalResultStates.isError, HospitalModel(msg: message));
+      } else {
+        hospitalResult = HospitalResult(HospitalResultStates.isError,
+            HospitalModel(msg: "Something went wrong"));
+      }
     }
-    return returnresponse;
+    return hospitalResult;
   }
 }

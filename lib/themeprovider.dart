@@ -14,8 +14,6 @@ class Themeprovider extends ChangeNotifier {
     switch (_theme) {
       case "light":
         return ThemeMode.light;
-      case "dark":
-        return ThemeMode.light;
       default:
         return ThemeMode.light;
     }
@@ -73,7 +71,7 @@ class HexColor extends Color {
   static int _getColorFromHex(String hexColor) {
     hexColor = hexColor.toUpperCase().replaceAll("#", "");
     if (hexColor.length == 6) {
-      hexColor = "FF" + hexColor;
+      hexColor = "FF$hexColor";
     }
     return int.parse(hexColor, radix: 16);
   }

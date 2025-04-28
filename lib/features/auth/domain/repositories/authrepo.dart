@@ -5,14 +5,16 @@ import 'package:h_smart/core/exceptions/network_exception.dart';
 import 'package:h_smart/features/auth/data/repositories/auth_repo.dart';
 
 import '../../../../constant/enum.dart';
+import '../entities/loginResponse.dart';
+import '../usecases/authStates.dart';
 
 abstract class AuthRepository {
-  Future<List<String>> createacount(createaccount);
-  Future<List<String>> login(login);
-  Future<List<String>> Verifyemail(otp);
-  Future<List<dynamic>> getinfo();
-  Future<List<String>> setuphealthissues(setup);
-  Future<List<dynamic>> continueRegistration(
+  Future<RegisterResult> createacount(createaccount);
+  Future<LoginResult> login(login);
+  Future<VerifyEmailResult> Verifyemail(otp);
+  Future<GetInfoResult> getinfo();
+  Future<SetUpHealthResult> setuphealthissues(setup);
+  Future<ContinueRegisterResult> continueRegistration(
       firstname, lastname, phone, dob, address, File image, imageurl);
 }
 
@@ -20,125 +22,139 @@ class AuthRepositoryImp implements AuthRepository {
   final AuthDatasource authDatasource;
   AuthRepositoryImp(this.authDatasource);
   @override
-  Future<List<String>> createacount(createaccount) async {
-    List<String> returnresponse = [];
+  Future<RegisterResult> createacount(createaccount) async {
+    RegisterResult registerResult =
+        RegisterResult(RegisterResultStates.isLoading, {});
 
     try {
-      returnresponse = await authDatasource.createacount(createaccount);
+      registerResult = await authDatasource.createacount(createaccount);
     } catch (e) {
       log(e.toString());
-      NetworkException exp = e as NetworkException;
 
-      returnresponse.add('2');
-      returnresponse.add(exp.errorMessage!);
+      if (e.runtimeType == NetworkException) {
+        NetworkException exp = e as NetworkException;
+        final message = exp.errorMessage ?? e.message;
+        registerResult =
+            RegisterResult(RegisterResultStates.isError, {"message": message});
+      } else {
+        registerResult = RegisterResult(
+            RegisterResultStates.isError, {"message": "Something Went Wrong"});
+      }
     }
-    return returnresponse;
+    return registerResult;
   }
 
   @override
-  Future<List<String>> login(login) async {
-    List<String> returnresponse = [];
+  Future<LoginResult> login(login) async {
+    LoginResult loginResult =
+        LoginResult(LoginResultStates.isLoading, LoginResponse());
 
     try {
-      returnresponse = await authDatasource.login(login);
-    } on NetworkException catch (e) {
-      // This block will catch the `NetworkException`
-      if (e.type == NetworkExceptionType.requestTimeOut) {
-        returnresponse.add('1');
-        returnresponse.add(e.message);
-        // Handle the timeout specifically
-        print('Timeout occurred: ${e.errorMessage}');
-      } else {
-        returnresponse.add('1');
-        returnresponse.add(e.message);
-        // Handle other types of NetworkException
-        print('Network Exception: ${e.errorMessage}');
-      }
+      loginResult = await authDatasource.login(login);
     } catch (e) {
-      if (e is NetworkException) {
-        log('Network exception: ${e.errorMessage}');
-        NetworkException exp = e;
-        print(e);
-
-        returnresponse.add('1');
-        returnresponse.add(exp.message);
-        log(e.toString());
-        // Handle the network error message here in the UI or show an alert
+      log(e.toString());
+      if (e.runtimeType == NetworkException) {
+        NetworkException exp = e as NetworkException;
+        final message = exp.errorMessage ?? e.message;
+        loginResult = LoginResult(
+            LoginResultStates.isError, LoginResponse(message: message));
       } else {
-        log('Unhandled exception: $e');
-        // Handle other exceptions
+        loginResult = LoginResult(
+            LoginResultStates.isError,LoginResponse(message: "Something Went Wrong"));
       }
     }
-    return returnresponse;
+
+    return loginResult;
   }
 
   @override
-  Future<List<dynamic>> continueRegistration(
+  Future<ContinueRegisterResult> continueRegistration(
       firstname, lastname, phone, dob, address, File image, imageurl) async {
-    List<dynamic> returnresponse = [];
-
+    ContinueRegisterResult continueRegisterResult =
+        ContinueRegisterResult(ContinueRegisterResultStates.isLoading, {});
     try {
-      returnresponse = await authDatasource.continueRegistration(
+      continueRegisterResult = await authDatasource.continueRegistration(
           firstname, lastname, phone, dob, address, image, imageurl);
     } catch (e) {
-      NetworkException exp = e as NetworkException;
-      print(e);
-
-      returnresponse.add('2');
-      returnresponse.add(exp.message);
       log(e.toString());
+
+      if (e.runtimeType == NetworkException) {
+        NetworkException exp = e as NetworkException;
+        final message = exp.errorMessage ?? e.message;
+        continueRegisterResult = ContinueRegisterResult(
+            ContinueRegisterResultStates.isError, {"message": message});
+      } else {
+        continueRegisterResult = ContinueRegisterResult(
+            ContinueRegisterResultStates.isError,
+            {"message": "Something Went Wrong"});
+      }
     }
-    return returnresponse;
+    return continueRegisterResult;
   }
 
   @override
-  Future<List<String>> Verifyemail(otp) async {
-    List<String> returnresponse = [];
+  Future<VerifyEmailResult> Verifyemail(otp) async {
+    VerifyEmailResult verifyEmailResult =
+        VerifyEmailResult(VerifyEmailResultStates.isLoading, {});
 
     try {
-      returnresponse = await authDatasource.Verifyemail(otp);
+      verifyEmailResult = await authDatasource.Verifyemail(otp);
     } catch (e) {
-      NetworkException exp = e as NetworkException;
-      print(e);
-
-      returnresponse.add('1');
-      returnresponse.add(exp.message);
       log(e.toString());
+      if (e.runtimeType == NetworkException) {
+        NetworkException exp = e as NetworkException;
+        final message = exp.errorMessage ?? e.message;
+        verifyEmailResult = VerifyEmailResult(
+            VerifyEmailResultStates.isError, {"message": message});
+      } else {
+        verifyEmailResult = VerifyEmailResult(VerifyEmailResultStates.isError,
+            {"message": "Something Went Wrong"});
+      }
     }
-    return returnresponse;
+    return verifyEmailResult;
   }
 
   @override
-  Future<List<String>> setuphealthissues(setup) async {
-    List<String> returnresponse = [];
+  Future<SetUpHealthResult> setuphealthissues(setup) async {
+    SetUpHealthResult setUpHealthResult =
+        SetUpHealthResult(SetUpHealthResultStates.isLoading, {});
 
     try {
-      returnresponse = await authDatasource.setuphealthissues(setup);
+      setUpHealthResult = await authDatasource.setuphealthissues(setup);
     } catch (e) {
-      NetworkException exp = e as NetworkException;
-      print(e);
-
-      returnresponse.add('1');
-      returnresponse.add(exp.message);
       log(e.toString());
+      if (e.runtimeType == NetworkException) {
+        NetworkException exp = e as NetworkException;
+        final message = exp.errorMessage ?? e.message;
+        setUpHealthResult = SetUpHealthResult(
+            SetUpHealthResultStates.isError, {"message": message});
+      } else {
+        setUpHealthResult = SetUpHealthResult(SetUpHealthResultStates.isError,
+            {"message": "Something Went Wrong"});
+      }
     }
-    return returnresponse;
+    return setUpHealthResult;
   }
 
   @override
-  Future<List<dynamic>> getinfo() async {
-    List<dynamic> returnresponse = [];
-
+  Future<GetInfoResult> getinfo() async {
+    GetInfoResult getInfoResult =
+        GetInfoResult(GetInfoResultStates.isLoading, {});
     try {
-      returnresponse = await authDatasource.getinfo();
+      getInfoResult = await authDatasource.getinfo();
     } catch (e) {
-      NetworkException exp = e as NetworkException;
-      print(e);
-
-      returnresponse.add('1');
-      returnresponse.add(exp.message);
       log(e.toString());
+
+      if (e.runtimeType == NetworkException) {
+        NetworkException exp = e as NetworkException;
+        final message = exp.errorMessage ?? e.message;
+        getInfoResult =
+            GetInfoResult(GetInfoResultStates.isError, {"message": message});
+      } else {
+        getInfoResult = GetInfoResult(
+            GetInfoResultStates.isError, {"message": "Something Went Wrong"});
+      }
     }
-    return returnresponse;
+    return getInfoResult;
   }
 }

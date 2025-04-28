@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:h_smart/features/medical_record/presentation/provider/medicalRecord.dart';
 import 'package:h_smart/features/medical_record/presentation/widgets/PrescribeBlock.dart';
 import 'package:h_smart/features/medical_record/presentation/widgets/separator.dart';
 import 'package:provider/provider.dart';
 
-class MedicineAndPres extends StatefulWidget {
+class MedicineAndPres extends ConsumerStatefulWidget {
   const MedicineAndPres({super.key});
 
   @override
-  State<MedicineAndPres> createState() => _MedicineAndPresState();
+  ConsumerState<MedicineAndPres> createState() => _MedicineAndPresState();
 }
 
-class _MedicineAndPresState extends State<MedicineAndPres>
+class _MedicineAndPresState extends ConsumerState<MedicineAndPres>
     with SingleTickerProviderStateMixin {
   late final TabController controller = TabController(length: 2, vsync: this)
     ..addListener(() {
@@ -22,7 +23,7 @@ class _MedicineAndPresState extends State<MedicineAndPres>
   void initState() {
     // TODO: implement initState
     super.initState();
-    context.read<MedicalRecordprovider>().getprescription();
+    ref.read(medicalRecordProvider).getprescription();
   }
 
   @override
@@ -125,60 +126,64 @@ class _MedicineAndPresState extends State<MedicineAndPres>
             ),
           ),
           Expanded(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: TabBarView(controller: controller, children: [
-                Consumer<MedicalRecordprovider>(
-                    builder: (context, value, child) {
-                  if (value.loading == true) {
+              child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: TabBarView(
+              controller: controller,
+              children: [
+                Builder(builder: (context) {
+                  final medicalRecord = ref.watch(medicalRecordProvider);
+
+                  if (medicalRecord.loading) {
                     return Center(
                       child: CircularProgressIndicator(
                         color: Theme.of(context).primaryColor,
                       ),
                     );
-                  } else if (value.error == true) {
+                  } else if (medicalRecord.error) {
                     return Center(
                       child: Text('Something Went Wrong'),
                     );
-                  } else if (value.currentempty == true) {
+                  } else if (medicalRecord.currentempty) {
                     return Center(
                       child: Text('The List is Empty'),
                     );
                   } else {
                     return ListView.builder(
-                      itemCount: value.pres.length,
+                      itemCount: medicalRecord.pres.length,
                       itemBuilder: (context, index) {
+                        final prescription = medicalRecord.pres[index];
                         return prescription1(
-                          drfistname: value.pres[index].doctorName.firstName,
-                          drlastname: value.pres[index].doctorName.lastName,
-                          bio: value.pres[index].doctorName.bio,
+                          drfistname: prescription.doctorName.firstName,
+                          drlastname: prescription.doctorName.lastName,
+                          bio: prescription.doctorName.bio,
                           pic:
                               'https://res.cloudinary.com/dlsavisdq/image/upload/v1700454717/afroread/book_image/zlpsw7apuj0wuriavtbu.jpg',
-                          number: value.pres[index].doctorName.phoneNumber,
+                          number: prescription.doctorName.phoneNumber,
                           index: index,
-                          drug: value.pres[index].drugs,
+                          drug: prescription.drugs,
                         );
                       },
                     );
                   }
                 }),
                 ListView(
+                  padding: EdgeInsets.only(top: 20),
                   children: [
-                    Gap(20),
                     Prescription(),
-                    Gap(20),
+                    SizedBox(height: 20),
                     Prescription(),
-                    Gap(20),
+                    SizedBox(height: 20),
                     Prescription(),
-                    Gap(20),
+                    SizedBox(height: 20),
                     Prescription(),
-                    Gap(20),
+                    SizedBox(height: 20),
                     Prescription(),
                   ],
-                )
-              ]),
+                ),
+              ],
             ),
-          )
+          ))
         ],
       ),
     );

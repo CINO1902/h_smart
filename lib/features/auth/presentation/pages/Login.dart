@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:gap/gap.dart';
 
 import 'package:h_smart/constant/customesnackbar.dart';
-
-import 'package:provider/provider.dart';
+import 'package:h_smart/features/auth/domain/usecases/authStates.dart';
 
 import '../../../medical_record/presentation/pages/index.dart';
 import '../provider/auth_provider.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage>
+class _LoginPageState extends ConsumerState<LoginPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   final formKey = GlobalKey<FormState>();
@@ -74,8 +74,8 @@ class _LoginPageState extends State<LoginPage>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Email'),
-                              Gap(5),
+                              const Text('Email'),
+                              const Gap(5),
                               TextFormField(
                                 controller: emailcontroller,
                                 decoration: InputDecoration(
@@ -172,44 +172,65 @@ class _LoginPageState extends State<LoginPage>
                           ],
                         ),
                       ),
-                      Consumer<authprovider>(builder: (context, value, child) {
-                        return InkWell(
-                          onTap: () async {
-                            if (!formKey.currentState!.validate()) {
-                              return;
-                            }
-                            if (value.loading == true) {
-                              return;
-                            }
-                            SmartDialog.showLoading();
-                            await context.read<authprovider>().login(
-                                emailcontroller.text, passwordcontroller.text);
-                            if (value.error == true) {
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(SnackBar(
-                                content: CustomeSnackbar(
-                                  topic: 'Oh Snap!',
-                                  msg: value.message,
-                                  color1: Color.fromARGB(255, 171, 51, 42),
-                                  color2: Color.fromARGB(255, 127, 39, 33),
-                                ),
-                                behavior: SnackBarBehavior.floating,
-                                backgroundColor: Colors.transparent,
-                                elevation: 0,
-                              ));
-                            } else {
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(SnackBar(
-                                content: CustomeSnackbar(
-                                  topic: 'Great!',
-                                  msg: value.message,
-                                  color1: Color.fromARGB(255, 25, 107, 52),
-                                  color2: Color.fromARGB(255, 19, 95, 40),
-                                ),
-                                behavior: SnackBarBehavior.floating,
-                                backgroundColor: Colors.transparent,
-                                elevation: 0,
-                              ));
+                      GestureDetector(
+                        onTap: () async {
+                          if (!formKey.currentState!.validate()) {
+                            return;
+                          }
+                          if (ref.read(authProvider).loginResult.state ==
+                              LoginResultStates.isLoading) {
+                            return;
+                          }
+                          print('object');
+                          SmartDialog.showLoading();
+                          await ref.read(authProvider).login(
+                              emailcontroller.text, passwordcontroller.text);
+                          if (ref.watch(authProvider).loginResult.state ==
+                              LoginResultStates.isError) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: CustomeSnackbar(
+                                topic: 'Oh Snap!',
+                                msg: ref
+                                        .watch(authProvider)
+                                        .loginResult
+                                        .response
+                                        .message ??
+                                    '',
+                                color1: Color.fromARGB(255, 171, 51, 42),
+                                color2: Color.fromARGB(255, 127, 39, 33),
+                              ),
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: Colors.transparent,
+                              elevation: 0,
+                            ));
+                          } else if (ref
+                                  .watch(authProvider)
+                                  .loginResult
+                                  .state ==
+                              LoginResultStates.isData) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: CustomeSnackbar(
+                                topic: 'Great!',
+                                msg: ref
+                                        .watch(authProvider)
+                                        .loginResult
+                                        .response
+                                        .message ??
+                                    '',
+                                color1: Color.fromARGB(255, 25, 107, 52),
+                                color2: Color.fromARGB(255, 19, 95, 40),
+                              ),
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: Colors.transparent,
+                              elevation: 0,
+                            ));
+                            if (ref
+                                    .watch(authProvider)
+                                    .loginResult
+                                    .response
+                                    .payload
+                                    ?.isProfileCompleted ??
+                                true) {
                               Navigator.pushAndRemoveUntil<void>(
                                 context,
                                 MaterialPageRoute<void>(
@@ -217,28 +238,31 @@ class _LoginPageState extends State<LoginPage>
                                         const indexpage()),
                                 (Route<dynamic> route) => false,
                               );
+                            } else {
+                              Navigator.pushNamed(
+                                  context, '/CompleteProfilePage');
                             }
+                          }
 
-                            SmartDialog.dismiss();
-                          },
-                          child: Container(
-                            width: double.infinity,
-                            height: 56,
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16),
-                                color: Theme.of(context).primaryColor),
-                            margin: const EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 8.0),
-                            child: const Center(
-                              child: Text("LOGIN",
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500)),
-                            ),
+                          SmartDialog.dismiss();
+                        },
+                        child: Container(
+                          width: double.infinity,
+                          height: 56,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              color: Theme.of(context).primaryColor),
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 16.0, vertical: 8.0),
+                          child: const Center(
+                            child: Text("LOGIN",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500)),
                           ),
-                        );
-                      }),
+                        ),
+                      ),
                       Gap(20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,

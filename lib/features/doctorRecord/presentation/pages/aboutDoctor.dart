@@ -1,26 +1,28 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
 import 'package:h_smart/constant/Inkbutton.dart';
-import 'package:h_smart/features/doctorRecord/presentation/provider/doctorprovider.dart';
 import 'package:h_smart/features/medical_record/presentation/provider/medicalRecord.dart';
 import 'package:provider/provider.dart';
 
-class AboutDoctor extends StatefulWidget {
+import '../provider/doctorprovider.dart';
+
+class AboutDoctor extends ConsumerStatefulWidget {
   const AboutDoctor({super.key});
 
   @override
-  State<AboutDoctor> createState() => _AboutDoctorState();
+  ConsumerState<AboutDoctor> createState() => _AboutDoctorState();
 }
 
-class _AboutDoctorState extends State<AboutDoctor> {
+class _AboutDoctorState extends ConsumerState<AboutDoctor> {
   @override
   void deactivate() {
     // TODO: implement deactivate
     super.deactivate();
-    context.read<doctorprpvider>().ondispose();
+    ref.read(doctorprovider).ondispose();
   }
 
   @override
@@ -45,19 +47,19 @@ class _AboutDoctorState extends State<AboutDoctor> {
                         bottomLeft: Radius.circular(20),
                         bottomRight: Radius.circular(20)),
                     child: Hero(
-                      tag: context.watch<doctorprpvider>().doctorclicked
-                          ? context
-                              .watch<doctorprpvider>()
+                      tag: ref.watch(doctorprovider).doctorclicked
+                          ? ref
+                              .watch(doctorprovider)
                               .clickeddoctorcategory
                               .firstName
-                          : context.watch<doctorprpvider>().mydoctorclicked
-                              ? context
-                                  .watch<doctorprpvider>()
+                          : ref.read(doctorprovider).mydoctorclicked
+                              ? ref
+                                  .read(doctorprovider)
                                   .mydoctorlist[0]
                                   .doctor
                                   .firstName
-                              : context
-                                  .watch<MedicalRecordprovider>()
+                              : ref
+                                  .watch(medicalRecordProvider)
                                   .clickeddoctorcategory
                                   .firstName,
                       child: CachedNetworkImage(
@@ -74,20 +76,20 @@ class _AboutDoctorState extends State<AboutDoctor> {
                             ),
                           );
                         },
-                        imageUrl: context.watch<doctorprpvider>().doctorclicked
-                            ? context
-                                .watch<doctorprpvider>()
+                        imageUrl: ref.watch(doctorprovider).doctorclicked
+                            ? ref
+                                .watch(doctorprovider)
                                 .clickeddoctorcategory
                                 .docProfilePicture
-                            : context.watch<doctorprpvider>().mydoctorclicked
-                                ? context
-                                        .watch<doctorprpvider>()
+                            : ref.watch(doctorprovider).mydoctorclicked
+                                ? ref
+                                        .watch(doctorprovider)
                                         .mydoctorlist[0]
                                         .doctor
                                         .docProfilePicture ??
                                     'https://t4.ftcdn.net/jpg/02/60/04/09/360_F_260040900_oO6YW1sHTnKxby4GcjCvtypUCWjnQRg5.jpg'
-                                : context
-                                    .watch<MedicalRecordprovider>()
+                                : ref
+                                    .watch(medicalRecordProvider)
                                     .clickeddoctorcategory
                                     .docProfilePicture,
                         fit: BoxFit.cover,
@@ -116,9 +118,9 @@ class _AboutDoctorState extends State<AboutDoctor> {
                   child: Column(children: [
                     SizedBox(
                       child: Text(
-                        context.watch<doctorprpvider>().doctorclicked
-                            ? '${context.watch<doctorprpvider>().clickeddoctorcategory.firstName} ${context.watch<doctorprpvider>().clickeddoctorcategory.lastName}'
-                            : '${context.watch<MedicalRecordprovider>().clickeddoctorcategory.firstName} ${context.watch<MedicalRecordprovider>().clickeddoctorcategory.lastName}',
+                        ref.read(doctorprovider).doctorclicked
+                            ? '${ref.watch(doctorprovider).clickeddoctorcategory.firstName} ${ref.watch(doctorprovider).clickeddoctorcategory.lastName}'
+                            : '${ref.watch(doctorprovider).clickeddoctorcategory.firstName} ${ref.watch(medicalRecordProvider).clickeddoctorcategory.lastName}',
                         style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w600),
                       ),
@@ -134,24 +136,22 @@ class _AboutDoctorState extends State<AboutDoctor> {
                             color: Color(0xff3772FF),
                           ),
                         ),
-                        Gap(5),
+                        const Gap(5),
                         Text(
-                          context.watch<doctorprpvider>().doctorclicked
-                              ? context
-                                  .watch<doctorprpvider>()
-                                  .clickdoctordescription
-                              : context.watch<doctorprpvider>().mydoctorclicked
-                                  ? context
-                                      .watch<doctorprpvider>()
+                          ref.watch(doctorprovider).doctorclicked
+                              ? ref.watch(doctorprovider).clickdoctordescription
+                              : ref.watch(doctorprovider).mydoctorclicked
+                                  ? ref
+                                      .watch(doctorprovider)
                                       .mydoctorlist[0]
                                       .doctor
                                       .specialization
                                       .name
                                   : 'Psychiatry',
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontSize: 11, fontWeight: FontWeight.w500),
                         ),
-                        Gap(5),
+                        const Gap(5),
                         SizedBox(
                           height: 12,
                           width: 12,
@@ -160,19 +160,19 @@ class _AboutDoctorState extends State<AboutDoctor> {
                             color: Color(0xff3772FF),
                           ),
                         ),
-                        Gap(5),
+                        const Gap(5),
                         Text(
-                          context.watch<doctorprpvider>().doctorclicked
+                          ref.watch(doctorprovider).doctorclicked
                               ? 'Lenox Hill Hospital'
-                              : context.watch<doctorprpvider>().mydoctorclicked
-                                  ? context
-                                      .watch<doctorprpvider>()
+                              : ref.watch(doctorprovider).mydoctorclicked
+                                  ? ref
+                                      .watch(doctorprovider)
                                       .mydoctorlist[0]
                                       .doctor
                                       .hospital
                                       .city
-                                  : context
-                                      .watch<MedicalRecordprovider>()
+                                  : ref
+                                      .watch(medicalRecordProvider)
                                       .clickeddoctorcategory
                                       .hospital
                                       .name,
@@ -196,19 +196,12 @@ class _AboutDoctorState extends State<AboutDoctor> {
             Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
-                  context.watch<doctorprpvider>().doctorclicked
-                      ? context
-                          .watch<doctorprpvider>()
-                          .clickeddoctorcategory
-                          .bio
-                      : context.watch<doctorprpvider>().mydoctorclicked
-                          ? context
-                              .watch<doctorprpvider>()
-                              .mydoctorlist[0]
-                              .doctor
-                              .bio
-                          : context
-                              .watch<MedicalRecordprovider>()
+                  ref.watch(doctorprovider).doctorclicked
+                      ? ref.watch(doctorprovider).clickeddoctorcategory.bio
+                      : ref.watch(doctorprovider).mydoctorclicked
+                          ? ref.watch(doctorprovider).mydoctorlist[0].doctor.bio
+                          : ref
+                              .watch(medicalRecordProvider)
                               .clickeddoctorcategory
                               .bio,
                   style: const TextStyle(
@@ -216,7 +209,7 @@ class _AboutDoctorState extends State<AboutDoctor> {
                       fontWeight: FontWeight.w400,
                       color: Color(0xff706F6F)),
                 )),
-            Gap(20),
+            const Gap(20),
             const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
@@ -357,19 +350,15 @@ class _AboutDoctorState extends State<AboutDoctor> {
                     ),
                   ),
                 ),
-                context.watch<doctorprpvider>().doctorclicked
+                ref.watch(doctorprovider).doctorclicked
                     ? InkWell(
                         onTap: () async {
-                          await context.read<doctorprpvider>().addtoFavourite(
-                              Provider.of<doctorprpvider>(context,
-                                      listen: false)
-                                  .clickeddoctorcategory
-                                  .user
-                                  .id);
-                          SmartDialog.showToast(Provider.of<doctorprpvider>(
-                                  context,
-                                  listen: false)
-                              .msg);
+                          await ref.watch(doctorprovider).addtoFavourite(ref
+                              .read(doctorprovider)
+                              .clickeddoctorcategory
+                              .user
+                              .id);
+                          SmartDialog.showToast(ref.watch(doctorprovider).msg);
                         },
                         child: Container(
                           margin: EdgeInsets.only(right: 20),
@@ -379,14 +368,14 @@ class _AboutDoctorState extends State<AboutDoctor> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(5),
                           ),
-                          child: context.watch<doctorprpvider>().loadfav
+                          child: ref.watch(doctorprovider).loadfav
                               ? SvgPicture.asset(
                                   'images/star-favourite.svg',
                                   color: Colors.black.withOpacity(.6),
                                 )
-                              : context.watch<doctorprpvider>().favdoctorid ==
-                                      context
-                                          .watch<doctorprpvider>()
+                              : ref.watch(doctorprovider).favdoctorid ==
+                                      ref
+                                          .watch(doctorprovider)
                                           .clickeddoctorcategory
                                           .user
                                           .id
@@ -400,21 +389,18 @@ class _AboutDoctorState extends State<AboutDoctor> {
                                     ),
                         ),
                       )
-                    : context.watch<doctorprpvider>().mydoctorclicked
+                    : ref.watch(doctorprovider).mydoctorclicked
                         ? InkWell(
                             onTap: () async {
-                              await context
-                                  .read<doctorprpvider>()
-                                  .removefromFavourite(
-                                      Provider.of<doctorprpvider>(context,
-                                              listen: false)
-                                          .clickeddoctorcategory
-                                          .user
-                                          .id);
-                              SmartDialog.showToast(Provider.of<doctorprpvider>(
-                                      context,
-                                      listen: false)
-                                  .msg);
+                              await ref
+                                  .read(doctorprovider)
+                                  .removefromFavourite(ref
+                                      .read(doctorprovider)
+                                      .clickeddoctorcategory
+                                      .user
+                                      .id);
+                              SmartDialog.showToast(
+                                  ref.watch(doctorprovider).msg);
                             },
                             child: Container(
                               margin: EdgeInsets.only(right: 20),
@@ -424,16 +410,14 @@ class _AboutDoctorState extends State<AboutDoctor> {
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(5),
                               ),
-                              child: context.watch<doctorprpvider>().loadfav
+                              child: ref.watch(doctorprovider).loadfav
                                   ? SvgPicture.asset(
                                       'images/star-favourite.svg',
                                       color: Colors.black.withOpacity(.6),
                                     )
-                                  : context
-                                              .watch<doctorprpvider>()
-                                              .favdoctorid ==
-                                          context
-                                              .watch<doctorprpvider>()
+                                  : ref.watch(doctorprovider).favdoctorid ==
+                                          ref
+                                              .watch(doctorprovider)
                                               .mydoctorlist[0]
                                               .doctor
                                               .user

@@ -2,20 +2,21 @@ import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import '../../../auth/presentation/provider/auth_provider.dart';
 
-class Profile extends StatefulWidget {
+class Profile extends ConsumerStatefulWidget {
   const Profile({super.key});
 
   @override
-  State<Profile> createState() => _ProfileState();
+  ConsumerState<Profile> createState() => _ProfileState();
 }
 
-class _ProfileState extends State<Profile> {
+class _ProfileState extends ConsumerState<Profile> {
   @override
   void initState() {
     // TODO: implement initState
@@ -53,7 +54,7 @@ class _ProfileState extends State<Profile> {
                           ),
                         );
                       },
-                      imageUrl: context.watch<authprovider>().profilepic,
+                      imageUrl: ref.watch(authProvider).profilepic,
                       fit: BoxFit.cover,
                       width: double.infinity,
                       errorWidget: (context, url, error) => Icon(
@@ -116,7 +117,7 @@ class _ProfileState extends State<Profile> {
                             ),
                           );
                         },
-                        imageUrl: context.watch<authprovider>().profilepic,
+                        imageUrl: ref.watch(authProvider).profilepic,
                         fit: BoxFit.cover,
                         errorWidget: (context, url, error) => Icon(
                           Icons.error,
@@ -129,7 +130,7 @@ class _ProfileState extends State<Profile> {
           ),
           Center(
             child: Text(
-              '${context.watch<authprovider>().firstname} ${context.watch<authprovider>().lastname}',
+              '${ref.watch(authProvider).firstname} ${ref.watch(authProvider).lastname}',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
           ),
@@ -151,8 +152,7 @@ class _ProfileState extends State<Profile> {
                     children: [
                       InkWell(
                           onTap: () {
-                            if (context.read<authprovider>().infoloading ==
-                                true) {
+                            if (ref.watch(authProvider).infoloading == true) {
                               SmartDialog.showToast('System is busy');
                               return;
                             }
@@ -202,7 +202,7 @@ class _ProfileState extends State<Profile> {
                       btnOkOnPress: () async {
                         SmartDialog.showLoading();
 
-                        context.read<authprovider>().logout();
+                        ref.watch(authProvider).logout();
 
                         Navigator.pushNamedAndRemoveUntil(
                             context, '/login', (route) => false);

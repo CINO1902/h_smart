@@ -1,11 +1,13 @@
 import 'dart:io';
 
+import '../../domain/usecases/authStates.dart';
+
 abstract class AuthDatasource {
-  Future<List<String>> createacount(createaccount);
-  Future<List<String>> login(login);
-  Future<List<dynamic>> continueRegistration(
+  Future<RegisterResult> createacount(createaccount);
+  Future<LoginResult> login(login);
+  Future<VerifyEmailResult> Verifyemail(otp);
+  Future<GetInfoResult> getinfo();
+  Future<SetUpHealthResult> setuphealthissues(setup);
+  Future<ContinueRegisterResult> continueRegistration(
       firstname, lastname, phone, dob, address, File image, imageurl);
-  Future<List<String>> Verifyemail(otp);
-  Future<List<String>> setuphealthissues(setup);
-    Future<List<dynamic>> getinfo();
 }

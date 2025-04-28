@@ -1,19 +1,20 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:h_smart/features/doctorRecord/presentation/provider/doctorprovider.dart';
 import 'package:provider/provider.dart';
 
-class ListDoctors extends StatefulWidget {
+class ListDoctors extends ConsumerStatefulWidget {
   ListDoctors({super.key, required this.appbartitle, required this.index});
   String appbartitle;
   int index;
 
   @override
-  State<ListDoctors> createState() => _ListDoctorsState();
+  ConsumerState<ListDoctors> createState() => _ListDoctorsState();
 }
 
-class _ListDoctorsState extends State<ListDoctors> {
+class _ListDoctorsState extends ConsumerState<ListDoctors> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,22 +79,20 @@ class _ListDoctorsState extends State<ListDoctors> {
                   ],
                 ),
                 const Gap(10),
-                Consumer<doctorprpvider>(builder: (context, value, child) {
-                  if (value.loading == true) {
+                Builder(builder: (context) {
+                  if (ref.watch(doctorprovider).loading == true) {
                     return Center(
                       child: CircularProgressIndicator(),
                     );
-                  } else if (value.error == true) {
+                  } else if (ref.watch(doctorprovider).error == true) {
                     return Center(
                       child: Column(
                         children: [
                           const Text('Something Went Wrong'),
                           InkWell(
                             onTap: () {
-                              context
-                                  .read<doctorprpvider>()
-                                  .calldoctorcatergory();
-                              context.read<doctorprpvider>().callmydoctor();
+                              ref.read(doctorprovider).calldoctorcatergory();
+                              ref.read(doctorprovider).callmydoctor();
                             },
                             child: Container(
                               width: 110,
@@ -120,13 +119,16 @@ class _ListDoctorsState extends State<ListDoctors> {
                       height: MediaQuery.of(context).size.height * .8,
                       child: ListView.builder(
                         shrinkWrap: true,
-                        itemCount:
-                            value.doctorcategory[widget.index].doctors.length,
+                        itemCount: ref
+                            .watch(doctorprovider)
+                            .doctorcategory[widget.index]
+                            .doctors
+                            .length,
                         itemBuilder: (context, index) {
                           return InkWell(
                             onTap: () {
-                              context
-                                  .read<doctorprpvider>()
+                              ref
+                                  .read(doctorprovider)
                                   .getclickeddoctor(widget.index, index);
                               Navigator.pushNamed(context, '/aboutDoctor');
                             },
@@ -143,8 +145,11 @@ class _ListDoctorsState extends State<ListDoctors> {
                                   height: 56,
                                   width: 56,
                                   child: Hero(
-                                      tag: value.doctorcategory[widget.index]
-                                          .doctors[index].firstName,
+                                      tag: ref
+                                          .watch(doctorprovider)
+                                          .doctorcategory[widget.index]
+                                          .doctors[index]
+                                          .firstName,
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(50),
                                         child: CachedNetworkImage(
@@ -164,7 +169,8 @@ class _ListDoctorsState extends State<ListDoctors> {
                                               ),
                                             );
                                           },
-                                          imageUrl: value
+                                          imageUrl: ref
+                                              .watch(doctorprovider)
                                               .doctorcategory[widget.index]
                                               .doctors[index]
                                               .docProfilePicture,
@@ -195,13 +201,15 @@ class _ListDoctorsState extends State<ListDoctors> {
                                           SizedBox(
                                               width: 150,
                                               child: Text(
-                                                value
+                                                ref
+                                                        .watch(doctorprovider)
                                                         .doctorcategory[
                                                             widget.index]
                                                         .doctors[index]
                                                         .firstName +
                                                     ' ' +
-                                                    value
+                                                    ref
+                                                        .watch(doctorprovider)
                                                         .doctorcategory[
                                                             widget.index]
                                                         .doctors[index]
@@ -248,7 +256,7 @@ class _ListDoctorsState extends State<ListDoctors> {
                       ),
                     );
                   }
-                }),
+                })
               ],
             ),
           ),

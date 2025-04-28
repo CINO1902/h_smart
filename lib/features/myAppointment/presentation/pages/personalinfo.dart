@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_multi_formatter/formatters/phone_input_formatter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:gap/gap.dart';
 import 'package:h_smart/constant/Inkbutton.dart';
@@ -9,14 +10,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../constant/customesnackbar.dart';
 import '../../../auth/presentation/provider/auth_provider.dart';
 
-class PersonalInfo extends StatefulWidget {
+class PersonalInfo extends ConsumerStatefulWidget {
   const PersonalInfo({super.key});
 
   @override
-  State<PersonalInfo> createState() => _PersonalInfoState();
+  ConsumerState<PersonalInfo> createState() => _PersonalInfoState();
 }
 
-class _PersonalInfoState extends State<PersonalInfo> {
+class _PersonalInfoState extends ConsumerState<PersonalInfo> {
   bool updatechange = false;
 
   @override
@@ -31,17 +32,17 @@ class _PersonalInfoState extends State<PersonalInfo> {
 
   @override
   Widget build(BuildContext context) {
-    final uploadprovider = context.watch<mydashprovider>();
+    final uploadprovider = ref.watch(appointmentProvider);
     TextEditingController _firstname =
-        TextEditingController(text: context.watch<authprovider>().firstname);
+        TextEditingController(text: ref.watch(authProvider).firstname);
     TextEditingController lastname =
-        TextEditingController(text: context.watch<authprovider>().lastname);
+        TextEditingController(text: ref.watch(authProvider).lastname);
     TextEditingController phone =
-        TextEditingController(text: context.watch<authprovider>().phone);
+        TextEditingController(text: ref.watch(authProvider).phone);
     TextEditingController email =
-        TextEditingController(text: context.watch<authprovider>().email);
+        TextEditingController(text: ref.watch(authProvider).email);
     TextEditingController address =
-        TextEditingController(text: context.watch<authprovider>().address);
+        TextEditingController(text: ref.watch(authProvider).address);
     return Scaffold(
       appBar: AppBar(
           centerTitle: true,
@@ -63,7 +64,7 @@ class _PersonalInfoState extends State<PersonalInfo> {
                             updatechange = true;
                           });
                         },
-                        child: Icon(Icons.edit_outlined)),
+                        child: const Icon(Icons.edit_outlined)),
                   )
           ],
           title: const Text(
@@ -76,26 +77,25 @@ class _PersonalInfoState extends State<PersonalInfo> {
             child: Stack(
               children: [
                 Container(
-                    padding: EdgeInsets.all(5),
-                    margin: EdgeInsets.only(top: 20),
+                    padding: const EdgeInsets.all(5),
+                    margin: const EdgeInsets.only(top: 20),
                     height: 100,
                     width: 100,
                     decoration: BoxDecoration(
-                      color: Color(0xffEDEDED),
+                      color: const Color(0xffEDEDED),
                       borderRadius: BorderRadius.circular(50),
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(50),
-                      child: context.watch<mydashprovider>().image != null
+                      child: ref.watch(appointmentProvider).image != null
                           ? Image.file(
-                              context.watch<mydashprovider>().image!,
+                              ref.watch(appointmentProvider).image!,
                               height: 140,
                               width: 140,
                               fit: BoxFit.cover,
                             )
                           : CachedNetworkImage(
-                              imageUrl:
-                                  context.watch<authprovider>().profilepic,
+                              imageUrl: ref.watch(authProvider).profilepic,
                               fit: BoxFit.cover,
                               errorWidget: (context, url, error) =>
                                   Icon(Icons.error),
@@ -118,23 +118,23 @@ class _PersonalInfoState extends State<PersonalInfo> {
                           ),
                         ),
                       )
-                    : SizedBox()
+                    : const SizedBox()
               ],
             ),
           ),
           Gap(20),
           Container(
-            margin: EdgeInsets.all(20),
-            padding: EdgeInsets.all(10),
+            margin: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(10),
             height: 420,
             width: double.infinity,
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
-                color: Color(0xffF3F7FF)),
+                color: const Color(0xffF3F7FF)),
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('First name'),
-              Gap(5),
+              const Text('First name'),
+              const Gap(5),
               SizedBox(
                 height: 44,
                 child: TextFormField(
@@ -142,9 +142,10 @@ class _PersonalInfoState extends State<PersonalInfo> {
                   cursorHeight: 20,
                   readOnly: !updatechange,
                   decoration: InputDecoration(
-                    fillColor: updatechange ? Colors.white : Color(0xffEAECF0),
+                    fillColor:
+                        updatechange ? Colors.white : const Color(0xffEAECF0),
                     filled: true,
-                    contentPadding: EdgeInsets.only(
+                    contentPadding: const EdgeInsets.only(
                       top: 5,
                       left: 10,
                     ),
@@ -301,76 +302,73 @@ class _PersonalInfoState extends State<PersonalInfo> {
           ),
           Gap(50),
           updatechange
-              ? Consumer<mydashprovider>(builder: (context, value, child) {
-                  return SizedBox(
-                      height: 50,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                        child: InkWell(
-                            onTap: () async {
-                              if (value.loading == true) {
-                                return;
-                              }
-                              SmartDialog.showLoading();
-                              await value.uploadbook();
-                              if (value.uploadimageerror == true) {
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(SnackBar(
-                                  content: CustomeSnackbar(
-                                    topic: 'Oh Snap!',
-                                    msg:
-                                        'There is an issue uploading the image',
-                                    color1: Color.fromARGB(255, 171, 51, 42),
-                                    color2: Color.fromARGB(255, 127, 39, 33),
-                                  ),
-                                  behavior: SnackBarBehavior.floating,
-                                  backgroundColor: Colors.transparent,
-                                  elevation: 0,
-                                ));
-                                SmartDialog.dismiss();
-                              } else {
-                                await value.editprofile(
-                                    _firstname.text,
-                                    lastname.text,
-                                    phone.text,
-                                    email.text,
-                                    address.text);
-                                if (value.error == true) {
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(SnackBar(
-                                    content: CustomeSnackbar(
-                                      topic: 'Oh Snap!',
-                                      msg: value.message,
-                                      color1: Color.fromARGB(255, 171, 51, 42),
-                                      color2: Color.fromARGB(255, 127, 39, 33),
-                                    ),
-                                    behavior: SnackBarBehavior.floating,
-                                    backgroundColor: Colors.transparent,
-                                    elevation: 0,
-                                  ));
-                                  SmartDialog.dismiss();
-                                } else {
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(SnackBar(
-                                    content: CustomeSnackbar(
-                                      topic: 'Great!',
-                                      msg: value.message,
-                                      color1: Color.fromARGB(255, 25, 107, 52),
-                                      color2: Color.fromARGB(255, 19, 95, 40),
-                                    ),
-                                    behavior: SnackBarBehavior.floating,
-                                    backgroundColor: Colors.transparent,
-                                    elevation: 0,
-                                  ));
-                                  await context.read<authprovider>().getinfo();
-                                  SmartDialog.dismiss();
-                                  Navigator.pop(context);
-                                }
-                              }
-                            },
-                            child: InkButton(title: 'Update Changes')),
-                      ));
-                })
+              ? SizedBox(
+                  height: 50,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: InkWell(
+                        onTap: () async {
+                          if (ref.watch(appointmentProvider).loading == true) {
+                            return;
+                          }
+                          SmartDialog.showLoading();
+                          await ref.watch(appointmentProvider).uploadbook();
+                          if (ref.watch(appointmentProvider).uploadimageerror ==
+                              true) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: CustomeSnackbar(
+                                topic: 'Oh Snap!',
+                                msg: 'There is an issue uploading the image',
+                                color1: Color.fromARGB(255, 171, 51, 42),
+                                color2: Color.fromARGB(255, 127, 39, 33),
+                              ),
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: Colors.transparent,
+                              elevation: 0,
+                            ));
+                            SmartDialog.dismiss();
+                          } else {
+                            await ref.watch(appointmentProvider).editprofile(
+                                _firstname.text,
+                                lastname.text,
+                                phone.text,
+                                email.text,
+                                address.text);
+                            if (ref.watch(appointmentProvider).error == true) {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(
+                                content: CustomeSnackbar(
+                                  topic: 'Oh Snap!',
+                                  msg: ref.watch(appointmentProvider).message,
+                                  color1: Color.fromARGB(255, 171, 51, 42),
+                                  color2: Color.fromARGB(255, 127, 39, 33),
+                                ),
+                                behavior: SnackBarBehavior.floating,
+                                backgroundColor: Colors.transparent,
+                                elevation: 0,
+                              ));
+                              SmartDialog.dismiss();
+                            } else {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(
+                                content: CustomeSnackbar(
+                                  topic: 'Great!',
+                                  msg: ref.watch(appointmentProvider).message,
+                                  color1: Color.fromARGB(255, 25, 107, 52),
+                                  color2: Color.fromARGB(255, 19, 95, 40),
+                                ),
+                                behavior: SnackBarBehavior.floating,
+                                backgroundColor: Colors.transparent,
+                                elevation: 0,
+                              ));
+                              await ref.read(authProvider).getinfo();
+                              SmartDialog.dismiss();
+                              Navigator.pop(context);
+                            }
+                          }
+                        },
+                        child: InkButton(title: 'Update Changes')),
+                  ))
               : SizedBox()
         ],
       ),

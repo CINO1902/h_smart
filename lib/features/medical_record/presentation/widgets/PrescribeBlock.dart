@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:h_smart/features/doctorRecord/domain/entities/mydoctor.dart';
 import 'package:h_smart/features/medical_record/domain/entities/prescription.dart';
@@ -7,7 +8,7 @@ import 'package:h_smart/features/medical_record/presentation/provider/medicalRec
 import 'package:h_smart/features/medical_record/presentation/widgets/separator.dart';
 import 'package:provider/provider.dart';
 
-class prescription1 extends StatefulWidget {
+class prescription1 extends ConsumerStatefulWidget {
   prescription1({
     super.key,
     required this.drfistname,
@@ -27,10 +28,10 @@ class prescription1 extends StatefulWidget {
   List<Specializations> drug = [];
   String pic = '';
   @override
-  State<prescription1> createState() => _prescription1State();
+  ConsumerState<prescription1> createState() => _prescription1State();
 }
 
-class _prescription1State extends State<prescription1> {
+class _prescription1State extends ConsumerState<prescription1> {
   bool showdetails = false;
 
   @override
@@ -136,8 +137,8 @@ class _prescription1State extends State<prescription1> {
                                   children: [
                                     InkWell(
                                       onTap: () {
-                                        context
-                                            .read<MedicalRecordprovider>()
+                                        ref
+                                            .read(medicalRecordProvider)
                                             .getclickeddoctor(widget.index);
                                         Navigator.pushNamed(
                                             context, '/aboutDoctor');

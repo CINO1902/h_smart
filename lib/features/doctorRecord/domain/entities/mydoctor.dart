@@ -9,23 +9,26 @@ Mydoctor mydoctorFromJson(String str) => Mydoctor.fromJson(json.decode(str));
 String mydoctorToJson(Mydoctor data) => json.encode(data.toJson());
 
 class Mydoctor {
-  bool isSuccess;
-  List<PayloadDoc> payload;
+  bool? isSuccess;
+  String? message;
+  List<PayloadDoc>? payload;
 
   Mydoctor({
-    required this.isSuccess,
-    required this.payload,
+    this.isSuccess,
+    this.message,
+    this.payload,
   });
 
   factory Mydoctor.fromJson(Map<String, dynamic> json) => Mydoctor(
         isSuccess: json["is_success"],
+        message: json["message"],
         payload: List<PayloadDoc>.from(
             json["payload"].map((x) => PayloadDoc.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
         "is_success": isSuccess,
-        "payload": List<dynamic>.from(payload.map((x) => x.toJson())),
+        "payload": List<dynamic>.from(payload!.map((x) => x.toJson())),
       };
 }
 
@@ -69,7 +72,7 @@ class PayloadDoctor {
   PayloadDoctor({
     required this.id,
     required this.user,
-     this.docProfilePicture,
+    this.docProfilePicture,
     required this.specialization,
     required this.hospital,
     required this.firstName,

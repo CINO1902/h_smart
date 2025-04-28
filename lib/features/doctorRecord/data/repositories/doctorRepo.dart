@@ -1,7 +1,9 @@
+import '../../domain/usecases/doctorStates.dart';
+
 abstract class DoctorDatasource {
-  Future<List<dynamic>> getDoctorList();
+  Future<GetDoctorListResult> getDoctorList();
   Future<List<dynamic>> getDoctorCategory();
   Future<List<dynamic>> addtofav(id);
-  Future<List<dynamic>> mydoctor();
+  Future<CallMyDoctorResult> mydoctor();
   Future<List<dynamic>> removefav(id);
 }

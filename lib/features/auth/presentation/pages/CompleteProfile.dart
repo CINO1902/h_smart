@@ -1,28 +1,32 @@
 import 'dart:io';
 
 import 'package:flutter_multi_formatter/formatters/phone_input_formatter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:h_smart/constant/Inkbutton.dart';
 import 'package:h_smart/constant/utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:h_smart/features/auth/domain/usecases/authStates.dart';
 import 'package:h_smart/features/auth/presentation/provider/auth_provider.dart';
+import 'package:intl_phone_field/countries.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 
 import 'package:intl/intl.dart';
+import 'package:intl_phone_field/phone_number.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../constant/customesnackbar.dart';
-import '../../../medical_record/presentation/pages/HomePage.dart';
 
-class CompleteProfilePage extends StatefulWidget {
+class CompleteProfilePage extends ConsumerStatefulWidget {
   const CompleteProfilePage({super.key});
 
   @override
-  State<CompleteProfilePage> createState() => _CompleteProfilePage();
+  ConsumerState<CompleteProfilePage> createState() => _CompleteProfilePage();
 }
 
-class _CompleteProfilePage extends State<CompleteProfilePage>
+class _CompleteProfilePage extends ConsumerState<CompleteProfilePage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   final formKey = GlobalKey<FormState>();
@@ -43,8 +47,41 @@ class _CompleteProfilePage extends State<CompleteProfilePage>
   TextEditingController phoneNumberController = TextEditingController();
   TextEditingController homeAddressController = TextEditingController();
   DateTime dateTime = DateTime.now();
+  PhoneNumber number =
+      PhoneNumber(countryISOCode: '', countryCode: '', number: '');
   bool chosendate = false;
 
+  Country country = const Country(
+    name: "Nigeria",
+    nameTranslations: {
+      "sk": "Nigéria",
+      "se": "Nigeria",
+      "pl": "Nigeria",
+      "no": "Nigeria",
+      "ja": "ナイジェリア",
+      "it": "Nigeria",
+      "zh": "尼日利亚",
+      "nl": "Nigeria",
+      "de": "Nigeria",
+      "fr": "Nigéria",
+      "es": "Nigeria",
+      "en": "Nigeria",
+      "pt_BR": "Nigéria",
+      "sr-Cyrl": "Нигерија",
+      "sr-Latn": "Nigerija",
+      "zh_TW": "奈及利亞",
+      "tr": "Nijerya",
+      "ro": "Nigeria",
+      "ar": "نيجيريا",
+      "fa": "نیجریه",
+      "yue": "尼日利亞"
+    },
+    flag: "🇳🇬",
+    code: "NG",
+    dialCode: "234",
+    minLength: 10,
+    maxLength: 11,
+  );
   @override
   void dispose() {
     _controller.dispose();
@@ -97,12 +134,14 @@ class _CompleteProfilePage extends State<CompleteProfilePage>
     }
   }
 
-  void _continue(authprovider value) async {
-    if (value.loading == true) {
+  void _continue(WidgetRef ref) async {
+    print(dobController.text);
+    if (ref.read(authProvider).continueRegisterResult.state ==
+        ContinueRegisterResultStates.isLoading) {
+      // ref.read(authProvider).authController111();
       return;
     }
     if (!formKey.currentState!.validate()) {
-      print(dobController.text);
       return;
     }
     if (chosendate == false) {
@@ -119,7 +158,7 @@ class _CompleteProfilePage extends State<CompleteProfilePage>
       ));
       return;
     }
-    if (context.read<authprovider>().image == null) {
+    if (ref.read(authProvider).image == null) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: CustomeSnackbar(
           topic: 'Oh Snap!',
@@ -134,25 +173,34 @@ class _CompleteProfilePage extends State<CompleteProfilePage>
       return;
     }
     SmartDialog.showLoading();
-    await context.read<authprovider>().uploadbook();
-    await context.read<authprovider>().continueRegistration(
+    await ref.read(authProvider).uploadImage(
         firstNameController.text,
         lastNameController.text,
-        phoneNumberController.text,
+        number.countryCode + phoneNumberController.text,
         DateTime.parse(dobController.text),
         homeAddressController.text);
-    if (value.error == true) {
+    // await ref.read(authProvider).continueRegistration(
+    //     firstNameController.text,
+    //     lastNameController.text,
+    //     number.countryCode + phoneNumberController.text,
+    //     DateTime.parse(dobController.text),
+    //     homeAddressController.text);
+    if (ref.watch(authProvider).continueRegisterResult.state ==
+        ContinueRegisterResultStates.isError) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           behavior: SnackBarBehavior.floating,
           backgroundColor: Colors.transparent,
           elevation: 0,
           content: CustomeSnackbar(
-            topic: 'Error',
-            color1: Color.fromARGB(255, 171, 51, 42),
-            color2: Color.fromARGB(255, 127, 39, 33),
-            msg: value.message,
-          )));
-    } else {
+              topic: 'Error',
+              color1: Color.fromARGB(255, 171, 51, 42),
+              color2: Color.fromARGB(255, 127, 39, 33),
+              msg: (ref
+                  .read(authProvider)
+                  .continueRegisterResult
+                  .response['message']))));
+    } else if (ref.watch(authProvider).continueRegisterResult.state ==
+        ContinueRegisterResultStates.isData) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           behavior: SnackBarBehavior.floating,
           backgroundColor: Colors.transparent,
@@ -161,14 +209,13 @@ class _CompleteProfilePage extends State<CompleteProfilePage>
             topic: 'Registration Successful',
             color1: Color.fromARGB(255, 25, 107, 52),
             color2: Color.fromARGB(255, 19, 95, 40),
-            msg: value.message,
+            msg: ref
+                    .watch(authProvider)
+                    .continueRegisterResult
+                    .response['message'] ??
+                'Profile Completed',
           )));
       Navigator.pushNamed(context, '/setuphealth');
-      // Navigator.push(
-      //     context,
-      //     MaterialPageRoute(
-      //       builder: (context) => HomePage(s),
-      //     ));
     }
     SmartDialog.dismiss();
   }
@@ -213,12 +260,12 @@ class _CompleteProfilePage extends State<CompleteProfilePage>
                   Center(
                     child: InkWell(
                       onTap: () {
-                        context.read<authprovider>().pickimage();
+                        ref.read(authProvider).pickimage();
                       },
                       child: Stack(
                         children: [
                           Container(
-                            padding: context.watch<authprovider>().image != null
+                            padding: ref.read(authProvider).image != null
                                 ? EdgeInsets.all(5)
                                 : EdgeInsets.all(10),
                             margin: EdgeInsets.only(top: 20),
@@ -228,11 +275,12 @@ class _CompleteProfilePage extends State<CompleteProfilePage>
                               color: Color(0xffEDEDED),
                               borderRadius: BorderRadius.circular(50),
                             ),
-                            child: context.watch<authprovider>().image != null
+                            child:ref.watch(authProvider).imageloading
+                    ? Center(child: CircularProgressIndicator()): ref.read(authProvider).image != null
                                 ? ClipRRect(
                                     borderRadius: BorderRadius.circular(50),
                                     child: Image.file(
-                                      context.watch<authprovider>().image!,
+                                      ref.watch(authProvider).image!,
                                       height: 140,
                                       width: 140,
                                       fit: BoxFit.cover,
@@ -263,8 +311,7 @@ class _CompleteProfilePage extends State<CompleteProfilePage>
                     child: Column(
                       children: <Widget>[
                         Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 16),
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -287,13 +334,13 @@ class _CompleteProfilePage extends State<CompleteProfilePage>
                                 ),
                               ],
                             )),
+                        const Gap(16),
                         Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 16),
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Last name'),
+                                const Text('Last name'),
                                 const Gap(5),
                                 TextFormField(
                                   controller: lastNameController,
@@ -312,9 +359,9 @@ class _CompleteProfilePage extends State<CompleteProfilePage>
                                 ),
                               ],
                             )),
+                        const Gap(16),
                         Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 16),
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -339,29 +386,40 @@ class _CompleteProfilePage extends State<CompleteProfilePage>
                                 ),
                               ],
                             )),
+                        const Gap(16),
                         Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 16),
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Phone number'),
+                                const Text('Phone number'),
                                 Gap(5),
-                                TextFormField(
+                                IntlPhoneField(
+                                  initialCountryCode: '+234',
                                   controller: phoneNumberController,
-                                  inputFormatters: [PhoneInputFormatter()],
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      number = value;
+                                    });
+                                  },
+                                  onCountryChanged: (value) {
+                                    setState(() {
+                                      country = value;
+                                    });
+                                  },
                                   decoration: InputDecoration(
-                                    hintText: "+234",
                                     border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(16),
                                         borderSide: const BorderSide(
                                             color: Color(0xffEAECF0))),
                                   ),
                                   validator: (value) {
-                                    if (value!.trim().isEmpty) {
+                                    if (value!.completeNumber.trim().isEmpty) {
                                       return "Phone Number can't be empty";
                                     }
-                                    if (value!.trim().length < 11) {
+                                    if (value.completeNumber.trim().length <
+                                        11) {
                                       return "incomplete phone number";
                                     }
 
@@ -370,9 +428,9 @@ class _CompleteProfilePage extends State<CompleteProfilePage>
                                 ),
                               ],
                             )),
+                        const Gap(12),
                         Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 16),
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -404,16 +462,12 @@ class _CompleteProfilePage extends State<CompleteProfilePage>
               Align(
                 alignment: Alignment.bottomCenter,
                 child: SafeArea(
-                  child:
-                      Consumer<authprovider>(builder: (context, value, child) {
-                    return InkWell(
+                    child: InkWell(
                         onTap: () {
-                          _continue(value);
+                          _continue(ref);
                           // Navigator.pushNamed(context, '/setuphealth');
                         },
-                        child: InkButton(title: 'Continue'));
-                  }),
-                ),
+                        child: InkButton(title: 'Continue'))),
               )
             ],
           )),

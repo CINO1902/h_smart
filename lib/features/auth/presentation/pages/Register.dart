@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:gap/gap.dart';
+import 'package:h_smart/features/auth/domain/usecases/authStates.dart';
 import 'package:h_smart/features/auth/presentation/provider/auth_provider.dart';
 
 import 'package:provider/provider.dart';
@@ -9,14 +11,14 @@ import '../../../../constant/customesnackbar.dart';
 import 'CompleteProfile.dart';
 import 'Login.dart';
 
-class RegisterPage extends StatefulWidget {
+class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  ConsumerState<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage>
+class _RegisterPageState extends ConsumerState<RegisterPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   final formKey = GlobalKey<FormState>();
@@ -35,11 +37,12 @@ class _RegisterPageState extends State<RegisterPage>
     super.dispose();
   }
 
-  void register(authprovider value) async {
+  void register() async {
     if (!formKey.currentState!.validate()) {
       return;
     }
-    if (value.loading == true) {
+    if (ref.read(authProvider).registerResult.state ==
+        RegisterResultStates.isLoading) {
       return;
     } else if (isPrivacyPolicyChecked == false) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -56,14 +59,15 @@ class _RegisterPageState extends State<RegisterPage>
       return;
     }
     SmartDialog.showLoading();
-    await context
-        .read<authprovider>()
+    await ref
+        .read(authProvider)
         .register(emailController.text, passwordController.text);
-    if (value.error == true) {
+    if (ref.watch(authProvider).registerResult.state ==
+        RegisterResultStates.isError) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: CustomeSnackbar(
           topic: 'Oh Snap!',
-          msg: value.message,
+          msg: ref.watch(authProvider).registerResult.response['message'],
           color1: Color.fromARGB(255, 171, 51, 42),
           color2: Color.fromARGB(255, 127, 39, 33),
         ),
@@ -71,11 +75,13 @@ class _RegisterPageState extends State<RegisterPage>
         backgroundColor: Colors.transparent,
         elevation: 0,
       ));
-    } else {
+    } else if (ref.watch(authProvider).registerResult.state ==
+        RegisterResultStates.isData) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: CustomeSnackbar(
           topic: 'Great!',
-          msg: value.message,
+          msg: ref.watch(authProvider).registerResult.response['message'] ??
+              'Registered Successfully',
           color1: Color.fromARGB(255, 25, 107, 52),
           color2: Color.fromARGB(255, 19, 95, 40),
         ),
@@ -277,31 +283,28 @@ class _RegisterPageState extends State<RegisterPage>
                         ],
                       ),
                     ),
-                    Consumer<authprovider>(builder: (context, value, child) {
-                      return InkWell(
-                        onTap: () {
-                          register(value);
-                        },
-                        child: Container(
-                          width: double.infinity,
-                          height: 56,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              color: Theme.of(context).primaryColor),
-                          margin: const EdgeInsets.symmetric(
-                              horizontal: 16.0, vertical: 8.0),
-                          child: const Center(
-                              child: Text(
-                            "Sign Up",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500),
-                          )),
-                        ),
-                      );
-                    }),
-
+                    GestureDetector(
+                      onTap: () {
+                        register();
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        height: 56,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            color: Theme.of(context).primaryColor),
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 8.0),
+                        child: const Center(
+                            child: Text(
+                          "Sign Up",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500),
+                        )),
+                      ),
+                    ),
                     Container(
                       margin: const EdgeInsets.symmetric(
                           horizontal: 16.0, vertical: 16.0),

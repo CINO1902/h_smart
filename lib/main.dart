@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:h_smart/core/api/firebaseinit.dart';
 import 'package:h_smart/features/Hospital/presentation/pages/allGovernmentHospital.dart';
@@ -17,7 +18,7 @@ import 'package:h_smart/features/auth/presentation/pages/WelcomePage.dart';
 import 'package:h_smart/features/auth/presentation/pages/setUpHealthDetails.dart';
 import 'package:h_smart/features/auth/presentation/pages/verifyemail.dart';
 import 'package:h_smart/features/chat/presentation/pages/chat.dart';
-import 'package:h_smart/features/chat/presentation/provider/chatservice.dart';
+import 'package:h_smart/features/chat/presentation/controller/chatservice.dart';
 import 'package:h_smart/features/doctorRecord/presentation/pages/aboutDoctor.dart';
 import 'package:h_smart/features/doctorRecord/presentation/provider/doctorprovider.dart';
 import 'package:h_smart/features/firstAid/presentation/pages/firstaid.dart';
@@ -98,88 +99,56 @@ class _MyAppState extends State<MyApp> {
   bool isLoggedIn = false;
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          create: (context) => authprovider(locator()),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => doctorprpvider(locator()),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => MedicalRecordprovider(locator()),
-        ),
-        ChangeNotifierProxyProvider<authprovider, ChatService>(
-            create: (context) => ChatService(),
-            update: (BuildContext context, authprovider authprovider,
-                ChatService? chatService) {
-              chatService!.update(authprovider);
-              return ChatService();
-            }),
-        ChangeNotifierProxyProvider<authprovider, mydashprovider>(
-            create: (context) => mydashprovider(locator()),
-            update: (BuildContext context, authprovider authprovider,
-                mydashprovider? mydashprovider) {
-              mydashprovider!.update(authprovider);
-              return mydashprovider;
-            }),
-        ChangeNotifierProvider(
-          create: (context) => GetHospitalProvider(locator()),
-        ),
-      ],
-      child: ChangeNotifierProvider(
-          create: (context) => Themeprovider(),
-          builder: (context, child) {
-            return MaterialApp(
-              debugShowCheckedModeBanner: false,
-              title: 'H Smart',
-              theme: myTheme.lighttheme,
-              darkTheme: myTheme.darktheme,
-              navigatorObservers: [FlutterSmartDialog.observer],
-              builder: FlutterSmartDialog.init(),
-              initialRoute: '/',
-              routes: {
-                '/': (context) => widget.token == null
-                    ? const WelcomePage()
-                    : const indexpage(),
-                '/login': (context) => const LoginPage(),
-                '/register': (context) => const RegisterPage(),
-                '/verifyemail': (context) => const verifyemail(),
-                '/CompleteProfilePage': (context) =>
-                    const CompleteProfilePage(),
-                '/setuphealth': (context) => const setuphealth(),
-                '/indexpage': (context) => const indexpage(),
-                '/Doctor': (context) => const Doctor(),
-                '/aboutDoctor': (context) => const AboutDoctor(),
-                '/AppointmentScheduled': (context) =>
-                    const AppointmentScheduled(),
-                '/RateExperience': (context) => const RateExperience(),
-                '/Chat': (context) => const Chat(),
-                '/MyAppointment': (context) => const MyAppointment(),
-                '/PersonalInfo': (context) => const PersonalInfo(),
-                '/MedicalRecord': (context) => const MedicalRecord(),
-                '/MedicalInfo': (context) => const MedicalInfo(),
-                '/MedicineAndPres': (context) => const MedicineAndPres(),
-                '/SymptomsChecker': (context) => const SymptomsChecker(),
-                '/Support': (context) => const Support(),
-                '/feedback': (context) => const Feedbacks(),
-                '/faq': (context) => const FAQ(),
-                '/firstAid': (context) => const FirstAid(),
-                '/TestAndReport': (context) => const TestAndReport(),
-                '/Report': (context) => const Report(),
-                '/Legal': (context) => const Legal(),
-                '/ReportAndDoc': (context) => const ReportAndDoc(),
-                '/Settings': (context) => const Settings(),
-                '/ChangePassword': (context) => const ChangePassword(),
-                '/Hospital': (context) => const Hospital(),
-                '/viewhospitaldetail': (context) => const viewhospitaldetail(),
-                '/governmenthospital': (context) => const GovermentHospital(),
-                '/privatehospital': (context) => const PrivateHosptal(),
-              },
-
-              // home: isLoggedIn ? const MainPage(title: 'Home') : const WelcomePage(),
-            );
-          }),
+    return ProviderScope(
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'H Smart',
+        theme: myTheme.lighttheme,
+        // darkTheme: myTheme.darktheme,
+        navigatorObservers: [FlutterSmartDialog.observer],
+        builder: FlutterSmartDialog.init(),
+        initialRoute: '/',
+        routes: {
+          '/': (context) => widget.token == null
+              ? const WelcomePage()
+              : const indexpage(),
+          '/login': (context) => const LoginPage(),
+          '/register': (context) => const RegisterPage(),
+          '/verifyemail': (context) => const verifyemail(),
+          '/CompleteProfilePage': (context) =>
+              const CompleteProfilePage(),
+          '/setuphealth': (context) => const setuphealth(),
+          '/indexpage': (context) => const indexpage(),
+          '/Doctor': (context) => const Doctor(),
+          '/aboutDoctor': (context) => const AboutDoctor(),
+          '/AppointmentScheduled': (context) =>
+              const AppointmentScheduled(),
+          '/RateExperience': (context) => const RateExperience(),
+          '/Chat': (context) => const Chat(),
+          '/MyAppointment': (context) => const MyAppointment(),
+          '/PersonalInfo': (context) => const PersonalInfo(),
+          '/MedicalRecord': (context) => const MedicalRecord(),
+          '/MedicalInfo': (context) => const MedicalInfo(),
+          '/MedicineAndPres': (context) => const MedicineAndPres(),
+          '/SymptomsChecker': (context) => const SymptomsChecker(),
+          '/Support': (context) => const Support(),
+          '/feedback': (context) => const Feedbacks(),
+          '/faq': (context) => const FAQ(),
+          '/firstAid': (context) => const FirstAid(),
+          '/TestAndReport': (context) => const TestAndReport(),
+          '/Report': (context) => const Report(),
+          '/Legal': (context) => const Legal(),
+          '/ReportAndDoc': (context) => const ReportAndDoc(),
+          '/Settings': (context) => const Settings(),
+          '/ChangePassword': (context) => const ChangePassword(),
+          '/Hospital': (context) => const Hospital(),
+          '/viewhospitaldetail': (context) => const viewhospitaldetail(),
+          '/governmenthospital': (context) => const GovermentHospital(),
+          '/privatehospital': (context) => const PrivateHosptal(),
+        },
+          
+        // home: isLoggedIn ? const MainPage(title: 'Home') : const WelcomePage(),
+      ),
     );
   }
 }

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:gap/gap.dart';
+import 'package:h_smart/features/auth/domain/entities/setuphealthissue.dart';
+import 'package:h_smart/features/auth/domain/usecases/authStates.dart';
 import 'package:h_smart/features/medical_record/presentation/pages/index.dart';
 import 'package:provider/provider.dart';
 
@@ -8,14 +11,14 @@ import '../../../../constant/Inkbutton.dart';
 import '../../../../constant/customesnackbar.dart';
 import '../provider/auth_provider.dart';
 
-class setuphealth extends StatefulWidget {
+class setuphealth extends ConsumerStatefulWidget {
   const setuphealth({super.key});
 
   @override
-  State<setuphealth> createState() => _setuphealthState();
+  ConsumerState<setuphealth> createState() => _setuphealthState();
 }
 
-class _setuphealthState extends State<setuphealth> {
+class _setuphealthState extends ConsumerState<setuphealth> {
   final formKey = GlobalKey<FormState>();
   String? selectedsexOption;
 
@@ -34,21 +37,23 @@ class _setuphealthState extends State<setuphealth> {
   TextEditingController bloodtypecon = TextEditingController();
   TextEditingController allergycontoller = TextEditingController();
   TextEditingController chronicContoller = TextEditingController();
-  void SetupHealth(authprovider value) async {
+  void SetupHealth() async {
     if (!formKey.currentState!.validate()) {
       return;
     }
-    if (value.loading == true) {
+    if (ref.read(authProvider).setUpHealthResult.state ==
+        SetUpHealthResultStates.isLoading) {
       return;
     }
     SmartDialog.showLoading();
-    await context.read<authprovider>().setupHealthIssue(genderControler.text,
+    await ref.read(authProvider).setupHealthIssue(genderControler.text,
         bloodtypecon.text, allergycontoller.text, chronicContoller.text);
-    if (value.error == true) {
+    if (ref.watch(authProvider).setUpHealthResult.state ==
+        SetUpHealthResultStates.isError) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: CustomeSnackbar(
           topic: 'Oh Snap!',
-          msg: value.message,
+          msg: ref.watch(authProvider).setUpHealthResult.response['message'],
           color1: Color.fromARGB(255, 171, 51, 42),
           color2: Color.fromARGB(255, 127, 39, 33),
         ),
@@ -60,7 +65,8 @@ class _setuphealthState extends State<setuphealth> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: CustomeSnackbar(
           topic: 'Great!',
-          msg: value.message,
+          msg: ref.read(authProvider).setUpHealthResult.response['message'] ??
+              'Health Checked',
           color1: Color.fromARGB(255, 25, 107, 52),
           color2: Color.fromARGB(255, 19, 95, 40),
         ),
@@ -263,14 +269,12 @@ class _setuphealthState extends State<setuphealth> {
                           ],
                         )),
                     Gap(70),
-                    Consumer<authprovider>(builder: (context, value, child) {
-                      return InkWell(
-                          onTap: () {
-                            SetupHealth(value);
-                            // Navigator.pushNamed(context, '/indexpage');
-                          },
-                          child: InkButton(title: 'Continue'));
-                    })
+                    InkWell(
+                        onTap: () {
+                          SetupHealth();
+                          // Navigator.pushNamed(context, '/indexpage');
+                        },
+                        child: InkButton(title: 'Continue')),
                   ],
                 ),
               )

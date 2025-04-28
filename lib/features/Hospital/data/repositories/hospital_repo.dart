@@ -1,3 +1,5 @@
+import '../../domain/states/hospitalStates.dart';
+
 abstract class HospitalDataSource {
-  Future<List<List>> getHospital();
+ Future<HospitalResult> getHospital();
 }

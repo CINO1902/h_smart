@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:gap/gap.dart';
+import 'package:h_smart/features/auth/domain/usecases/authStates.dart';
 import 'package:h_smart/features/auth/presentation/provider/auth_provider.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
@@ -10,14 +12,14 @@ import 'package:provider/provider.dart';
 import '../../../../constant/Inkbutton.dart';
 import '../../../../constant/customesnackbar.dart';
 
-class verifyemail extends StatefulWidget {
+class verifyemail extends ConsumerStatefulWidget {
   const verifyemail({super.key});
 
   @override
-  State<verifyemail> createState() => _verifyemailState();
+  ConsumerState<verifyemail> createState() => _verifyemailState();
 }
 
-class _verifyemailState extends State<verifyemail> {
+class _verifyemailState extends ConsumerState<verifyemail> {
   TextEditingController textEditingController = TextEditingController();
 
   // ignore: close_sinks
@@ -192,66 +194,70 @@ class _verifyemailState extends State<verifyemail> {
                         ),
                 ],
               ),
-              Consumer<authprovider>(builder: (context, value, child) {
-                return Align(
-                    heightFactor: 6,
-                    alignment: Alignment.bottomCenter,
-                    child: InkWell(
-                      onTap: () async {
-                        if (currentText.length != 4) {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: CustomeSnackbar(
-                              topic: 'Oh Snap!',
-                              msg: 'Enter The Complete Otp',
-                              color1: Color.fromARGB(255, 171, 51, 42),
-                              color2: Color.fromARGB(255, 127, 39, 33),
-                            ),
-                            behavior: SnackBarBehavior.floating,
-                            backgroundColor: Colors.transparent,
-                            elevation: 0,
-                          ));
-                          return;
-                        }
-                        if (value.loading == true) {
-                          return;
-                        }
-                        SmartDialog.showLoading();
-                        await context
-                            .read<authprovider>()
-                            .verifyOtp(currentText);
-                        if (value.error == true) {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: CustomeSnackbar(
-                              topic: 'Oh Snap!',
-                              msg: value.message,
-                              color1: Color.fromARGB(255, 171, 51, 42),
-                              color2: Color.fromARGB(255, 127, 39, 33),
-                            ),
-                            behavior: SnackBarBehavior.floating,
-                            backgroundColor: Colors.transparent,
-                            elevation: 0,
-                          ));
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: CustomeSnackbar(
-                              topic: 'Great!',
-                              msg: value.message,
-                              color1: Color.fromARGB(255, 25, 107, 52),
-                              color2: Color.fromARGB(255, 19, 95, 40),
-                            ),
-                            behavior: SnackBarBehavior.floating,
-                            backgroundColor: Colors.transparent,
-                            elevation: 0,
-                          ));
-                          Navigator.pushNamed(context, '/CompleteProfilePage');
-                        }
-                        SmartDialog.dismiss();
-                      },
-                      child: InkButton(
-                        title: 'Verify and continue',
-                      ),
-                    ));
-              })
+              Align(
+                  heightFactor: 6,
+                  alignment: Alignment.bottomCenter,
+                  child: InkWell(
+                    onTap: () async {
+                      if (currentText.length != 4) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: CustomeSnackbar(
+                            topic: 'Oh Snap!',
+                            msg: 'Enter The Complete Otp',
+                            color1: Color.fromARGB(255, 171, 51, 42),
+                            color2: Color.fromARGB(255, 127, 39, 33),
+                          ),
+                          behavior: SnackBarBehavior.floating,
+                          backgroundColor: Colors.transparent,
+                          elevation: 0,
+                        ));
+                        return;
+                      }
+                      if (ref.read(authProvider).verifyEmailResult.state ==
+                          VerifyEmailResultStates.isLoading) {
+                        return;
+                      }
+                      SmartDialog.showLoading();
+                      await ref.read(authProvider).verifyOtp(currentText);
+                      if (ref.read(authProvider).verifyEmailResult.state ==
+                          VerifyEmailResultStates.isError) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: CustomeSnackbar(
+                            topic: 'Oh Snap!',
+                            msg: ref
+                                .read(authProvider)
+                                .verifyEmailResult
+                                .response['message'],
+                            color1: Color.fromARGB(255, 171, 51, 42),
+                            color2: Color.fromARGB(255, 127, 39, 33),
+                          ),
+                          behavior: SnackBarBehavior.floating,
+                          backgroundColor: Colors.transparent,
+                          elevation: 0,
+                        ));
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: CustomeSnackbar(
+                            topic: 'Great!',
+                            msg: ref
+                                .read(authProvider)
+                                .verifyEmailResult
+                                .response['message'],
+                            color1: Color.fromARGB(255, 25, 107, 52),
+                            color2: Color.fromARGB(255, 19, 95, 40),
+                          ),
+                          behavior: SnackBarBehavior.floating,
+                          backgroundColor: Colors.transparent,
+                          elevation: 0,
+                        ));
+                        Navigator.pushNamed(context, '/CompleteProfilePage');
+                      }
+                      SmartDialog.dismiss();
+                    },
+                    child: InkButton(
+                      title: 'Verify and continue',
+                    ),
+                  )),
             ],
           ),
         ),

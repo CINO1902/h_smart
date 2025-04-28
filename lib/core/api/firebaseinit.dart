@@ -22,8 +22,8 @@ class FirebaseApi {
       print('User declined or has not accepted permission');
     }
 
-    final FCMToken = await messaging.getToken();
+    // final FCMToken = await messaging.getToken();
 
-    print('Firebase Token: $FCMToken');
+    // print('Firebase Token: $FCMToken');
   }
 }
