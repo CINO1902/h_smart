@@ -6,6 +6,8 @@ import 'package:h_smart/features/myAppointment/presentation/pages/myAppointment.
 import 'package:h_smart/features/myAppointment/presentation/pages/profile.dart';
 import 'package:line_icons/line_icons.dart';
 
+import '../../../../core/utils/appColor.dart';
+
 class indexpage extends StatefulWidget {
   const indexpage({super.key});
 
@@ -51,15 +53,15 @@ class _indexpageState extends State<indexpage> {
                 rippleColor: Theme.of(context).colorScheme.inverseSurface,
                 hoverColor: Theme.of(context).colorScheme.inverseSurface,
                 gap: 8,
-                activeColor: Theme.of(context).primaryColor,
+                activeColor: AppColors.kprimaryColor500,
                 iconSize: 24,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 duration: const Duration(milliseconds: 400),
                 tabBackgroundColor: Colors.grey[100]!,
                 color: Colors.black,
-                tabs: [
-                  const GButton(
+                tabs: const [
+                  GButton(
                     icon: LineIcons.home,
                     text: 'Home',
                   ),
@@ -68,14 +70,14 @@ class _indexpageState extends State<indexpage> {
                     text: 'Appointment',
                     textStyle: TextStyle(
                         fontSize: 12,
-                        color: Theme.of(context).primaryColor,
+                        color: AppColors.kprimaryColor500,
                         fontWeight: FontWeight.bold),
                   ),
-                  const GButton(
+                  GButton(
                     icon: LineIcons.rocketChat,
                     text: 'Chat',
                   ),
-                  const GButton(
+                  GButton(
                     icon: LineIcons.user,
                     text: 'Profile',
                   ),

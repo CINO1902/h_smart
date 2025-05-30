@@ -5,6 +5,8 @@ import 'package:gap/gap.dart';
 import 'package:h_smart/features/doctorRecord/presentation/provider/doctorprovider.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/utils/appColor.dart';
+
 class ListDoctors extends ConsumerStatefulWidget {
   ListDoctors({super.key, required this.appbartitle, required this.index});
   String appbartitle;
@@ -99,7 +101,7 @@ class _ListDoctorsState extends ConsumerState<ListDoctors> {
                               height: 36,
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(16),
-                                  color: Theme.of(context).primaryColor),
+                                  color: AppColors.kprimaryColor500),
                               margin: const EdgeInsets.symmetric(
                                   horizontal: 16.0, vertical: 8.0),
                               child: const Center(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:h_smart/core/utils/appColor.dart';
 
 class InkButton extends StatelessWidget {
   InkButton({
@@ -17,8 +18,8 @@ class InkButton extends StatelessWidget {
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           color: active != null
-              ? Theme.of(context).primaryColor.withOpacity(.5)
-              : Theme.of(context).primaryColor),
+              ? AppColors.kprimaryColor500.withOpacity(.5)
+              : AppColors.kprimaryColor500),
       child: Align(
           alignment: Alignment.center,
           child: Text(

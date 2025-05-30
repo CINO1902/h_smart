@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../constant/enum.dart';
 import '../../constant/network_api.dart';
@@ -67,6 +68,8 @@ class DioService implements HttpService {
     String? authtoken,
     dynamic data,
   }) async {
+    final pref = await SharedPreferences.getInstance();
+    final accesstoken = pref.getString('jwt_token');
     Response response;
     try {
       if (methodrequest == RequestMethod.post) {
@@ -84,7 +87,7 @@ class DioService implements HttpService {
           cancelToken: cancelToken,
           options: Options(
             headers: {
-              'Authorization': 'Bearer $authtoken',
+              'Authorization': 'Bearer $accesstoken',
             },
           ),
         );
@@ -95,7 +98,7 @@ class DioService implements HttpService {
           cancelToken: cancelToken,
           options: Options(
             headers: {
-              'Authorization': 'Bearer $authtoken',
+              'Authorization': 'Bearer $accesstoken',
             },
           ),
         );

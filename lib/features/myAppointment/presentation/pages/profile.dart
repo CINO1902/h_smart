@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:gap/gap.dart';
-import 'package:provider/provider.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
+import '../../../../core/utils/appColor.dart' show AppColors;
 import '../../../auth/presentation/provider/auth_provider.dart';
 
 class Profile extends ConsumerStatefulWidget {
@@ -41,27 +41,34 @@ class _ProfileState extends ConsumerState<Profile> {
                       bottomRight: Radius.circular(20)),
                   child: ImageFiltered(
                     imageFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: CachedNetworkImage(
-                      progressIndicatorBuilder: (context, url, progress) {
-                        return Center(
-                          child: SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              value: progress.progress,
-                              strokeWidth: 2,
+                    child: ref.watch(authProvider).profilepic == ''
+                        ? const CircleAvatar(
+                            radius: 14,
+                            backgroundColor: AppColors.kprimaryColor500,
+                            child: const Icon(Icons.camera_alt,
+                                size: 16, color: Colors.white),
+                          )
+                        : CachedNetworkImage(
+                            progressIndicatorBuilder: (context, url, progress) {
+                              return Center(
+                                child: SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    value: progress.progress,
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                              );
+                            },
+                            imageUrl: ref.watch(authProvider).profilepic,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            errorWidget: (context, url, error) => Icon(
+                              Icons.error,
+                              color: Colors.red,
                             ),
                           ),
-                        );
-                      },
-                      imageUrl: ref.watch(authProvider).profilepic,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      errorWidget: (context, url, error) => Icon(
-                        Icons.error,
-                        color: Colors.red,
-                      ),
-                    ),
                   ),
                 ),
               ),
@@ -102,29 +109,37 @@ class _ProfileState extends ConsumerState<Profile> {
                       color: Color(0xffEDEDED),
                       borderRadius: BorderRadius.circular(50),
                     ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(50),
-                      child: CachedNetworkImage(
-                        progressIndicatorBuilder: (context, url, progress) {
-                          return Center(
-                            child: SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                value: progress.progress,
-                                strokeWidth: 2,
+                    child: ref.watch(authProvider).profilepic == ''
+                        ? const CircleAvatar(
+                            radius: 14,
+                            backgroundColor: AppColors.kprimaryColor500,
+                            child: const Icon(Icons.camera_alt,
+                                size: 16, color: Colors.white),
+                          )
+                        : ClipRRect(
+                            borderRadius: BorderRadius.circular(50),
+                            child: CachedNetworkImage(
+                              progressIndicatorBuilder:
+                                  (context, url, progress) {
+                                return Center(
+                                  child: SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      value: progress.progress,
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                );
+                              },
+                              imageUrl: ref.watch(authProvider).profilepic,
+                              fit: BoxFit.cover,
+                              errorWidget: (context, url, error) => Icon(
+                                Icons.error,
+                                color: Colors.red,
                               ),
                             ),
-                          );
-                        },
-                        imageUrl: ref.watch(authProvider).profilepic,
-                        fit: BoxFit.cover,
-                        errorWidget: (context, url, error) => Icon(
-                          Icons.error,
-                          color: Colors.red,
-                        ),
-                      ),
-                    )),
+                          )),
               ),
             ],
           ),
@@ -222,7 +237,7 @@ class _ProfileState extends ConsumerState<Profile> {
                       child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
+                            const Text(
                               'Log out',
                               style: TextStyle(
                                   fontWeight: FontWeight.w400,

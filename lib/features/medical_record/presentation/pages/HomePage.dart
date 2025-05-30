@@ -80,22 +80,22 @@ class _HomePageState extends ConsumerState<HomePage>
   }
 
   void verifyuser() async {
-    if (ref.read(authProvider).getinfo1 == false) {
-      await ref.read(authProvider).getinfo().then((_) {
-        if (ref.read(authProvider).getinfo1 == false) verifyuser();
-      });
-    }
+    // if (ref.read(authProvider).getinfo1 == false) {
+    //   await ref.read(authProvider).getinfo().then((_) {
+    //     if (ref.read(authProvider).getinfo1 == false) verifyuser();
+    //   });
+    // }
 
-    if (!mounted) return;
+    // if (!mounted) return;
 
-    if (ref.read(authProvider).logoutuser) {
-      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
-      SmartDialog.showToast('Session Closed, Log in Again');
-      ref.read(authProvider).logout();
-      return;
-    }
+    // if (ref.read(authProvider).logoutuser) {
+    //   Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+    //   SmartDialog.showToast('Session Closed, Log in Again');
+    //   ref.read(authProvider).logout();
+    //   return;
+    // }
 
-    await ref.read(medicalRecordProvider).getprescription();
+    // await ref.read(medicalRecordProvider).getprescription();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.scrollcontroller1.hasClients) {
@@ -115,7 +115,6 @@ class _HomePageState extends ConsumerState<HomePage>
           children: [
             // ─────────── Top fixed section ───────────
             SizedBox(
-              // height: MediaQuery.of(context).size.height * 0.165,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -152,6 +151,9 @@ class _HomePageState extends ConsumerState<HomePage>
                           child: SizedBox(
                             height: 25,
                             child: ListView(
+                              scrollDirection: Axis.horizontal,
+                              shrinkWrap:
+                                  true, // optional, but sometimes useful
                               controller: widget.scrollcontroller1,
                               children: const [
                                 ShimmerWidget.rectangle(width: 100, height: 25),

@@ -10,6 +10,8 @@ import 'package:h_smart/features/doctorRecord/presentation/provider/doctorprovid
 import 'package:provider/provider.dart';
 import 'package:sticky_headers/sticky_headers.dart';
 
+import '../../../../core/utils/appColor.dart';
+
 class Doctor extends ConsumerStatefulWidget {
   const Doctor({super.key});
 
@@ -98,7 +100,7 @@ class _DoctorState extends ConsumerState<Doctor> {
         height: MediaQuery.of(context).size.height * 0.5,
         child: Center(
           child: CircularProgressIndicator(
-            color: Theme.of(context).primaryColor,
+            color: AppColors.kprimaryColor500,
           ),
         ),
       );
@@ -119,7 +121,7 @@ class _DoctorState extends ConsumerState<Doctor> {
                     const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
-                  color: Theme.of(context).primaryColor,
+                  color: AppColors.kprimaryColor500,
                 ),
                 child: const Center(
                   child: Text(
@@ -302,7 +304,7 @@ Widget _buildDoctorCard(BuildContext context, WidgetRef ref) {
                     height: 20,
                     width: 20,
                     child: CircularProgressIndicator(
-                      color: Theme.of(context).primaryColor,
+                      color: AppColors.kprimaryColor500,
                       value: progress.progress,
                       strokeWidth: 2,
                     ),

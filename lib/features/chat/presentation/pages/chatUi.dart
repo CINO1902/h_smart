@@ -10,6 +10,7 @@ import 'package:h_smart/features/chat/presentation/widgets/ChatBubble.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../constant/socketClass.dart';
+import '../../../../core/utils/appColor.dart';
 import '../../domains/utils/DatabaseHelper.dart';
 
 class ChatUI extends ConsumerStatefulWidget {
@@ -262,7 +263,7 @@ class _ChatUIState extends ConsumerState<ChatUI> {
                           width: 30,
                           child: Image.asset(
                             'images/chevron-left.png',
-                            color: Theme.of(context).primaryColor,
+                            color: AppColors.kprimaryColor500,
                           )),
                     ),
                     Gap(15),
@@ -278,7 +279,7 @@ class _ChatUIState extends ConsumerState<ChatUI> {
                                 height: 20,
                                 width: 20,
                                 child: CircularProgressIndicator(
-                                  color: Theme.of(context).primaryColor,
+                                  color: AppColors.kprimaryColor500,
                                   value: progress.progress,
                                   strokeWidth: 2,
                                 ),
@@ -464,7 +465,7 @@ class _ChatUIState extends ConsumerState<ChatUI> {
                                       height: 20,
                                       width: 20,
                                       child: CircularProgressIndicator(
-                                        color: Theme.of(context).primaryColor,
+                                        color: AppColors.kprimaryColor500,
                                         value: progress.progress,
                                         strokeWidth: 2,
                                       ),
@@ -512,7 +513,7 @@ class _ChatUIState extends ConsumerState<ChatUI> {
                                   height: 20,
                                   width: 20,
                                   child: CircularProgressIndicator(
-                                    color: Theme.of(context).primaryColor,
+                                    color: AppColors.kprimaryColor500,
                                     value: progress.progress,
                                     strokeWidth: 2,
                                   ),

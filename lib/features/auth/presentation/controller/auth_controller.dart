@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:h_smart/features/auth/domain/entities/ContinueRegistrationModel.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:h_smart/features/auth/domain/entities/loginResponse.dart';
 import 'package:http/http.dart' as http;
+import '../../../../constant/network_api.dart' as imageUrl1;
 import 'package:h_smart/features/auth/domain/entities/completeprofileRes.dart';
 import 'package:h_smart/features/auth/domain/entities/createaccount.dart';
 import 'package:h_smart/features/auth/domain/entities/setuphealthissue.dart';
@@ -111,7 +113,7 @@ class Authprovider extends ChangeNotifier {
     final response = await authReposity.login(login);
     logoutuser = false;
     if (response.state == LoginResultStates.isData) {
-      final token = response.response.accessToken;
+      final token = response.response.payload?.accessToken;
       final pref = await SharedPreferences.getInstance();
       pref.setString('jwt_token', token ?? '');
     }
@@ -194,18 +196,22 @@ class Authprovider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> register(email, password) async {
+  Future<void> register(
+      String firstname, String lastname, String phone, email, password) async {
     registerResult = RegisterResult(RegisterResultStates.isLoading, {});
     notifyListeners();
-    Registermodel reg = Registermodel(email: email, password: password);
+    Registermodel reg = Registermodel(
+        email: email,
+        password: password,
+        firstname: firstname,
+        lastname: lastname,
+        phoneNumber: phone);
     final response = await authReposity.createacount(reg);
     registerResult = response;
 
-    if (response.state == RegisterResultStates.isData) {
-      final pref = await SharedPreferences.getInstance();
-      String token = response.response['access_token'];
-      // pref.setString('jwt_token', token);
-    }
+    // if (response.state == RegisterResultStates.isData) {
+
+    // }
     notifyListeners();
   }
 
@@ -235,7 +241,6 @@ class Authprovider extends ChangeNotifier {
       final ImageTemporary = File(result.path);
 
       image = ImageTemporary;
-      print(image);
     } catch (e) {
       imageloading = false;
       es = e.toString();
@@ -251,60 +256,118 @@ class Authprovider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> uploadImage(String firstname, String lastname, String phone,
-      DateTime dob, String address) async {
-    final url = Uri.parse('https://api.cloudinary.com/v1_1/dlsavisdq/upload');
+  Future<void> uploadProfile({
+    required String gender,
+    required DateTime dob,
+    required String address,
+    String? bloodtype,
+    String? emergencyContactName,
+    required String emergencyContactPhone,
+    required List<String?> allergies,
+    required List<String?> medicalConditions,
+  }) async {
+    continueRegisterResult = ContinueRegisterResult(
+      ContinueRegisterResultStates.isLoading,
+      {},
+    );
+    notifyListeners();
+
+    final uri = Uri.parse(
+      'http://38.242.146.4:8030/api/v1/upload?privacy_level=public',
+    );
+
+    if (image == null) {
+      continueRegisterResult = ContinueRegisterResult(
+        ContinueRegisterResultStates.isError,
+        {'message': 'No image selected'},
+      );
+      notifyListeners();
+      return;
+    }
+
     try {
-      if (image != null) {
-        final request = http.MultipartRequest('POST', url)
-          ..fields['upload_preset'] = 'image_preset_hSmart'
-          ..files.add(await http.MultipartFile.fromPath('file', image!.path));
+      print(
+        image!.path,
+      );
+      final request = http.MultipartRequest('POST', uri)
+        ..files.add(
+          await http.MultipartFile.fromPath(
+            'file',
+            image!.path,
+            contentType: MediaType('image', 'jpeg'),
+          ),
+        );
 
-        // Apply a timeout of 15 seconds
-        final response = await request.send().timeout(Duration(seconds: 15));
+      final streamedResponse = await request.send().timeout(
+            const Duration(seconds: 15),
+          );
+      final respBody = await streamedResponse.stream.bytesToString();
 
-        if (response.statusCode == 200) {
-          final responseData = await response.stream.toBytes();
-          final responseString = String.fromCharCodes(responseData);
-          final jsonMap = jsonDecode(responseString);
-
-          final url = jsonMap['url'];
-          imageurl = url;
-          await continueRegistration(firstname, lastname, phone, dob, address);
-        } else {
-          imageurl = null;
-          continueRegisterResult = ContinueRegisterResult(
-              ContinueRegisterResultStates.isError,
-              {"message": "Something Went Wrong"});
-        }
-      } else {
-        continueRegisterResult = ContinueRegisterResult(
-            ContinueRegisterResultStates.isError,
-            {"message": "No image is selected"});
+      if (streamedResponse.statusCode != 200) {
+        throw Exception(
+            'Image upload failed with status ${streamedResponse.statusCode}');
       }
+
+      final jsonMap = jsonDecode(respBody) as Map<String, dynamic>;
+      final returnedUrl = jsonMap['payload']['file_url'] as String?;
+      if (returnedUrl == null) {
+        throw Exception('Upload succeeded but no URL returned');
+      }
+      print(returnedUrl);
+      // Now call your continueRegistration endpoint with the uploaded URL
+      await continueRegistration(
+        gender: gender,
+        dob: dob,
+        address: address,
+        bloodtype: bloodtype,
+        emergencyContactName: emergencyContactName,
+        emergencyContactPhone: emergencyContactPhone,
+        allergies: allergies,
+        medicalConditions: medicalConditions,
+        profileUrl: returnedUrl,
+      );
+    } on TimeoutException {
+      continueRegisterResult = ContinueRegisterResult(
+        ContinueRegisterResultStates.isError,
+        {'message': 'Request timed out'},
+      );
     } catch (e) {
-      if (e is TimeoutException) {
-        continueRegisterResult = ContinueRegisterResult(
-            ContinueRegisterResultStates.isError,
-            {"message": "Request timed out"});
-      } else {
-        continueRegisterResult = ContinueRegisterResult(
-            ContinueRegisterResultStates.isError,
-            {"message": "Something Went Wrong"});
-      }
+      continueRegisterResult = ContinueRegisterResult(
+        ContinueRegisterResultStates.isError,
+        {'message': 'Something went wrong: $e'},
+      );
     }
 
     notifyListeners();
   }
 
-  Future<void> continueRegistration(String firstname, String lastname,
-      String phone, DateTime dob, String address) async {
+  Future<void> continueRegistration({
+    required String gender,
+    required DateTime dob,
+    required String address,
+    String? bloodtype,
+    String? emergencyContactName,
+    required String emergencyContactPhone,
+    required List<String?> allergies,
+    required List<String?> medicalConditions,
+    String? profileUrl,
+  }) async {
     continueRegisterResult =
         ContinueRegisterResult(ContinueRegisterResultStates.isLoading, {});
     notifyListeners();
 
-    final response = await authReposity.continueRegistration(
-        firstname, lastname, phone, dob, address, image!, imageurl);
+    ContinueRegistrationModel continueModel = ContinueRegistrationModel(
+        address: address,
+        dateOfBirth: dob,
+        gender: gender,
+        bloodType: bloodtype,
+        emergencyContactName: emergencyContactName,
+        emergencyContactPhone: emergencyContactPhone,
+        allergies: allergies,
+        medicalConditions: medicalConditions,
+        profileUrl: profileUrl);
+    print(continueModel.toJson());
+    final response = await authReposity.continueRegistration(continueModel);
 
     continueRegisterResult = response;
     if (response.state == ContinueRegisterResultStates.isData) {

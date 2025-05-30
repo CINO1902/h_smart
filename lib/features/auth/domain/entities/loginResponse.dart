@@ -9,71 +9,89 @@ LoginResponse loginResponseFromJson(String str) => LoginResponse.fromJson(json.d
 String loginResponseToJson(LoginResponse data) => json.encode(data.toJson());
 
 class LoginResponse {
+    bool? error;
     String? message;
-    String? accessToken;
     Payload? payload;
 
     LoginResponse({
+        this.error,
         this.message,
-        this.accessToken,
         this.payload,
     });
 
     LoginResponse copyWith({
+        bool? error,
         String? message,
-        String? accessToken,
         Payload? payload,
     }) => 
         LoginResponse(
+            error: error ?? this.error,
             message: message ?? this.message,
-            accessToken: accessToken ?? this.accessToken,
             payload: payload ?? this.payload,
         );
 
     factory LoginResponse.fromJson(Map<String, dynamic> json) => LoginResponse(
+        error: json["error"],
         message: json["message"],
-        accessToken: json["access_token"],
         payload: json["payload"] == null ? null : Payload.fromJson(json["payload"]),
     );
 
     Map<String, dynamic> toJson() => {
+        "error": error,
         "message": message,
-        "access_token": accessToken,
         "payload": payload?.toJson(),
     };
 }
 
 class Payload {
-    String? userId;
+    String? accessToken;
     String? email;
-    bool? isProfileCompleted;
+    bool? isProfileComplete;
+    String? role;
+    String? status;
+    String? userId;
 
     Payload({
-        this.userId,
+        this.accessToken,
         this.email,
-        this.isProfileCompleted,
+        this.isProfileComplete,
+        this.role,
+        this.status,
+        this.userId,
     });
 
     Payload copyWith({
-        String? userId,
+        String? accessToken,
         String? email,
-        bool? isProfileCompleted,
+        bool? isProfileComplete,
+        String? role,
+        String? status,
+        String? userId,
     }) => 
         Payload(
-            userId: userId ?? this.userId,
+            accessToken: accessToken ?? this.accessToken,
             email: email ?? this.email,
-            isProfileCompleted: isProfileCompleted ?? this.isProfileCompleted,
+            isProfileComplete: isProfileComplete ?? this.isProfileComplete,
+            role: role ?? this.role,
+            status: status ?? this.status,
+            userId: userId ?? this.userId,
         );
 
     factory Payload.fromJson(Map<String, dynamic> json) => Payload(
-        userId: json["user_id"],
+        accessToken: json["access_token"],
         email: json["email"],
-        isProfileCompleted: json["is_profile_completed"],
+        isProfileComplete: json["is_profile_complete"],
+        role: json["role"],
+        status: json["status"],
+        userId: json["user_id"],
     );
 
     Map<String, dynamic> toJson() => {
-        "user_id": userId,
+        "access_token": accessToken,
         "email": email,
-        "is_profile_completed": isProfileCompleted,
+        "is_profile_complete": isProfileComplete,
+        "role": role,
+        "status": status,
+        "user_id": userId,
     };
 }

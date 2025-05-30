@@ -4,13 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
+import 'package:h_smart/constant/snackbar.dart';
 import 'package:h_smart/features/auth/domain/usecases/authStates.dart';
 import 'package:h_smart/features/auth/presentation/provider/auth_provider.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../constant/Inkbutton.dart';
-import '../../../../constant/customesnackbar.dart';
+import '../../../../core/utils/appColor.dart' show AppColors;
 
 class verifyemail extends ConsumerStatefulWidget {
   const verifyemail({super.key});
@@ -159,13 +160,13 @@ class _verifyemailState extends ConsumerState<verifyemail> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
+                  const Text(
                     'Resend Code?',
                     style: TextStyle(
                         decoration: TextDecoration.underline,
                         fontSize: 13,
                         fontWeight: FontWeight.w800,
-                        color: Theme.of(context).primaryColor),
+                        color: AppColors.kprimaryColor500),
                   ),
                   const Gap(10),
                   count == 0
@@ -176,21 +177,21 @@ class _verifyemailState extends ConsumerState<verifyemail> {
                               countdown();
                             });
                           },
-                          child: Text(
+                          child: const Text(
                             'Send',
                             style: TextStyle(
                                 decoration: TextDecoration.underline,
                                 fontSize: 13,
                                 fontWeight: FontWeight.w800,
-                                color: Theme.of(context).primaryColor),
+                                color: AppColors.kprimaryColor500),
                           ),
                         )
                       : Text(
                           '(0:$count)',
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
-                              color: Theme.of(context).primaryColor),
+                              color: AppColors.kprimaryColor500),
                         ),
                 ],
               ),
@@ -200,17 +201,8 @@ class _verifyemailState extends ConsumerState<verifyemail> {
                   child: InkWell(
                     onTap: () async {
                       if (currentText.length != 4) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: CustomeSnackbar(
-                            topic: 'Oh Snap!',
-                            msg: 'Enter The Complete Otp',
-                            color1: Color.fromARGB(255, 171, 51, 42),
-                            color2: Color.fromARGB(255, 127, 39, 33),
-                          ),
-                          behavior: SnackBarBehavior.floating,
-                          backgroundColor: Colors.transparent,
-                          elevation: 0,
-                        ));
+                        SnackBarService.notifyAction(context,
+                            message: 'OTP has to be a 4 digit');
                         return;
                       }
                       if (ref.read(authProvider).verifyEmailResult.state ==
@@ -219,38 +211,22 @@ class _verifyemailState extends ConsumerState<verifyemail> {
                       }
                       SmartDialog.showLoading();
                       await ref.read(authProvider).verifyOtp(currentText);
+                      final msg = ref
+                          .read(authProvider)
+                          .verifyEmailResult
+                          .response['message'];
                       if (ref.read(authProvider).verifyEmailResult.state ==
                           VerifyEmailResultStates.isError) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: CustomeSnackbar(
-                            topic: 'Oh Snap!',
-                            msg: ref
-                                .read(authProvider)
-                                .verifyEmailResult
-                                .response['message'],
-                            color1: Color.fromARGB(255, 171, 51, 42),
-                            color2: Color.fromARGB(255, 127, 39, 33),
-                          ),
-                          behavior: SnackBarBehavior.floating,
-                          backgroundColor: Colors.transparent,
-                          elevation: 0,
-                        ));
+                        SnackBarService.showSnackBar(context,
+                            title: 'Error',
+                            body: msg,
+                            status: SnackbarStatus.fail);
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: CustomeSnackbar(
-                            topic: 'Great!',
-                            msg: ref
-                                .read(authProvider)
-                                .verifyEmailResult
-                                .response['message'],
-                            color1: Color.fromARGB(255, 25, 107, 52),
-                            color2: Color.fromARGB(255, 19, 95, 40),
-                          ),
-                          behavior: SnackBarBehavior.floating,
-                          backgroundColor: Colors.transparent,
-                          elevation: 0,
-                        ));
-                        Navigator.pushNamed(context, '/CompleteProfilePage');
+                        SnackBarService.showSnackBar(context,
+                            title: 'Success',
+                            body: msg,
+                            status: SnackbarStatus.success);
+                        context.push('/CompleteProfilePage');
                       }
                       SmartDialog.dismiss();
                     },

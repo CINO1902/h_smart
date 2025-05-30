@@ -49,17 +49,18 @@ NetworkException parseNetworkException(DioException e) {
         case 401:
           networkException = NetworkException(
               NetworkExceptionType.unauthorizedRequest,
-              errorMessage: e.response!.data['error'] ??
+              errorMessage: e.response!.data['errors'] ??
                   e.response!.data['message'] ??
-                  e.response!.data['detail']);
+                  e.response!.data['detail'] ??
+                  e.response!.data['error_message']);
           break;
         case 403:
           networkException = NetworkException(
             NetworkExceptionType.unauthorizedRequest,
-            errorMessage: e.response!.data['detail'] ??
-                e.response!.data['errors'] ??
+            errorMessage: e.response!.data['errors'] ??
                 e.response!.data['message'] ??
-                e.response!.data['detail'],
+                e.response!.data['detail'] ??
+                e.response!.data['error_message'],
           );
           break;
         case 404:
@@ -83,7 +84,8 @@ NetworkException parseNetworkException(DioException e) {
             NetworkExceptionType.conflict,
             errorMessage: e.response!.data['errors'] ??
                 e.response!.data['message'] ??
-                e.response!.data['detail'],
+                e.response!.data['detail'] ??
+                e.response!.data['error_message'],
           );
           break;
         case 500:
@@ -91,7 +93,8 @@ NetworkException parseNetworkException(DioException e) {
             NetworkExceptionType.internalServerError,
             errorMessage: e.response!.data['errors'] ??
                 e.response!.data['message'] ??
-                e.response!.data['detail'],
+                e.response!.data['detail'] ??
+                e.response!.data['error_message'],
           );
           break;
         case 400:
@@ -99,26 +102,36 @@ NetworkException parseNetworkException(DioException e) {
             NetworkExceptionType.internalServerError,
             errorMessage: e.response!.data['errors'] ??
                 e.response!.data['message'] ??
-                e.response!.data['detail'],
+                e.response!.data['detail'] ??
+                e.response!.data['error_message'],
           );
           break;
         case 503:
           networkException = NetworkException(
             NetworkExceptionType.serviceUnavailable,
-            errorMessage: e.response!.data['msg'],
+            errorMessage: e.response!.data['errors'] ??
+                e.response!.data['message'] ??
+                e.response!.data['detail'] ??
+                e.response!.data['error_message'],
           );
           break;
         default:
           networkException = NetworkException(
             NetworkExceptionType.unExpected,
-            errorMessage: e.response?.data['message'],
+            errorMessage: e.response!.data['errors'] ??
+                e.response!.data['message'] ??
+                e.response!.data['detail'] ??
+                e.response!.data['error_message'],
           );
       }
       break;
     default:
       networkException = NetworkException(
         NetworkExceptionType.unExpected,
-        errorMessage: e.response?.data['message'],
+        errorMessage: e.response!.data['errors'] ??
+            e.response!.data['message'] ??
+            e.response!.data['detail'] ??
+            e.response!.data['error_message'],
       );
   }
   return networkException;

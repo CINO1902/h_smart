@@ -1,476 +1,481 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_multi_formatter/formatters/phone_input_formatter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:h_smart/constant/Inkbutton.dart';
-import 'package:h_smart/constant/utils.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
+import 'package:h_smart/core/utils/appColor.dart';
+import 'package:h_smart/features/auth/presentation/controller/auth_controller.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:intl_phone_field/phone_number.dart';
+import 'package:multi_select_flutter/multi_select_flutter.dart';
+
+import 'package:h_smart/constant/utils.dart';
+import 'package:h_smart/constant/snackbar.dart'
+    show SnackBarService, SnackbarStatus;
 import 'package:h_smart/features/auth/domain/usecases/authStates.dart';
 import 'package:h_smart/features/auth/presentation/provider/auth_provider.dart';
-import 'package:intl_phone_field/countries.dart';
-import 'package:intl_phone_field/intl_phone_field.dart';
-
 import 'package:intl/intl.dart';
-import 'package:intl_phone_field/phone_number.dart';
-import 'package:provider/provider.dart';
-
-import '../../../../constant/customesnackbar.dart';
 
 class CompleteProfilePage extends ConsumerStatefulWidget {
-  const CompleteProfilePage({super.key});
+  const CompleteProfilePage({Key? key}) : super(key: key);
 
   @override
-  ConsumerState<CompleteProfilePage> createState() => _CompleteProfilePage();
+  ConsumerState<CompleteProfilePage> createState() =>
+      _CompleteProfilePageState();
 }
 
-class _CompleteProfilePage extends ConsumerState<CompleteProfilePage>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  final formKey = GlobalKey<FormState>();
+class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
+  final _formKey = GlobalKey<FormState>();
+
+  final _phoneController = TextEditingController();
+  final _dobController = TextEditingController();
+  final _addressController = TextEditingController();
+  final _emergencyNameController = TextEditingController();
+
+  DateTime _selectedDate = DateTime.now();
+  bool _dateChosen = false;
+  late PhoneNumber _phoneNumber;
+  String? _selectedGender;
+  String? _selectedBloodType;
+  List<String> _selectedAllergies = [];
+  List<String> _selectedConditions = [];
+
+  static const _genders = ['Male', 'Female', 'Other'];
+  static const _bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+  static const _allergyOptions = [
+    'Pollen',
+    'Dust',
+    'Peanuts',
+    'Seafood',
+    'Gluten'
+  ];
+  static const _conditionOptions = [
+    'Diabetes',
+    'Hypertension',
+    'Asthma',
+    'Heart Disease',
+    'None'
+  ];
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this);
-    PhoneInputFormatter.replacePhoneMask(
-      countryCode: 'NG',
-      newMask: '+000 000 000 0000',
-    );
   }
 
-  TextEditingController firstNameController = TextEditingController();
-  TextEditingController lastNameController = TextEditingController();
-  TextEditingController dobController = TextEditingController();
-  TextEditingController phoneNumberController = TextEditingController();
-  TextEditingController homeAddressController = TextEditingController();
-  DateTime dateTime = DateTime.now();
-  PhoneNumber number =
-      PhoneNumber(countryISOCode: '', countryCode: '', number: '');
-  bool chosendate = false;
-
-  Country country = const Country(
-    name: "Nigeria",
-    nameTranslations: {
-      "sk": "Nigéria",
-      "se": "Nigeria",
-      "pl": "Nigeria",
-      "no": "Nigeria",
-      "ja": "ナイジェリア",
-      "it": "Nigeria",
-      "zh": "尼日利亚",
-      "nl": "Nigeria",
-      "de": "Nigeria",
-      "fr": "Nigéria",
-      "es": "Nigeria",
-      "en": "Nigeria",
-      "pt_BR": "Nigéria",
-      "sr-Cyrl": "Нигерија",
-      "sr-Latn": "Nigerija",
-      "zh_TW": "奈及利亞",
-      "tr": "Nijerya",
-      "ro": "Nigeria",
-      "ar": "نيجيريا",
-      "fa": "نیجریه",
-      "yue": "尼日利亞"
-    },
-    flag: "🇳🇬",
-    code: "NG",
-    dialCode: "234",
-    minLength: 10,
-    maxLength: 11,
-  );
   @override
   void dispose() {
-    _controller.dispose();
+    _dobController.dispose();
+    _addressController.dispose();
+    _emergencyNameController.dispose();
     super.dispose();
   }
 
-  Future<void> _selectDate(BuildContext context) async {
+  Future<void> _pickDate() async {
     if (Platform.isIOS) {
       Utils.showSheet(
         context,
         child: SizedBox(
           height: 210,
           child: CupertinoDatePicker(
+            mode: CupertinoDatePickerMode.date,
+            initialDateTime: _selectedDate,
             minimumYear: 1950,
             maximumYear: DateTime.now().year,
-            initialDateTime: dateTime,
-            mode: CupertinoDatePickerMode.date,
-            onDateTimeChanged: (dateTime) =>
-                setState(() => this.dateTime = dateTime),
+            onDateTimeChanged: (d) => _selectedDate = d,
           ),
         ),
         onClicked: () {
-          final value = DateFormat('yyyy-MM-dd').format(dateTime);
-          // Utils.showSnackBar(context, 'Selected "$value"');
-          dobController.text = value;
-          setState(() {
-            chosendate = true;
-          });
+          _setDate(_selectedDate);
           Navigator.pop(context);
         },
       );
     } else {
-      final DateTime? picked = await showDatePicker(
+      final picked = await showDatePicker(
         context: context,
-        initialDate: DateTime.now(),
-        firstDate: DateTime.fromMicrosecondsSinceEpoch(0),
+        initialDate: _selectedDate,
+        firstDate: DateTime(1950),
         lastDate: DateTime.now(),
       );
-      if (picked != null && picked != dateTime) {
-        setState(() {
-          dateTime = picked;
-        });
-        setState(() {
-          chosendate = true;
-        });
-      }
-
-      dobController.value =
-          TextEditingValue(text: (dateTime!.toString().split(' ')[0]));
+      if (picked != null) _setDate(picked);
     }
   }
 
-  void _continue(WidgetRef ref) async {
-    print(dobController.text);
-    if (ref.read(authProvider).continueRegisterResult.state ==
-        ContinueRegisterResultStates.isLoading) {
-      // ref.read(authProvider).authController111();
+  void _setDate(DateTime date) {
+    _selectedDate = date;
+    _dobController.text = DateFormat('yyyy-MM-dd').format(date);
+    setState(() => _dateChosen = true);
+  }
+
+  Future<void> _onContinue() async {
+    print(_selectedAllergies);
+    final auth = ref.read(authProvider);
+    if (auth.continueRegisterResult.state ==
+        ContinueRegisterResultStates.isLoading) return;
+    if (!_formKey.currentState!.validate()) return;
+    if (!_dateChosen) {
+      SnackBarService.notifyAction(
+        context,
+        message: 'Date of birth is required',
+        status: SnackbarStatus.fail,
+      );
       return;
     }
-    if (!formKey.currentState!.validate()) {
+    if (auth.image == null) {
+      SnackBarService.notifyAction(
+        context,
+        message: 'Please insert a picture',
+        status: SnackbarStatus.fail,
+      );
       return;
     }
-    if (chosendate == false) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: CustomeSnackbar(
-          topic: 'Oh Snap!',
-          msg: 'Date of birth can\'t be null',
-          color1: Color.fromARGB(255, 171, 51, 42),
-          color2: Color.fromARGB(255, 127, 39, 33),
-        ),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ));
-      return;
-    }
-    if (ref.read(authProvider).image == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: CustomeSnackbar(
-          topic: 'Oh Snap!',
-          msg: 'Please Insert a picture',
-          color1: Color.fromARGB(255, 171, 51, 42),
-          color2: Color.fromARGB(255, 127, 39, 33),
-        ),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ));
-      return;
-    }
+
     SmartDialog.showLoading();
-    await ref.read(authProvider).uploadImage(
-        firstNameController.text,
-        lastNameController.text,
-        number.countryCode + phoneNumberController.text,
-        DateTime.parse(dobController.text),
-        homeAddressController.text);
-    // await ref.read(authProvider).continueRegistration(
-    //     firstNameController.text,
-    //     lastNameController.text,
-    //     number.countryCode + phoneNumberController.text,
-    //     DateTime.parse(dobController.text),
-    //     homeAddressController.text);
-    if (ref.watch(authProvider).continueRegisterResult.state ==
-        ContinueRegisterResultStates.isError) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          content: CustomeSnackbar(
-              topic: 'Error',
-              color1: Color.fromARGB(255, 171, 51, 42),
-              color2: Color.fromARGB(255, 127, 39, 33),
-              msg: (ref
-                  .read(authProvider)
-                  .continueRegisterResult
-                  .response['message']))));
-    } else if (ref.watch(authProvider).continueRegisterResult.state ==
-        ContinueRegisterResultStates.isData) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          content: CustomeSnackbar(
-            topic: 'Registration Successful',
-            color1: Color.fromARGB(255, 25, 107, 52),
-            color2: Color.fromARGB(255, 19, 95, 40),
-            msg: ref
-                    .watch(authProvider)
-                    .continueRegisterResult
-                    .response['message'] ??
-                'Profile Completed',
-          )));
-      Navigator.pushNamed(context, '/setuphealth');
-    }
+    await auth.uploadProfile(
+      gender: _selectedGender!,
+      dob: DateTime.parse(_dobController.text),
+      address: _addressController.text.trim(),
+      bloodtype: _selectedBloodType,
+      emergencyContactName: _emergencyNameController.text.trim(),
+      emergencyContactPhone: _phoneNumber.completeNumber,
+      allergies: _selectedAllergies,
+      medicalConditions: _selectedConditions,
+    );
     SmartDialog.dismiss();
-  }
 
-  bool isPrivacyPolicyChecked = false;
+    final result = ref.watch(authProvider).continueRegisterResult;
+    final message = result.response['message'] ?? '';
+    if (result.state == ContinueRegisterResultStates.isError) {
+      SnackBarService.showSnackBar(
+        context,
+        title: 'Error',
+        body: message,
+        status: SnackbarStatus.fail,
+      );
+    } else if (result.state == ContinueRegisterResultStates.isData) {
+      SnackBarService.showSnackBar(
+        context,
+        title: 'Success',
+        body: message,
+        status: SnackbarStatus.success,
+      );
+      context.push('/profile-complet');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final auth = ref.watch(authProvider);
     return Scaffold(
-      body: Container(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-          child: Stack(
-            children: [
-              Align(
-                alignment: Alignment.topLeft,
-                child: SafeArea(
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: SizedBox(
-                        height: 30,
-                        width: 30,
-                        child: Image.asset('images/chevron-left.png')),
+      appBar: AppBar(
+        title: const Text(
+          'Complete Your Profile',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.white,
+        iconTheme: IconThemeData(color: AppColors.kprimaryColor500),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          children: [
+            const Gap(8),
+            Expanded(
+              child: ListView(
+                children: [
+                  const Text(
+                    'Make sure your name and date of birth matches your medical information',
+                  ),
+                  const Gap(16),
+                  _buildAvatarPicker(context, auth, ref),
+                  const Gap(24),
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        _buildDateField(),
+                        _buildDropdown(
+                          label: 'Gender',
+                          value: _selectedGender,
+                          items: _genders,
+                          onChanged: (val) =>
+                              setState(() => _selectedGender = val),
+                        ),
+                        _buildDropdown(
+                          label: 'Blood Type',
+                          value: _selectedBloodType,
+                          items: _bloodTypes,
+                          onChanged: (val) =>
+                              setState(() => _selectedBloodType = val),
+                        ),
+                        _buildTextField(
+                            controller: _addressController, label: 'Address'),
+                        _buildTextField(
+                            controller: _emergencyNameController,
+                            label: 'Emergency Contact Name'),
+                        _buildPhoneField(),
+                        _buildMultiSelect(
+                          label: 'Allergies',
+                          options: _allergyOptions,
+                          selected: _selectedAllergies,
+                          onConfirm: (vals) => setState(
+                              () => _selectedAllergies = vals.cast<String>()),
+                        ),
+                        _buildMultiSelect(
+                          label: 'Medical Conditions',
+                          options: _conditionOptions,
+                          selected: _selectedConditions,
+                          onConfirm: (vals) => setState(
+                              () => _selectedConditions = vals.cast<String>()),
+                        ),
+                        const Gap(80),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SafeArea(
+              child: GestureDetector(
+                onTap: _onContinue,
+                child: Container(
+                  width: double.infinity,
+                  height: 48,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      color: AppColors.kprimaryColor500),
+                  child: const Center(
+                    child: Text("Continue",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500)),
                   ),
                 ),
               ),
-              ListView(
-                children: [
-                  Gap(20),
-                  const Gap(10),
-                  Container(
-                      margin: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: const Text("Complete Your Profile",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w700, fontSize: 23))),
-                  Container(
-                      margin: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: const Text(
-                          "Make sure your name and date of birth matches your medical information",
-                          textAlign: TextAlign.start)),
-                  Center(
-                    child: InkWell(
-                      onTap: () {
-                        ref.read(authProvider).pickimage();
-                      },
-                      child: Stack(
-                        children: [
-                          Container(
-                            padding: ref.read(authProvider).image != null
-                                ? EdgeInsets.all(5)
-                                : EdgeInsets.all(10),
-                            margin: EdgeInsets.only(top: 20),
-                            height: 100,
-                            width: 100,
-                            decoration: BoxDecoration(
-                              color: Color(0xffEDEDED),
-                              borderRadius: BorderRadius.circular(50),
-                            ),
-                            child:ref.watch(authProvider).imageloading
-                    ? Center(child: CircularProgressIndicator()): ref.read(authProvider).image != null
-                                ? ClipRRect(
-                                    borderRadius: BorderRadius.circular(50),
-                                    child: Image.file(
-                                      ref.watch(authProvider).image!,
-                                      height: 140,
-                                      width: 140,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  )
-                                : Image.asset(
-                                    'images/User.png',
-                                    color: Colors.grey,
-                                  ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.only(left: 70),
-                            margin: EdgeInsets.only(top: 90),
-                            child: SizedBox(
-                              height: 30,
-                              width: 30,
-                              child: Image.asset(
-                                'images/camera.png',
-                              ),
-                            ),
-                          )
-                        ],
+            ),
+            const Gap(16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPhoneField() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: IntlPhoneField(
+        initialCountryCode: 'NG',
+        controller: _phoneController,
+        decoration: InputDecoration(
+          labelText: 'Phone Number',
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        onChanged: (phone) => _phoneNumber = phone,
+        validator: (value) => value == null || !value.isValidNumber()
+            ? 'Enter a valid phone number'
+            : null,
+      ),
+    );
+  }
+
+  Widget _buildAvatarPicker(
+      BuildContext context, Authprovider auth, WidgetRef ref) {
+    return Center(
+      child: GestureDetector(
+        onTap: () => ref.read(authProvider).pickimage(),
+        child: Stack(
+          alignment: Alignment.bottomRight,
+          children: [
+            CircleAvatar(
+              radius: 50,
+              backgroundColor: Colors.grey[200],
+              backgroundImage: auth.image != null
+                  ? FileImage(auth.image!)
+                  : const AssetImage('images/User.png') as ImageProvider,
+              child:
+                  auth.imageloading ? const CircularProgressIndicator() : null,
+            ),
+            const CircleAvatar(
+              radius: 14,
+              backgroundColor: AppColors.kprimaryColor500,
+              child:
+                  const Icon(Icons.camera_alt, size: 16, color: Colors.white),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDateField() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextFormField(
+        controller: _dobController,
+        readOnly: true,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        decoration: InputDecoration(
+          labelText: 'Date of Birth',
+          hintText: 'YYYY-MM-DD',
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          suffixIcon: Icon(Icons.calendar_today),
+        ),
+        onTap: _pickDate,
+        validator: (value) => (value == null || value.isEmpty)
+            ? 'Date of birth is required'
+            : null,
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: keyboardType,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: 'Enter your $label'.toLowerCase(),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        validator: (value) => (value == null || value.trim().isEmpty)
+            ? '$label can\'t be empty'
+            : null,
+      ),
+    );
+  }
+
+  Widget _buildDropdown({
+    required String label,
+    String? value,
+    required List<String> items,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: GestureDetector(
+        onTap: () async {
+          final selectedValue = await showModalBottomSheet<String>(
+            context: context,
+            isScrollControlled: true,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+            ),
+            builder: (ctx) {
+              final screenHeight = MediaQuery.of(ctx).size.height;
+
+              // Estimate height based on number of items (roughly 56 px per ListTile)
+              final estimatedHeight = 120 + (items.length * 56);
+              final minHeight = screenHeight * 0.2;
+              final maxHeight = screenHeight * 0.5;
+              final modalHeight =
+                  estimatedHeight.clamp(minHeight, maxHeight).toDouble();
+
+              return SizedBox(
+                height: modalHeight,
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text('Select $label',
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
+                    ),
+                    const Divider(height: 1),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: items.length,
+                        itemBuilder: (context, index) {
+                          final item = items[index];
+                          return ListTile(
+                            title: Text(item),
+                            onTap: () => Navigator.pop(ctx, item),
+                          );
+                        },
                       ),
                     ),
-                  ),
-                  Form(
-                    key: formKey,
-                    child: Column(
-                      children: <Widget>[
-                        Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text('First name'),
-                                const Gap(5),
-                                TextFormField(
-                                  controller: firstNameController,
-                                  decoration: InputDecoration(
-                                    hintText: "Enter your first name",
-                                    border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        borderSide: const BorderSide(
-                                            color: Color(0xffEAECF0))),
-                                  ),
-                                  validator: (value) {
-                                    if (value!.trim().isEmpty) {
-                                      return "First name can't be empty";
-                                    }
-                                  },
-                                ),
-                              ],
-                            )),
-                        const Gap(16),
-                        Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text('Last name'),
-                                const Gap(5),
-                                TextFormField(
-                                  controller: lastNameController,
-                                  decoration: InputDecoration(
-                                    hintText: "Enter your last name",
-                                    border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        borderSide: const BorderSide(
-                                            color: Color(0xffEAECF0))),
-                                  ),
-                                  validator: (value) {
-                                    if (value!.trim().isEmpty) {
-                                      return "Last name can't be empty";
-                                    }
-                                  },
-                                ),
-                              ],
-                            )),
-                        const Gap(16),
-                        Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Date of birth'),
-                                const Gap(5),
-                                TextFormField(
-                                  readOnly: true,
-                                  onTap: () => {_selectDate(context)},
-                                  controller: dobController,
-                                  decoration: InputDecoration(
-                                    hintText: "DD-MM-YYYY",
-                                    border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        borderSide: const BorderSide(
-                                            color: Color(0xffEAECF0))),
-                                  ),
-                                  validator: (value) {
-                                    if (value!.trim().isEmpty) {
-                                      return "First name can't be empty";
-                                    }
-                                  },
-                                ),
-                              ],
-                            )),
-                        const Gap(16),
-                        Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text('Phone number'),
-                                Gap(5),
-                                IntlPhoneField(
-                                  initialCountryCode: '+234',
-                                  controller: phoneNumberController,
-                                  keyboardType: TextInputType.number,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      number = value;
-                                    });
-                                  },
-                                  onCountryChanged: (value) {
-                                    setState(() {
-                                      country = value;
-                                    });
-                                  },
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        borderSide: const BorderSide(
-                                            color: Color(0xffEAECF0))),
-                                  ),
-                                  validator: (value) {
-                                    if (value!.completeNumber.trim().isEmpty) {
-                                      return "Phone Number can't be empty";
-                                    }
-                                    if (value.completeNumber.trim().length <
-                                        11) {
-                                      return "incomplete phone number";
-                                    }
+                    const SizedBox(height: 8),
+                  ],
+                ),
+              );
+            },
+          );
 
-                                    return null;
-                                  },
-                                ),
-                              ],
-                            )),
-                        const Gap(12),
-                        Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Address'),
-                                const Gap(5),
-                                TextFormField(
-                                  controller: homeAddressController,
-                                  decoration: InputDecoration(
-                                    hintText: "Enter your home address",
-                                    border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        borderSide: const BorderSide(
-                                            color: Color(0xffEAECF0))),
-                                  ),
-                                  validator: (value) {
-                                    if (value!.trim().isEmpty) {
-                                      return "Address can't be empty";
-                                    }
-                                  },
-                                ),
-                              ],
-                            )),
-                        Gap(50)
-                      ],
-                    ),
-                  )
-                ],
-              ),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: SafeArea(
-                    child: InkWell(
-                        onTap: () {
-                          _continue(ref);
-                          // Navigator.pushNamed(context, '/setuphealth');
-                        },
-                        child: InkButton(title: 'Continue'))),
-              )
-            ],
-          )),
+          if (selectedValue != null) {
+            onChanged(selectedValue);
+          }
+        },
+        child: InputDecorator(
+          decoration: InputDecoration(
+            labelText: label,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: Text(
+            value ?? 'Select $label',
+            style: TextStyle(
+              color: value == null ? Colors.grey : Colors.black,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMultiSelect({
+    required String label,
+    required List<String> options,
+    required List<String> selected,
+    required Function(List<String?>) onConfirm,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: MultiSelectBottomSheetField<String?>(
+        initialChildSize: 0.3,
+        minChildSize: 0.3,
+        maxChildSize: 0.5,
+        listType: MultiSelectListType.LIST,
+        items: options.map((e) => MultiSelectItem(e, e)).toList(),
+        title: Text(label),
+        buttonText: Text(label),
+        initialValue: selected,
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade400),
+          borderRadius: BorderRadius.circular(12),
+        ),
+
+        // Wrap the callback to accept List<String?> and filter out nulls:
+        onConfirm: (List<String?> values) {
+          final nonNull = values.whereType<String>().toList();
+          onConfirm(nonNull);
+        },
+
+        chipDisplay: MultiSelectChipDisplay(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade400),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          chipColor: Colors.grey.shade200,
+          textStyle: const TextStyle(color: Colors.black),
+          onTap: (val) {
+            setState(() {
+              selected.remove(val);
+            });
+          },
+        ),
+      ),
     );
   }
 }

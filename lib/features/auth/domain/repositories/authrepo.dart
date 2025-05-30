@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:h_smart/core/exceptions/network_exception.dart';
 import 'package:h_smart/features/auth/data/repositories/auth_repo.dart';
+import 'package:h_smart/features/auth/domain/entities/ContinueRegistrationModel.dart';
 
 import '../../../../constant/enum.dart';
 import '../entities/loginResponse.dart';
@@ -15,7 +16,7 @@ abstract class AuthRepository {
   Future<GetInfoResult> getinfo();
   Future<SetUpHealthResult> setuphealthissues(setup);
   Future<ContinueRegisterResult> continueRegistration(
-      firstname, lastname, phone, dob, address, File image, imageurl);
+      ContinueRegistrationModel continuemodel);
 }
 
 class AuthRepositoryImp implements AuthRepository {
@@ -48,7 +49,6 @@ class AuthRepositoryImp implements AuthRepository {
   Future<LoginResult> login(login) async {
     LoginResult loginResult =
         LoginResult(LoginResultStates.isLoading, LoginResponse());
-
     try {
       loginResult = await authDatasource.login(login);
     } catch (e) {
@@ -59,22 +59,21 @@ class AuthRepositoryImp implements AuthRepository {
         loginResult = LoginResult(
             LoginResultStates.isError, LoginResponse(message: message));
       } else {
-        loginResult = LoginResult(
-            LoginResultStates.isError,LoginResponse(message: "Something Went Wrong"));
+        loginResult = LoginResult(LoginResultStates.isError,
+            LoginResponse(message: "Something Went Wrong"));
       }
     }
-
     return loginResult;
   }
 
   @override
   Future<ContinueRegisterResult> continueRegistration(
-      firstname, lastname, phone, dob, address, File image, imageurl) async {
+      ContinueRegistrationModel continueModel) async {
     ContinueRegisterResult continueRegisterResult =
         ContinueRegisterResult(ContinueRegisterResultStates.isLoading, {});
     try {
-      continueRegisterResult = await authDatasource.continueRegistration(
-          firstname, lastname, phone, dob, address, image, imageurl);
+      continueRegisterResult =
+          await authDatasource.continueRegistration(continueModel);
     } catch (e) {
       log(e.toString());
 

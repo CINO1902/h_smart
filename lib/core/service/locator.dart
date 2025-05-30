@@ -15,6 +15,10 @@ import 'package:h_smart/features/medical_record/domain/repositories/MedicalRecor
 import '../../features/Hospital/presentation/controller/hospitalController.dart';
 import '../../features/auth/data/repositories/auth_repo.dart';
 import '../../features/auth/presentation/controller/auth_controller.dart';
+import '../../features/chat/data/datasource/remoteDatasource.dart';
+import '../../features/chat/data/repositories/chat_repo.dart';
+import '../../features/chat/domains/repositories/chat_repo.dart';
+import '../../features/chat/presentation/controller/chatservice.dart';
 import '../../features/doctorRecord/presentation/controller/doctorRecordController.dart';
 import '../../features/medical_record/presentation/controller/medicalRecordController.dart';
 import '../../features/myAppointment/data/datasources/remotedatasource.dart';
@@ -61,6 +65,12 @@ void setup() {
     ..registerLazySingleton<UserDataSource>(() => UserDatasourceImpl(locator()))
     ..registerLazySingleton<UserRepository>(() => UserRepositoryImp(locator()))
     ..registerLazySingleton(() => Mydashprovider(locator()))
+    //Chat
+    ..registerLazySingleton<ChatDatasourceImp>(
+        () => ChatDatasourceImp(locator()))
+    ..registerLazySingleton<ChatDataSource>(() => ChatDatasourceImp(locator()))
+    ..registerLazySingleton<ChatRepository>(() => ChatRepositoryImp(locator()))
+    ..registerLazySingleton(() => ChatController(locator()))
     //packages
     ..registerLazySingleton<HttpService>(() => DioService(locator()))
     ..registerLazySingleton(() => Dio());

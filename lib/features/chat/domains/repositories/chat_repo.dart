@@ -12,9 +12,9 @@ abstract class ChatRepository {
       converstionId, lastMessageTimestamp);
 }
 
-class chatRepositoryImp implements ChatRepository {
+class ChatRepositoryImp implements ChatRepository {
   final ChatDataSource chatDatasource;
-  chatRepositoryImp(this.chatDatasource);
+  ChatRepositoryImp(this.chatDatasource);
 
   @override
   Future<GetChatResult> getallMessage(converstionId) async {

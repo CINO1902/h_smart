@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import '../../domain/entities/ContinueRegistrationModel.dart';
 import '../../domain/usecases/authStates.dart';
 
 abstract class AuthDatasource {
@@ -9,5 +8,5 @@ abstract class AuthDatasource {
   Future<GetInfoResult> getinfo();
   Future<SetUpHealthResult> setuphealthissues(setup);
   Future<ContinueRegisterResult> continueRegistration(
-      firstname, lastname, phone, dob, address, File image, imageurl);
+      ContinueRegistrationModel continuemodel);
 }

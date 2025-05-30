@@ -3,6 +3,8 @@ import 'package:gap/gap.dart';
 
 import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
 
+import '../../../../core/utils/appColor.dart' show AppColors;
+
 class Settings extends StatefulWidget {
   const Settings({super.key});
 
@@ -59,7 +61,7 @@ class _SettingsState extends State<Settings> {
                   Text('Notification'),
                   AdvancedSwitch(
                     controller: _controller,
-                    activeColor: Theme.of(context).primaryColor,
+                    activeColor: AppColors.kprimaryColor500,
                     inactiveColor: Colors.grey,
                     borderRadius: BorderRadius.all(const Radius.circular(15)),
                     width: 35.0,
@@ -86,7 +88,7 @@ class _SettingsState extends State<Settings> {
                   Text('Reminder'),
                   AdvancedSwitch(
                     controller: _controller,
-                    activeColor: Theme.of(context).primaryColor,
+                    activeColor: AppColors.kprimaryColor500,
                     inactiveColor: Colors.grey,
                     borderRadius: BorderRadius.all(const Radius.circular(15)),
                     width: 35.0,

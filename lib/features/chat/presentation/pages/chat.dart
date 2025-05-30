@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:h_smart/features/auth/presentation/provider/auth_provider.dart';
 import 'package:h_smart/features/chat/presentation/pages/chatUi.dart';
+import '../../../../core/utils/appColor.dart' show AppColors;
 import '../../domains/utils/DatabaseHelper.dart';
 
 class Chat extends ConsumerStatefulWidget {
@@ -200,7 +201,7 @@ class _ChatState extends ConsumerState<Chat> {
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
-                          color: Theme.of(context).primaryColor,
+                          color: AppColors.kprimaryColor500,
                           value: progress.progress,
                           strokeWidth: 2,
                         ),

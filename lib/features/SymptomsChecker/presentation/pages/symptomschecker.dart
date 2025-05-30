@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:h_smart/features/SymptomsChecker/presentation/pages/symptomsdesc.dart';
 
+import '../../../../core/utils/appColor.dart';
+
 class SymptomsChecker extends StatefulWidget {
   const SymptomsChecker({super.key});
 
@@ -105,7 +107,7 @@ class _SymptomsCheckerState extends State<SymptomsChecker>
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
                           color: controller.index == 0
-                              ? Theme.of(context).primaryColor
+                              ? AppColors.kprimaryColor500
                               : Color(0xffF3F7FF),
                         ),
                         child: Center(
@@ -138,15 +140,14 @@ class _SymptomsCheckerState extends State<SymptomsChecker>
                               ? BorderRadius.circular(10)
                               : BorderRadius.zero,
                           color: controller.index == 1
-                              ? Theme.of(context).primaryColor
+                              ? AppColors.kprimaryColor500
                               : Color(0xffF3F7FF),
                         ),
                         child: Center(
                           child: Text(
                             "Children",
                             style: controller.index == 1
-                                ? TextStyle(
-                                    color: Theme.of(context).primaryColorLight)
+                                ? TextStyle(color: AppColors.kprimaryColor500)
                                 : TextStyle(
                                     color: Theme.of(context)
                                         .colorScheme

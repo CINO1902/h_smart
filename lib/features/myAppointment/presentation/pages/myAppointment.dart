@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
+import '../../../../core/utils/appColor.dart';
+
 class MyAppointment extends StatefulWidget {
   const MyAppointment({super.key});
 
@@ -61,7 +63,7 @@ class _MyAppointmentState extends State<MyAppointment>
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
                           color: controller.index == 0
-                              ? Theme.of(context).primaryColor
+                              ? AppColors.kprimaryColor500
                               : Color(0xffF3F7FF),
                         ),
                         child: Center(
@@ -94,15 +96,14 @@ class _MyAppointmentState extends State<MyAppointment>
                               ? BorderRadius.circular(10)
                               : BorderRadius.zero,
                           color: controller.index == 1
-                              ? Theme.of(context).primaryColor
+                              ? AppColors.kprimaryColor500
                               : Color(0xffF3F7FF),
                         ),
                         child: Center(
                           child: Text(
                             "Past",
                             style: controller.index == 1
-                                ? TextStyle(
-                                    color: Theme.of(context).primaryColorLight)
+                                ? TextStyle(color: AppColors.kprimaryColor500)
                                 : TextStyle(
                                     color: Theme.of(context)
                                         .colorScheme

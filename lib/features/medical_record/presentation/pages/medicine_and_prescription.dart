@@ -6,6 +6,8 @@ import 'package:h_smart/features/medical_record/presentation/widgets/PrescribeBl
 import 'package:h_smart/features/medical_record/presentation/widgets/separator.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/utils/appColor.dart';
+
 class MedicineAndPres extends ConsumerStatefulWidget {
   const MedicineAndPres({super.key});
 
@@ -23,7 +25,7 @@ class _MedicineAndPresState extends ConsumerState<MedicineAndPres>
   void initState() {
     // TODO: implement initState
     super.initState();
-    ref.read(medicalRecordProvider).getprescription();
+    // ref.read(medicalRecordProvider).getprescription();
   }
 
   @override
@@ -69,7 +71,7 @@ class _MedicineAndPresState extends ConsumerState<MedicineAndPres>
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
                           color: controller.index == 0
-                              ? Theme.of(context).primaryColor
+                              ? AppColors.kprimaryColor500
                               : Color(0xffF3F7FF),
                         ),
                         child: Center(
@@ -102,15 +104,14 @@ class _MedicineAndPresState extends ConsumerState<MedicineAndPres>
                               ? BorderRadius.circular(10)
                               : BorderRadius.zero,
                           color: controller.index == 1
-                              ? Theme.of(context).primaryColor
+                              ? AppColors.kprimaryColor500
                               : Color(0xffF3F7FF),
                         ),
                         child: Center(
                           child: Text(
                             "Past",
                             style: controller.index == 1
-                                ? TextStyle(
-                                    color: Theme.of(context).primaryColorLight)
+                                ? TextStyle(color: AppColors.kprimaryColor500)
                                 : TextStyle(
                                     color: Theme.of(context)
                                         .colorScheme
@@ -137,7 +138,7 @@ class _MedicineAndPresState extends ConsumerState<MedicineAndPres>
                   if (medicalRecord.loading) {
                     return Center(
                       child: CircularProgressIndicator(
-                        color: Theme.of(context).primaryColor,
+                        color: AppColors.kprimaryColor500,
                       ),
                     );
                   } else if (medicalRecord.error) {

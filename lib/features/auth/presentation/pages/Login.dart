@@ -2,288 +2,224 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 
-import 'package:h_smart/constant/customesnackbar.dart';
+import 'package:h_smart/constant/snackbar.dart';
 import 'package:h_smart/features/auth/domain/usecases/authStates.dart';
-
-import '../../../medical_record/presentation/pages/index.dart';
+import 'package:h_smart/features/auth/presentation/pages/Register.dart';
+import '../../../../core/utils/appColor.dart' show AppColors;
 import '../provider/auth_provider.dart';
+import '../../../medical_record/presentation/pages/index.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
-  const LoginPage({super.key});
+  const LoginPage({Key? key}) : super(key: key);
 
   @override
   ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends ConsumerState<LoginPage>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  final formKey = GlobalKey<FormState>();
+class _LoginPageState extends ConsumerState<LoginPage> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(vsync: this);
-  }
+  bool _showPassword = false;
+  bool _rememberMe = false;
 
   @override
   void dispose() {
-    _controller.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
-  bool isRememberMeChecked = false;
-  bool passvisible = true;
-  TextEditingController emailcontroller = TextEditingController();
-  TextEditingController passwordcontroller = TextEditingController();
+  Future<void> _onLogin() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final auth = ref.read(authProvider);
+    if (auth.loginResult.state == LoginResultStates.isLoading) return;
+
+    SmartDialog.showLoading();
+    await auth.login(
+      _emailController.text.trim(),
+      _passwordController.text,
+    );
+    SmartDialog.dismiss();
+
+    final result = ref.watch(authProvider).loginResult;
+    final msg = result.response.message;
+
+    if (result.state == LoginResultStates.isError) {
+      SnackBarService.showSnackBar(
+        context,
+        title: 'Error',
+        body: msg ?? 'Login failed',
+        status: SnackbarStatus.fail,
+      );
+    } else if (result.state == LoginResultStates.isData) {
+      SnackBarService.showSnackBar(
+        context,
+        title: 'Success',
+        body: msg ?? 'Welcome back!',
+        status: SnackbarStatus.success,
+      );
+
+      final isComplete = result.response.payload?.isProfileComplete ?? true;
+      if (isComplete) {
+        context.pushReplacement('/home');
+      } else {
+        context.push('/complete-profile');
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          surfaceTintColor: Colors.transparent,
-          centerTitle: true,
-          title: Image.asset(
-            'images/logo1.png',
-            width: 200,
-            height: 150,
+      appBar: AppBar(
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        centerTitle: true,
+        title: Image.asset('images/logo1.png', width: 150),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: ListView(
+          children: [
+            const SizedBox(height: 24),
+            const Text(
+              'Log In to Your H-SMART Account',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const Gap(24),
+            Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  _buildTextField(
+                    controller: _emailController,
+                    label: 'Email / Phone',
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  _buildPasswordField(),
+                  _buildRememberAndForgot(),
+                  const Gap(16),
+                  _buildLoginButton(),
+                  const Gap(16),
+                  _buildRegisterLink(),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextFormField(
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        controller: controller,
+        keyboardType: keyboardType,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        validator: (value) {
+          final text = value?.trim() ?? '';
+          if (text.isEmpty) return '$label can\'t be empty';
+          return null;
+        },
+      ),
+    );
+  }
+
+  Widget _buildPasswordField() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: TextFormField(
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        controller: _passwordController,
+        obscureText: !_showPassword,
+        decoration: InputDecoration(
+          labelText: 'Password',
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          suffixIcon: IconButton(
+            icon: Icon(_showPassword ? Icons.visibility_off : Icons.visibility),
+            onPressed: () => setState(() => _showPassword = !_showPassword),
           ),
         ),
-        body: Container(
-            alignment: const Alignment(0, -0.2),
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-            child: ListView(
-              children: [
-                Gap(10),
-                Container(
-                    margin: const EdgeInsets.symmetric(vertical: 8.0),
-                    // Set the vertical margin here
-                    child: const Text("Log In to Your H-Smart Account",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontWeight: FontWeight.w700, fontSize: 16))),
-                Form(
-                  key: formKey,
-                  child: Column(
-                    children: <Widget>[
-                      Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('Email'),
-                              const Gap(5),
-                              TextFormField(
-                                controller: emailcontroller,
-                                decoration: InputDecoration(
-                                  hintText: "Email / Phone",
-                                  border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: const BorderSide(
-                                          color: Color(0xffEAECF0))),
-                                ),
-                                validator: (value) {
-                                  if (value!.trim().isEmpty) {
-                                    return "Email can't be empty";
-                                  }
-                                },
-                              ),
-                            ],
-                          )),
-                      Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('Password'),
-                              Gap(5),
-                              TextFormField(
-                                  controller: passwordcontroller,
-                                  obscureText: passvisible,
-                                  decoration: InputDecoration(
-                                    suffixIcon: InkWell(
-                                      onTap: () {
-                                        setState(() {
-                                          passvisible = !passvisible;
-                                        });
-                                      },
-                                      child: passvisible
-                                          ? Icon(
-                                              Icons.visibility,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onBackground,
-                                            )
-                                          : Icon(
-                                              Icons.visibility_off,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onBackground,
-                                            ),
-                                    ),
-                                    hintText: "Enter your password",
-                                    border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        borderSide: const BorderSide(
-                                            color: Color(0xffEAECF0))),
-                                  ),
-                                  validator: (value) {
-                                    if (value!.trim().isEmpty) {
-                                      return "Password can't be empty";
-                                    }
-                                  }),
-                            ],
-                          )),
-                      Container(
-                        margin: const EdgeInsets.symmetric(
-                            horizontal: 0, vertical: 2.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                Checkbox(
-                                  value: isRememberMeChecked,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      isRememberMeChecked = value!;
-                                    });
-                                  },
-                                ),
-                                const Text("Remember Me",
-                                    overflow: TextOverflow.visible,
-                                    textAlign: TextAlign.left),
-                              ],
-                            ),
-                            Container(
-                                margin: const EdgeInsets.symmetric(
-                                    horizontal: 0, vertical: 2.0),
-                                child: GestureDetector(
-                                  onTap: () => {},
-                                  child: const Text("Forgot Password?",
-                                      style: TextStyle(color: Colors.blue),
-                                      overflow: TextOverflow.visible,
-                                      textAlign: TextAlign.left),
-                                )),
-                          ],
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () async {
-                          if (!formKey.currentState!.validate()) {
-                            return;
-                          }
-                          if (ref.read(authProvider).loginResult.state ==
-                              LoginResultStates.isLoading) {
-                            return;
-                          }
-                          print('object');
-                          SmartDialog.showLoading();
-                          await ref.read(authProvider).login(
-                              emailcontroller.text, passwordcontroller.text);
-                          if (ref.watch(authProvider).loginResult.state ==
-                              LoginResultStates.isError) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: CustomeSnackbar(
-                                topic: 'Oh Snap!',
-                                msg: ref
-                                        .watch(authProvider)
-                                        .loginResult
-                                        .response
-                                        .message ??
-                                    '',
-                                color1: Color.fromARGB(255, 171, 51, 42),
-                                color2: Color.fromARGB(255, 127, 39, 33),
-                              ),
-                              behavior: SnackBarBehavior.floating,
-                              backgroundColor: Colors.transparent,
-                              elevation: 0,
-                            ));
-                          } else if (ref
-                                  .watch(authProvider)
-                                  .loginResult
-                                  .state ==
-                              LoginResultStates.isData) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: CustomeSnackbar(
-                                topic: 'Great!',
-                                msg: ref
-                                        .watch(authProvider)
-                                        .loginResult
-                                        .response
-                                        .message ??
-                                    '',
-                                color1: Color.fromARGB(255, 25, 107, 52),
-                                color2: Color.fromARGB(255, 19, 95, 40),
-                              ),
-                              behavior: SnackBarBehavior.floating,
-                              backgroundColor: Colors.transparent,
-                              elevation: 0,
-                            ));
-                            if (ref
-                                    .watch(authProvider)
-                                    .loginResult
-                                    .response
-                                    .payload
-                                    ?.isProfileCompleted ??
-                                true) {
-                              Navigator.pushAndRemoveUntil<void>(
-                                context,
-                                MaterialPageRoute<void>(
-                                    builder: (BuildContext context) =>
-                                        const indexpage()),
-                                (Route<dynamic> route) => false,
-                              );
-                            } else {
-                              Navigator.pushNamed(
-                                  context, '/CompleteProfilePage');
-                            }
-                          }
+        validator: (value) {
+          final text = value?.trim() ?? '';
+          if (text.isEmpty) return 'Password can\'t be empty';
+          return null;
+        },
+      ),
+    );
+  }
 
-                          SmartDialog.dismiss();
-                        },
-                        child: Container(
-                          width: double.infinity,
-                          height: 56,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              color: Theme.of(context).primaryColor),
-                          margin: const EdgeInsets.symmetric(
-                              horizontal: 16.0, vertical: 8.0),
-                          child: const Center(
-                            child: Text("LOGIN",
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500)),
-                          ),
-                        ),
-                      ),
-                      Gap(20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text('Don\'nt have an account ?'),
-                          Gap(10),
-                          InkWell(
-                            onTap: () {
-                              Navigator.pushNamed(context, '/register');
-                            },
-                            child: const Text(
-                              'Click here',
-                              style: TextStyle(color: Colors.blue),
-                            ),
-                          )
-                        ],
-                      )
-                    ],
-                  ),
-                )
-              ],
-            )));
+  Widget _buildRememberAndForgot() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Checkbox(
+                value: _rememberMe,
+                onChanged: (val) => setState(() => _rememberMe = val ?? false),
+              ),
+              const Text('Remember Me'),
+            ],
+          ),
+          TextButton(
+            onPressed: () {},
+            child: const Text('Forgot Password?'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoginButton() {
+    return GestureDetector(
+      onTap: _onLogin,
+      child: Container(
+        width: double.infinity,
+        height: 48,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: AppColors.kprimaryColor500),
+        child: const Center(
+          child: Text("LOGIN",
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500)),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRegisterLink() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text("Don't have an account?"),
+        const Gap(4),
+        TextButton(
+          onPressed: () => context.push('/register'),
+          child: const Text('Sign Up'),
+        ),
+      ],
+    );
   }
 }
