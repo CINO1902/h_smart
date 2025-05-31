@@ -17,14 +17,12 @@ class indexpage extends StatefulWidget {
 
 class _indexpageState extends State<indexpage> {
   int _selectedIndex = 0;
-  ScrollController scrollcontroller = ScrollController();
+
   bool canpop = true;
   @override
   Widget build(BuildContext context) {
     List<Widget> _widgetOptions = <Widget>[
-      HomePage(
-        scrollcontroller1: scrollcontroller,
-      ),
+      HomePage(),
       const MyAppointment(),
       const Chat(),
       const Profile(),

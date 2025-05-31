@@ -1,49 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:gap/gap.dart';
 import 'package:h_smart/constant/SchimmerWidget.dart';
 import 'package:h_smart/features/auth/presentation/provider/auth_provider.dart';
 import 'package:h_smart/features/medical_record/presentation/provider/medicalRecord.dart';
 
 import '../widgets/AutoScrollText.dart';
-
-/// A delegate class that makes “Quick Action” stick.
-class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
-  final Widget child;
-  final double height;
-
-  _StickyHeaderDelegate({
-    required this.child,
-    this.height = 6, // 56 logical pixels tall
-  });
-
-  @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(
-      color: Theme.of(context).scaffoldBackgroundColor,
-      alignment: Alignment.centerLeft,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: child,
-    );
-  }
-
-  @override
-  double get maxExtent => height;
-
-  @override
-  double get minExtent => height;
-
-  @override
-  bool shouldRebuild(covariant _StickyHeaderDelegate old) {
-    return old.child != child || old.height != height;
-  }
-}
+import '../widgets/StickyHeader.dart';
 
 class HomePage extends ConsumerStatefulWidget {
-  HomePage({super.key, required this.scrollcontroller1});
-  final ScrollController scrollcontroller1;
+  const HomePage({
+    super.key,
+  });
 
   @override
   ConsumerState<HomePage> createState() => _HomePageState();
@@ -52,57 +20,49 @@ class HomePage extends ConsumerStatefulWidget {
 class _HomePageState extends ConsumerState<HomePage>
     with SingleTickerProviderStateMixin {
   late final ScrollController _verticalController;
+  late final ScrollController _prescriptionController; // NEW
 
   @override
   void initState() {
     super.initState();
     _verticalController = ScrollController();
-    verifyuser();
+    _prescriptionController =
+        ScrollController(); // initialize the dedicated controller
+    _startPrescriptionAutoScroll();
   }
 
   @override
   void dispose() {
     _verticalController.dispose();
+    _prescriptionController.dispose();
     super.dispose();
   }
 
-  animateToMaxmin(double max, double min, double direction, int seconds,
-      ScrollController scrollController) {
-    if (scrollController.hasClients) {
-      scrollController
-          .animateTo(direction,
-              duration: Duration(seconds: seconds), curve: Curves.linear)
-          .then((_) {
-        final next = direction == max ? min : max;
-        animateToMaxmin(max, min, next, seconds, scrollController);
-      });
-    }
+  void _startPrescriptionAutoScroll() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_prescriptionController.hasClients) {
+        final minExt = _prescriptionController.position.minScrollExtent;
+        final maxExt = _prescriptionController.position.maxScrollExtent;
+
+        // Only start auto‐scroll if there is actually something to scroll.
+        if (maxExt > minExt) {
+          _autoScrollLoop(maxExt, minExt, maxExt);
+        }
+      }
+    });
   }
 
-  void verifyuser() async {
-    // if (ref.read(authProvider).getinfo1 == false) {
-    //   await ref.read(authProvider).getinfo().then((_) {
-    //     if (ref.read(authProvider).getinfo1 == false) verifyuser();
-    //   });
-    // }
+  void _autoScrollLoop(double max, double min, double target) {
+    // Prevent infinite recursion when max == min:
+    if (max == min) return;
 
-    // if (!mounted) return;
-
-    // if (ref.read(authProvider).logoutuser) {
-    //   Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
-    //   SmartDialog.showToast('Session Closed, Log in Again');
-    //   ref.read(authProvider).logout();
-    //   return;
-    // }
-
-    // await ref.read(medicalRecordProvider).getprescription();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (widget.scrollcontroller1.hasClients) {
-        final minExt = widget.scrollcontroller1.position.minScrollExtent;
-        final maxExt = widget.scrollcontroller1.position.maxScrollExtent;
-        animateToMaxmin(maxExt, minExt, maxExt, 3, widget.scrollcontroller1);
-      }
+    _prescriptionController
+        .animateTo(target,
+            duration: const Duration(seconds: 3), curve: Curves.linear)
+        .then((_) {
+      // Toggle target between min and max
+      final next = (target == max) ? min : max;
+      _autoScrollLoop(max, min, next);
     });
   }
 
@@ -129,7 +89,7 @@ class _HomePageState extends ConsumerState<HomePage>
                           width: 188,
                           height: 64,
                           child: Text(
-                            'Welcome back,\n${ref.read(authProvider).firstname}',
+                            'Welcome back,\n${ref.read(authProvider).firstName}',
                             style: const TextStyle(
                                 fontSize: 23, fontWeight: FontWeight.w600),
                           ),
@@ -154,7 +114,7 @@ class _HomePageState extends ConsumerState<HomePage>
                               scrollDirection: Axis.horizontal,
                               shrinkWrap:
                                   true, // optional, but sometimes useful
-                              controller: widget.scrollcontroller1,
+                              controller: _prescriptionController,
                               children: const [
                                 ShimmerWidget.rectangle(width: 100, height: 25),
                               ],
@@ -166,7 +126,7 @@ class _HomePageState extends ConsumerState<HomePage>
                           child: SizedBox(
                             height: 25,
                             child: ListView(
-                              controller: widget.scrollcontroller1,
+                              controller: _prescriptionController,
                               scrollDirection: Axis.horizontal,
                               children: [
                                 const SizedBox(width: 20),
@@ -264,7 +224,7 @@ class _HomePageState extends ConsumerState<HomePage>
                   // 2) Sticky “Quick Action” header
                   SliverPersistentHeader(
                     pinned: true,
-                    delegate: _StickyHeaderDelegate(
+                    delegate: StickyHeaderDelegate(
                       height: 56,
                       child: const Text(
                         'Quick Action',

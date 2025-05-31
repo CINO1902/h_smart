@@ -3,79 +3,140 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:h_smart/constant/snackbar.dart';
-import 'package:h_smart/features/auth/domain/usecases/authStates.dart';
-import 'package:h_smart/features/auth/presentation/provider/auth_provider.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
 import '../../../../constant/Inkbutton.dart';
+import '../../../../constant/snackbar.dart';
 import '../../../../core/utils/appColor.dart' show AppColors;
+import '../../../../features/auth/domain/usecases/authStates.dart';
+import '../../../../features/auth/presentation/provider/auth_provider.dart';
+import 'package:gap/gap.dart';
 
-class verifyemail extends ConsumerStatefulWidget {
-  const verifyemail({super.key});
+class VerifyEmailPage extends ConsumerStatefulWidget {
+  String email;
+  VerifyEmailPage({Key? key, required this.email}) : super(key: key);
 
   @override
-  ConsumerState<verifyemail> createState() => _verifyemailState();
+  ConsumerState<VerifyEmailPage> createState() => _VerifyEmailPageState();
 }
 
-class _verifyemailState extends ConsumerState<verifyemail> {
-  TextEditingController textEditingController = TextEditingController();
+class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
+  final TextEditingController _otpController = TextEditingController();
+  final StreamController<ErrorAnimationType> _errorController =
+      StreamController<ErrorAnimationType>.broadcast();
 
-  // ignore: close_sinks
-  StreamController<ErrorAnimationType>? errorController;
-  bool hasError = false;
-  String currentText = "";
-  final formKey = GlobalKey<FormState>();
-  int count = 59;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  late Timer _timer;
+  int _remainingSeconds = 60;
+  String _currentOtp = "";
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    count = 60;
-    countdown();
+    _startCountdown();
   }
 
   @override
   void dispose() {
+    _timer.cancel();
+    _otpController.dispose();
+    _errorController.close();
     super.dispose();
-    t.cancel();
   }
 
-  Timer t = Timer(const Duration(), () {});
-
-  void countdown() {
-    t = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        if (count > 0) {
-          count--;
-        } else {
-          t.cancel();
-        }
-      });
+  void _startCountdown() {
+    _remainingSeconds = 60;
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_remainingSeconds > 0) {
+        setState(() {
+          _remainingSeconds--;
+        });
+      } else {
+        _timer.cancel();
+      }
     });
+  }
+
+  Future<void> _resendCode() async {
+    setState(() {
+      _remainingSeconds = 60;
+    });
+    _startCountdown();
+    SmartDialog.showLoading();
+    await ref.read(authProvider).callActivation(email: widget.email);
+    SmartDialog.dismiss();
+  }
+
+  Future<void> _verifyAndContinue() async {
+    if (_currentOtp.length != 4) {
+      SnackBarService.notifyAction(
+        context,
+        message: 'OTP must be 4 digits.',
+      );
+      return;
+    }
+
+    final verifyState = ref.read(authProvider).verifyEmailResult.state;
+    if (verifyState == VerifyEmailResultStates.isLoading) {
+      return;
+    }
+
+    SmartDialog.showLoading();
+    await ref.read(authProvider).verifyOtp(_currentOtp);
+    SmartDialog.dismiss();
+
+    final resultState = ref.read(authProvider).verifyEmailResult.state;
+    final responseMsg = ref
+            .read(authProvider)
+            .verifyEmailResult
+            .response['message'] as String? ??
+        'Unknown error';
+
+    if (resultState == VerifyEmailResultStates.isError) {
+      SnackBarService.showSnackBar(
+        context,
+        title: 'Error',
+        body: responseMsg,
+        status: SnackbarStatus.fail,
+      );
+    } else {
+      SnackBarService.showSnackBar(
+        context,
+        title: 'Success',
+        body: responseMsg,
+        status: SnackbarStatus.success,
+      );
+
+      // Navigate to profile completion and remove this page from history
+      context.replace('/CompleteProfilePage');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: InkWell(
+          onTap: () => context.pop(),
+          child: const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Icon(
+              Icons.chevron_left,
+              size: 28,
+            ),
+          ),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.black87,
+      ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Gap(20),
-              InkWell(
-                onTap: () {
-                  Navigator.pop(context);
-                },
-                child: SizedBox(
-                    height: 30,
-                    width: 30,
-                    child: Image.asset('images/chevron-left.png')),
-              ),
               const Gap(20),
               const Text(
                 'Verify Your Email',
@@ -83,7 +144,7 @@ class _verifyemailState extends ConsumerState<verifyemail> {
               ),
               const Gap(20),
               const Text(
-                'We’ve sent an OTP to your email address. Please check your inbox',
+                'We’ve sent an OTP to your email address.\nPlease check your inbox.',
                 style: TextStyle(fontSize: 13),
               ),
               const Gap(30),
@@ -93,151 +154,113 @@ class _verifyemailState extends ConsumerState<verifyemail> {
               ),
               const Gap(5),
               Form(
-                key: formKey,
+                key: _formKey,
                 child: PinCodeTextField(
                   appContext: context,
-                  pastedTextStyle: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
                   length: 4,
-                  blinkWhenObscuring: true,
                   animationType: AnimationType.fade,
-                  validator: (v) {
-                    if (v!.length < 3) {
-                      return "Must be four numbers";
-                    } else {
-                      return null;
-                    }
-                  },
+                  blinkWhenObscuring: true,
+                  animationDuration: const Duration(milliseconds: 300),
+                  enableActiveFill: true,
+                  controller: _otpController,
+                  errorAnimationController: _errorController,
+                  keyboardType: TextInputType.text,
                   pinTheme: PinTheme(
-                    selectedColor: const Color(0xffEBF1FF),
-                    selectedFillColor: const Color(0xffEBF1FF),
                     shape: PinCodeFieldShape.box,
                     borderRadius: BorderRadius.circular(10),
                     fieldHeight: 54,
-                    activeColor: const Color(0xffEBF1FF),
                     fieldWidth: 75,
+                    activeColor: const Color(0xffEBF1FF),
                     inactiveColor: const Color(0xffEBF1FF),
+                    selectedColor: const Color(0xffEBF1FF),
                     inactiveFillColor: const Color(0xffEBF1FF),
+                    selectedFillColor: const Color(0xffEBF1FF),
                     activeFillColor: const Color(0xffEBF1FF),
                   ),
                   cursorColor: Colors.black,
-                  animationDuration: const Duration(milliseconds: 300),
-                  enableActiveFill: true,
-                  errorAnimationController: errorController,
-                  controller: textEditingController,
-                  keyboardType: TextInputType.number,
-
-                  onCompleted: (v) {
-                    debugPrint("Completed");
-                  },
-                  // onTap: () {
-                  //   print("Pressed");
-                  // },
                   onChanged: (value) {
-                    debugPrint(value);
                     setState(() {
-                      currentText = value;
+                      _currentOtp = value;
                     });
                   },
-                  beforeTextPaste: (text) {
-                    debugPrint("Allowing to paste $text");
-                    //if you return true then it will show the paste confirmation dialog. Otherwise if false, then nothing will happen.
-                    //but you can show anything you want here, like your pop up saying wrong paste format or etc
-                    return true;
+                  onCompleted: (value) {
+                    _currentOtp = value;
                   },
+                  validator: (value) {
+                    if (value == null || value.length < 4) {
+                      return 'Please enter 4 digits';
+                    }
+                    return null;
+                  },
+                  beforeTextPaste: (text) => true,
                 ),
               ),
               const Gap(40),
-              const Align(
-                alignment: Alignment.center,
-                child: Text(
+              Center(
+                child: const Text(
                   'Didn\'t receive the email?',
                   style: TextStyle(fontSize: 13),
                 ),
               ),
               const Gap(10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Resend Code?',
-                    style: TextStyle(
+              Center(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Resend Code?',
+                      style: TextStyle(
                         decoration: TextDecoration.underline,
                         fontSize: 13,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.kprimaryColor500),
-                  ),
-                  const Gap(10),
-                  count == 0
-                      ? InkWell(
-                          onTap: () {
-                            setState(() {
-                              count = 60;
-                              countdown();
-                            });
-                          },
-                          child: const Text(
-                            'Send',
-                            style: TextStyle(
+                        color: AppColors.kprimaryColor500,
+                      ),
+                    ),
+                    const Gap(10),
+                    _remainingSeconds == 0
+                        ? InkWell(
+                            onTap: _resendCode,
+                            child: const Text(
+                              'Send',
+                              style: TextStyle(
                                 decoration: TextDecoration.underline,
                                 fontSize: 13,
                                 fontWeight: FontWeight.w800,
-                                color: AppColors.kprimaryColor500),
-                          ),
-                        )
-                      : Text(
-                          '(0:$count)',
-                          style: const TextStyle(
+                                color: AppColors.kprimaryColor500,
+                              ),
+                            ),
+                          )
+                        : Text(
+                            '(${_formatTime(_remainingSeconds)})',
+                            style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.kprimaryColor500),
-                        ),
-                ],
+                              color: AppColors.kprimaryColor500,
+                            ),
+                          ),
+                  ],
+                ),
               ),
-              Align(
-                  heightFactor: 6,
-                  alignment: Alignment.bottomCenter,
-                  child: InkWell(
-                    onTap: () async {
-                      if (currentText.length != 4) {
-                        SnackBarService.notifyAction(context,
-                            message: 'OTP has to be a 4 digit');
-                        return;
-                      }
-                      if (ref.read(authProvider).verifyEmailResult.state ==
-                          VerifyEmailResultStates.isLoading) {
-                        return;
-                      }
-                      SmartDialog.showLoading();
-                      await ref.read(authProvider).verifyOtp(currentText);
-                      final msg = ref
-                          .read(authProvider)
-                          .verifyEmailResult
-                          .response['message'];
-                      if (ref.read(authProvider).verifyEmailResult.state ==
-                          VerifyEmailResultStates.isError) {
-                        SnackBarService.showSnackBar(context,
-                            title: 'Error',
-                            body: msg,
-                            status: SnackbarStatus.fail);
-                      } else {
-                        SnackBarService.showSnackBar(context,
-                            title: 'Success',
-                            body: msg,
-                            status: SnackbarStatus.success);
-                        context.push('/CompleteProfilePage');
-                      }
-                      SmartDialog.dismiss();
-                    },
-                    child: InkButton(
-                      title: 'Verify and continue',
-                    ),
-                  )),
+              const Spacer(),
+              Center(
+                child: InkWell(
+                  onTap: _verifyAndContinue,
+                  child: InkButton(
+                    title: 'Verify and continue',
+                  ),
+                ),
+              ),
+              const Gap(20),
             ],
           ),
         ),
       ),
     );
+  }
+
+  String _formatTime(int seconds) {
+    final minutes = (seconds ~/ 60).toString().padLeft(1, '0');
+    final secs = (seconds % 60).toString().padLeft(2, '0');
+    return '$minutes:$secs';
   }
 }

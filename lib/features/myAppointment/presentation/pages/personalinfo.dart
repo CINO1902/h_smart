@@ -5,7 +5,6 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:gap/gap.dart';
 import 'package:h_smart/constant/Inkbutton.dart';
 import 'package:h_smart/features/myAppointment/presentation/provider/mydashprovider.dart';
-import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../constant/customesnackbar.dart';
 import '../../../auth/presentation/provider/auth_provider.dart';
@@ -34,9 +33,9 @@ class _PersonalInfoState extends ConsumerState<PersonalInfo> {
   Widget build(BuildContext context) {
     final uploadprovider = ref.watch(appointmentProvider);
     TextEditingController _firstname =
-        TextEditingController(text: ref.watch(authProvider).firstname);
+        TextEditingController(text: ref.watch(authProvider).firstName);
     TextEditingController lastname =
-        TextEditingController(text: ref.watch(authProvider).lastname);
+        TextEditingController(text: ref.watch(authProvider).lastName);
     TextEditingController phone =
         TextEditingController(text: ref.watch(authProvider).phone);
     TextEditingController email =
@@ -95,7 +94,7 @@ class _PersonalInfoState extends ConsumerState<PersonalInfo> {
                               fit: BoxFit.cover,
                             )
                           : CachedNetworkImage(
-                              imageUrl: ref.watch(authProvider).profilepic,
+                              imageUrl: ref.watch(authProvider).profilePicUrl,
                               fit: BoxFit.cover,
                               errorWidget: (context, url, error) =>
                                   Icon(Icons.error),
@@ -361,7 +360,7 @@ class _PersonalInfoState extends ConsumerState<PersonalInfo> {
                                 backgroundColor: Colors.transparent,
                                 elevation: 0,
                               ));
-                              await ref.read(authProvider).getinfo();
+                              await ref.read(authProvider).retrieveUserData();
                               SmartDialog.dismiss();
                               Navigator.pop(context);
                             }

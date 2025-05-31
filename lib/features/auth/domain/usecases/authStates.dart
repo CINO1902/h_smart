@@ -53,3 +53,13 @@ class GetInfoResult {
 }
 
 enum GetInfoResultStates { isLoading, isError, isData, isIdle }
+
+
+class EmailVerificationResult {
+  final EmailVerificationResultState state;
+  final Map<String, dynamic> response;
+
+  EmailVerificationResult(this.state, this.response);
+}
+
+enum EmailVerificationResultState { isLoading, isError, isData, isIdle }

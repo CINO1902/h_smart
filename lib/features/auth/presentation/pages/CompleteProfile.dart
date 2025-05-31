@@ -44,7 +44,7 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
   List<String> _selectedAllergies = [];
   List<String> _selectedConditions = [];
 
-  static const _genders = ['Male', 'Female', 'Other'];
+  static const _genders = ['male', 'female', 'other'];
   static const _bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
   static const _allergyOptions = [
     'Pollen',
@@ -124,7 +124,7 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
       );
       return;
     }
-    if (auth.image == null) {
+    if (auth.profileImage == null) {
       SnackBarService.notifyAction(
         context,
         message: 'Please insert a picture',
@@ -138,7 +138,7 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
       gender: _selectedGender!,
       dob: DateTime.parse(_dobController.text),
       address: _addressController.text.trim(),
-      bloodtype: _selectedBloodType,
+      bloodType: _selectedBloodType,
       emergencyContactName: _emergencyNameController.text.trim(),
       emergencyContactPhone: _phoneNumber.completeNumber,
       allergies: _selectedAllergies,
@@ -162,7 +162,7 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
         body: message,
         status: SnackbarStatus.success,
       );
-      context.push('/profile-complet');
+      context.go('/profile-complete');
     }
   }
 
@@ -284,27 +284,27 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
   }
 
   Widget _buildAvatarPicker(
-      BuildContext context, Authprovider auth, WidgetRef ref) {
+      BuildContext context, AuthProvider auth, WidgetRef ref) {
     return Center(
       child: GestureDetector(
-        onTap: () => ref.read(authProvider).pickimage(),
+        onTap: () => ref.read(authProvider).pickImage(),
         child: Stack(
           alignment: Alignment.bottomRight,
           children: [
             CircleAvatar(
               radius: 50,
               backgroundColor: Colors.grey[200],
-              backgroundImage: auth.image != null
-                  ? FileImage(auth.image!)
+              backgroundImage: auth.profileImage != null
+                  ? FileImage(auth.profileImage!)
                   : const AssetImage('images/User.png') as ImageProvider,
-              child:
-                  auth.imageloading ? const CircularProgressIndicator() : null,
+              child: auth.isImageLoading
+                  ? const CircularProgressIndicator()
+                  : null,
             ),
             const CircleAvatar(
               radius: 14,
               backgroundColor: AppColors.kprimaryColor500,
-              child:
-                  const Icon(Icons.camera_alt, size: 16, color: Colors.white),
+              child: Icon(Icons.camera_alt, size: 16, color: Colors.white),
             ),
           ],
         ),

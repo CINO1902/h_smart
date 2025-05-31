@@ -66,7 +66,11 @@ NetworkException parseNetworkException(DioException e) {
         case 404:
           networkException = NetworkException(
             NetworkExceptionType.notFound,
-            errorMessage: 'Not Found',
+            errorMessage: e.response!.data['errors'] ??
+                e.response!.data['message'] ??
+                e.response!.data['detail'] ??
+                e.response!.data['error_message'] ??
+                'Not Found',
           );
           break;
 

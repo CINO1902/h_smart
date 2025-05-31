@@ -4,4 +4,4 @@ import '../../../../core/service/locator.dart';
 import '../controller/auth_controller.dart';
 
 final authProvider =
-    ChangeNotifierProvider((ref) => Authprovider(locator()));
+    ChangeNotifierProvider((ref) => AuthProvider(locator()));

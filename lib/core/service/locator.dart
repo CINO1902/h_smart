@@ -36,7 +36,7 @@ void setup() {
         () => AuthDatasourceImp(locator()))
     ..registerLazySingleton<AuthDatasource>(() => AuthDatasourceImp(locator()))
     ..registerLazySingleton<AuthRepository>(() => AuthRepositoryImp(locator()))
-    ..registerLazySingleton(() => Authprovider(locator()))
+    ..registerLazySingleton(() => AuthProvider(locator()))
     //DoctorDetails
     ..registerLazySingleton<DoctorDatasourceImp>(
         () => DoctorDatasourceImp(locator()))

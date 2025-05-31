@@ -11,6 +11,7 @@ import '../usecases/authStates.dart';
 
 abstract class AuthRepository {
   Future<RegisterResult> createacount(createaccount);
+  Future<EmailVerificationResult> callActivationToken(email);
   Future<LoginResult> login(login);
   Future<VerifyEmailResult> Verifyemail(otp);
   Future<GetInfoResult> getinfo();
@@ -155,5 +156,28 @@ class AuthRepositoryImp implements AuthRepository {
       }
     }
     return getInfoResult;
+  }
+
+  @override
+  Future<EmailVerificationResult> callActivationToken(email) async {
+    EmailVerificationResult emailVerificationResult =
+        EmailVerificationResult(EmailVerificationResultState.isLoading, {});
+    try {
+      emailVerificationResult = await authDatasource.callActivationToken(email);
+    } catch (e) {
+      log(e.toString());
+
+      if (e.runtimeType == NetworkException) {
+        NetworkException exp = e as NetworkException;
+        final message = exp.errorMessage ?? e.message;
+        emailVerificationResult = EmailVerificationResult(
+            EmailVerificationResultState.isError, {"message": message});
+      } else {
+        emailVerificationResult = EmailVerificationResult(
+            EmailVerificationResultState.isError,
+            {"message": "Something Went Wrong"});
+      }
+    }
+    return emailVerificationResult;
   }
 }

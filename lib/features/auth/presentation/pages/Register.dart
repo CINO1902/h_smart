@@ -3,10 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:h_smart/constant/customesnackbar.dart';
 import 'package:h_smart/constant/snackbar.dart';
 import 'package:h_smart/features/auth/domain/usecases/authStates.dart';
-import 'package:h_smart/features/auth/presentation/pages/Login.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:intl_phone_field/phone_number.dart';
 
@@ -63,11 +61,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
     SmartDialog.showLoading();
     await auth.register(
-      _firstNameController.text.trim(),
-      _lastNameController.text.trim(),
-      _phoneNumber.completeNumber,
-      _emailController.text.trim(),
-      _passwordController.text,
+      firstName: _firstNameController.text.trim(),
+      lastName: _lastNameController.text.trim(),
+      phone: _phoneNumber.completeNumber,
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
     );
     SmartDialog.dismiss();
 
@@ -77,7 +75,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           isError: true);
     } else if (result.state == RegisterResultStates.isData) {
       _showSnackbar(result.response['message'] ?? 'Registered successfully');
-      context.push('/verifyemail');
+      context.push('/verify-email', extra: {
+        "email": _emailController.text,
+      });
     }
   }
 
@@ -217,6 +217,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   Widget _buildTermsCheckbox() {
     return CheckboxListTile(
       value: _agreedToTerms,
+      activeColor: AppColors.kprimaryColor500,
       contentPadding: EdgeInsets.zero,
       title: const Text(
         'I agree to the Terms and Conditions and Privacy Policy',

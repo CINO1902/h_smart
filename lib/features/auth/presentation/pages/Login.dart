@@ -6,10 +6,8 @@ import 'package:go_router/go_router.dart';
 
 import 'package:h_smart/constant/snackbar.dart';
 import 'package:h_smart/features/auth/domain/usecases/authStates.dart';
-import 'package:h_smart/features/auth/presentation/pages/Register.dart';
 import '../../../../core/utils/appColor.dart' show AppColors;
 import '../provider/auth_provider.dart';
-import '../../../medical_record/presentation/pages/index.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -41,8 +39,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     SmartDialog.showLoading();
     await auth.login(
-      _emailController.text.trim(),
-      _passwordController.text,
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
     );
     SmartDialog.dismiss();
 
@@ -66,7 +64,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
       final isComplete = result.response.payload?.isProfileComplete ?? true;
       if (isComplete) {
-        context.pushReplacement('/home');
+        context.go('/home');
       } else {
         context.push('/complete-profile');
       }
@@ -174,6 +172,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           Row(
             children: [
               Checkbox(
+                activeColor: AppColors.kprimaryColor500,
                 value: _rememberMe,
                 onChanged: (val) => setState(() => _rememberMe = val ?? false),
               ),

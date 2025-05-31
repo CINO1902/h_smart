@@ -9,4 +9,5 @@ abstract class AuthDatasource {
   Future<SetUpHealthResult> setuphealthissues(setup);
   Future<ContinueRegisterResult> continueRegistration(
       ContinueRegistrationModel continuemodel);
+  Future<EmailVerificationResult> callActivationToken(email);
 }

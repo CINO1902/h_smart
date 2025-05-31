@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:gap/gap.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/utils/appColor.dart' show AppColors;
 import '../../../auth/presentation/provider/auth_provider.dart';
 
@@ -41,7 +42,7 @@ class _ProfileState extends ConsumerState<Profile> {
                       bottomRight: Radius.circular(20)),
                   child: ImageFiltered(
                     imageFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: ref.watch(authProvider).profilepic == ''
+                    child: ref.watch(authProvider).profilePicUrl == ''
                         ? const CircleAvatar(
                             radius: 14,
                             backgroundColor: AppColors.kprimaryColor500,
@@ -61,7 +62,7 @@ class _ProfileState extends ConsumerState<Profile> {
                                 ),
                               );
                             },
-                            imageUrl: ref.watch(authProvider).profilepic,
+                            imageUrl: ref.watch(authProvider).profilePicUrl,
                             fit: BoxFit.cover,
                             width: double.infinity,
                             errorWidget: (context, url, error) => Icon(
@@ -109,7 +110,7 @@ class _ProfileState extends ConsumerState<Profile> {
                       color: Color(0xffEDEDED),
                       borderRadius: BorderRadius.circular(50),
                     ),
-                    child: ref.watch(authProvider).profilepic == ''
+                    child: ref.watch(authProvider).profilePicUrl == ''
                         ? const CircleAvatar(
                             radius: 14,
                             backgroundColor: AppColors.kprimaryColor500,
@@ -132,7 +133,7 @@ class _ProfileState extends ConsumerState<Profile> {
                                   ),
                                 );
                               },
-                              imageUrl: ref.watch(authProvider).profilepic,
+                              imageUrl: ref.watch(authProvider).profilePicUrl,
                               fit: BoxFit.cover,
                               errorWidget: (context, url, error) => Icon(
                                 Icons.error,
@@ -145,8 +146,8 @@ class _ProfileState extends ConsumerState<Profile> {
           ),
           Center(
             child: Text(
-              '${ref.watch(authProvider).firstname} ${ref.watch(authProvider).lastname}',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              '${ref.watch(authProvider).firstName} ${ref.watch(authProvider).lastName}',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
           ),
           Gap(10),
@@ -167,7 +168,7 @@ class _ProfileState extends ConsumerState<Profile> {
                     children: [
                       InkWell(
                           onTap: () {
-                            if (ref.watch(authProvider).infoloading == true) {
+                            if (ref.watch(authProvider).infoLoading == true) {
                               SmartDialog.showToast('System is busy');
                               return;
                             }
@@ -219,8 +220,7 @@ class _ProfileState extends ConsumerState<Profile> {
 
                         ref.watch(authProvider).logout();
 
-                        Navigator.pushNamedAndRemoveUntil(
-                            context, '/login', (route) => false);
+                        context.pushReplacement('/login');
                         SmartDialog.dismiss();
                       },
                     ).show();

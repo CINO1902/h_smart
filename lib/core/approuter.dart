@@ -5,7 +5,6 @@ import 'package:h_smart/core/pageTransition.dart';
 import 'package:h_smart/features/SymptomsChecker/presentation/pages/symptomschecker.dart';
 import 'package:h_smart/features/TestAndResport/presentation/pages/testandreport.dart';
 
-import 'package:h_smart/features/auth/presentation/pages/setUpHealthDetails.dart';
 import 'package:h_smart/features/chat/presentation/pages/chat.dart';
 import 'package:h_smart/features/doctorRecord/presentation/pages/Doctor.dart';
 import 'package:h_smart/features/doctorRecord/presentation/pages/aboutDoctor.dart';
@@ -27,8 +26,10 @@ import '../features/auth/presentation/pages/CompleteProfile.dart'
     show CompleteProfilePage;
 import '../features/auth/presentation/pages/Login.dart' show LoginPage;
 import '../features/auth/presentation/pages/Register.dart' show RegisterPage;
-import '../features/auth/presentation/pages/profileComplete.dart' show ProfileCompleteScreen;
-import '../features/auth/presentation/pages/verifyemail.dart' show verifyemail;
+import '../features/auth/presentation/pages/profileComplete.dart'
+    show ProfileCompleteScreen;
+import '../features/auth/presentation/pages/verifyemail.dart'
+    show verifyemail, VerifyEmailPage;
 import '../features/firstAid/presentation/pages/firstaid.dart';
 import '../features/medical_record/presentation/pages/medicalinfo.dart';
 import '../features/medical_record/presentation/pages/medicine_and_prescription.dart';
@@ -75,7 +76,9 @@ final appRouter = GoRouter(
       pageBuilder: (context, state) => buildPageWithDefaultTransition(
         context: context,
         state: state,
-        child: const verifyemail(),
+        child: VerifyEmailPage(
+          email: (state.extra as Map)['email'],
+        ),
       ),
     ),
     GoRoute(
@@ -86,7 +89,7 @@ final appRouter = GoRouter(
         child: const CompleteProfilePage(),
       ),
     ),
-     GoRoute(
+    GoRoute(
       path: '/profile-complete',
       pageBuilder: (context, state) => buildPageWithDefaultTransition(
         context: context,
@@ -94,14 +97,14 @@ final appRouter = GoRouter(
         child: const ProfileCompleteScreen(),
       ),
     ),
-    GoRoute(
-      path: '/setup-health',
-      pageBuilder: (context, state) => buildPageWithDefaultTransition(
-        context: context,
-        state: state,
-        child: const setuphealth(),
-      ),
-    ),
+    // GoRoute(
+    //   path: '/setup-health',
+    //   pageBuilder: (context, state) => buildPageWithDefaultTransition(
+    //     context: context,
+    //     state: state,
+    //     child: const setuphealth(),
+    //   ),
+    // ),
     GoRoute(
       path: '/home',
       pageBuilder: (context, state) => buildPageWithDefaultTransition(

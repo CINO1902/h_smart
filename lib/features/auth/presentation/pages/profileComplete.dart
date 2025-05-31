@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class ProfileCompleteScreen extends StatelessWidget {
   const ProfileCompleteScreen({super.key});
@@ -58,7 +59,7 @@ class ProfileCompleteScreen extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, '/home');
+                    context.go('/home');
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF3B82F6),

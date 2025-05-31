@@ -384,7 +384,8 @@ class _ChatUIState extends ConsumerState<ChatUI> {
               msg['sender'] !=
                   ref
                       .read(authProvider)
-                      .userData['profile_id']; // Exclude messages sent by you
+                      .userData
+                      .id; // Exclude messages sent by you
         }).toList();
 
         // Update our state with the new message count if it has changed.
@@ -404,7 +405,7 @@ class _ChatUIState extends ConsumerState<ChatUI> {
               DateTime.parse(msg['timestamp']).toUtc().toLocal();
           return (msgTime.isAfter(newMessageThreshold) ||
                   msgTime.isAtSameMomentAs(newMessageThreshold)) &&
-              msg['sender'] != ref.read(authProvider).userData['profile_id'];
+              msg['sender'] != ref.read(authProvider).userData.id;
         });
         if (dividerIndex == -1 || newMessageCount == 0) {
           dividerIndex = -1;

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -55,7 +56,7 @@ class AuthDatasourceImp implements AuthDatasource {
   @override
   Future<ContinueRegisterResult> continueRegistration(
       ContinueRegistrationModel continueModel) async {
-    print(continueModel.toJson());
+    // print(continueModel.toJson());
     ContinueRegisterResult continueRegisterResult =
         ContinueRegisterResult(ContinueRegisterResultStates.isLoading, {});
 
@@ -65,8 +66,10 @@ class AuthDatasourceImp implements AuthDatasource {
         data: continueRegistrationModelToJson(continueModel));
 
     if (response.statusCode == 201) {
+      print(response.data['payload']);
       continueRegisterResult = ContinueRegisterResult(
-          ContinueRegisterResultStates.isData, response.data);
+          ContinueRegisterResultStates.isData,
+          {"message": response.data['message']});
     }
 
     return continueRegisterResult;
@@ -85,8 +88,10 @@ class AuthDatasourceImp implements AuthDatasource {
         });
 
     if (response.statusCode == 200) {
-      verifyEmailResult =
-          VerifyEmailResult(VerifyEmailResultStates.isData, response.data);
+      verifyEmailResult = VerifyEmailResult(VerifyEmailResultStates.isData, {
+        "message": response.data['message'],
+        "payload": response.data['payload']
+      });
     }
 
     return verifyEmailResult;
@@ -136,5 +141,23 @@ class AuthDatasourceImp implements AuthDatasource {
     }
 
     return getInfoResult;
+  }
+
+  @override
+  Future<EmailVerificationResult> callActivationToken(email) async {
+    EmailVerificationResult emailVerificationResult =
+        EmailVerificationResult(EmailVerificationResultState.isLoading, {});
+
+    final response = await httpService.request(
+        url: '/auth/activate_token',
+        methodrequest: RequestMethod.post,
+        data: jsonEncode({"email": email}));
+
+    if (response.statusCode == 200) {
+      emailVerificationResult = EmailVerificationResult(
+          EmailVerificationResultState.isData, response.data);
+    }
+
+    return emailVerificationResult;
   }
 }
