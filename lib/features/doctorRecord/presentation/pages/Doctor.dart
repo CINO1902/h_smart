@@ -1,13 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gap/gap.dart';
 import 'package:h_smart/constant/SchimmerWidget.dart';
-import 'package:h_smart/features/doctorRecord/domain/entities/SpecialisedDoctor.dart';
 import 'package:h_smart/features/doctorRecord/domain/usecases/doctorStates.dart';
 import 'package:h_smart/features/doctorRecord/presentation/pages/listdoctors.dart';
 import 'package:h_smart/features/doctorRecord/presentation/provider/doctorprovider.dart';
-import 'package:provider/provider.dart';
 import 'package:sticky_headers/sticky_headers.dart';
 
 import '../../../../core/utils/appColor.dart';
@@ -77,7 +74,7 @@ class _DoctorState extends ConsumerState<Doctor> {
                 ),
               ),
               Container(
-                  margin: EdgeInsets.only(top: 44),
+                  margin: const EdgeInsets.only(top: 44),
                   child: ListView(
                     children: [
                       const SizedBox(height: 30),
@@ -98,7 +95,7 @@ class _DoctorState extends ConsumerState<Doctor> {
     if (ref.watch(doctorprovider).loading) {
       return SizedBox(
         height: MediaQuery.of(context).size.height * 0.5,
-        child: Center(
+        child: const Center(
           child: CircularProgressIndicator(
             color: AppColors.kprimaryColor500,
           ),
@@ -179,7 +176,7 @@ class _DoctorState extends ConsumerState<Doctor> {
       },
       child: Container(
         height: 68,
-        margin: EdgeInsets.only(bottom: 15),
+        margin: const EdgeInsets.only(bottom: 15),
         padding: const EdgeInsets.all(5),
         decoration: const BoxDecoration(
             border: Border(bottom: BorderSide(color: Color(0xffEBF1FF)))),
@@ -206,7 +203,8 @@ class _DoctorState extends ConsumerState<Doctor> {
                     softWrap: true,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 2,
-                    style: TextStyle(fontSize: 9, fontWeight: FontWeight.w400),
+                    style: const TextStyle(
+                        fontSize: 9, fontWeight: FontWeight.w400),
                   ),
                 )
               ],
@@ -234,7 +232,7 @@ Widget _buildMyDoctorSection(BuildContext context, WidgetRef ref) {
       return Column(
         children: [
           _buildSectionHeader('My Doctor'),
-          ShimmerWidget.rectangle(width: double.infinity, height: 75),
+          const ShimmerWidget.rectangle(width: double.infinity, height: 75),
         ],
       );
     case CallMyDoctorResultState.isError:

@@ -28,7 +28,7 @@ class _RateExperienceState extends State<RateExperience> {
             style: TextStyle(fontSize: 17),
           )),
       body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         child: ListView(
           children: [
             const Gap(10),
@@ -44,17 +44,17 @@ class _RateExperienceState extends State<RateExperience> {
                   fontSize: 13,
                   fontWeight: FontWeight.w600),
             ),
-            Gap(10),
+            const Gap(10),
             Center(
               child: RatingBar.builder(
                 initialRating: 0,
-                unratedColor: Color(0xffEDEDED),
+                unratedColor: const Color(0xffEDEDED),
                 minRating: 1,
                 direction: Axis.horizontal,
                 allowHalfRating: true,
                 itemCount: 5,
                 itemSize: 40,
-                itemPadding: EdgeInsets.symmetric(horizontal: 0.0),
+                itemPadding: const EdgeInsets.symmetric(horizontal: 0.0),
                 itemBuilder: (context, _) => const Icon(
                   Icons.star,
                   color: Colors.amber,
@@ -72,13 +72,13 @@ class _RateExperienceState extends State<RateExperience> {
                   fontSize: 13,
                   fontWeight: FontWeight.w600),
             ),
-            Gap(10),
+            const Gap(10),
             Container(
               width: MediaQuery.of(context).size.width * 0.9,
               height: 150,
               decoration: BoxDecoration(
                   color: Colors.white,
-                  border: Border.all(color: Color(0xffC1D3FF)),
+                  border: Border.all(color: const Color(0xffC1D3FF)),
                   borderRadius: BorderRadius.circular(7)),
               child: TextFormField(
                 //controller: keystonecontroller,
@@ -97,7 +97,7 @@ class _RateExperienceState extends State<RateExperience> {
                     focusColor: Colors.black54),
               ),
             ),
-            Gap(100),
+            const Gap(100),
             Align(
               alignment: FractionalOffset.bottomCenter,
               child: InkWell(

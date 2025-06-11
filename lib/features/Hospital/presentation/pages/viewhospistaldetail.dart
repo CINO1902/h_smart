@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:provider/provider.dart';
+import 'package:h_smart/features/Hospital/domain/entities/GetHospital.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../../../constant/Inkbutton.dart';
 import '../provider/getHospitalProvider.dart';
 
 class viewhospitaldetail extends ConsumerStatefulWidget {
-  const viewhospitaldetail({super.key});
+  final Hospital hospital;
+  const viewhospitaldetail({super.key, required this.hospital});
 
   @override
   ConsumerState<viewhospitaldetail> createState() => _viewhospitaldetailState();
@@ -25,25 +27,41 @@ class _viewhospitaldetailState extends ConsumerState<viewhospitaldetail> {
               Stack(
                 children: [
                   SizedBox(
-                    height: 300,
+                    height: 400,
                     width: double.infinity,
                     child: ClipRRect(
                       borderRadius: const BorderRadius.only(
                           bottomLeft: Radius.circular(20),
                           bottomRight: Radius.circular(20)),
                       child: Hero(
-                        tag: ref.watch(hospitalprovider).imagetag1,
-                        child: Image.asset(
-                          'images/hospital1.png',
-                          fit: BoxFit.cover,
-                        ),
+                        tag: widget.hospital.id ?? '',
+                        child: widget.hospital.hospitalsCoverImage != null &&
+                                widget.hospital.hospitalsCoverImage!.isNotEmpty
+                            ? CachedNetworkImage(
+                                imageUrl: widget.hospital.hospitalsCoverImage!,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => Container(
+                                  color: Colors.grey[200],
+                                  child: const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                ),
+                                errorWidget: (context, url, error) => Container(
+                                  color: Colors.grey[200],
+                                  child: const Icon(Icons.error),
+                                ),
+                              )
+                            : Image.asset(
+                                'images/hospital1.png',
+                                fit: BoxFit.cover,
+                              ),
                       ),
                     ),
                   ),
                   Container(
-                    height: 130,
+                    height: 200,
                     width: double.infinity,
-                    margin: EdgeInsets.only(top: 170),
+                    margin: const EdgeInsets.only(top: 270),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
@@ -59,10 +77,10 @@ class _viewhospitaldetailState extends ConsumerState<viewhospitaldetail> {
                       child: Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            SizedBox(
+                            const SizedBox(
                               width: 235,
                               child: Text(
-                                ref.watch(hospitalprovider).clickedHospital[2],
+                                '',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                     fontSize: 16, fontWeight: FontWeight.w600),
@@ -76,29 +94,27 @@ class _viewhospitaldetailState extends ConsumerState<viewhospitaldetail> {
                                   width: 12,
                                   child: Image.asset(
                                     'images/MapPin.png',
-                                    color: Color(0xff3772FF),
+                                    color: const Color(0xff3772FF),
                                   ),
                                 ),
-                                Gap(5),
-                                Text(
-                                  ref
-                                      .watch(hospitalprovider)
-                                      .clickedHospital[3],
+                                const Gap(5),
+                                const Text(
+                                  '',
                                   style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w500),
                                 ),
-                                Gap(5),
+                                const Gap(5),
                                 SizedBox(
                                   height: 12,
                                   width: 12,
                                   child: Image.asset(
                                     'images/Clock.png',
-                                    color: Color(0xff3772FF),
+                                    color: const Color(0xff3772FF),
                                   ),
                                 ),
-                                Gap(5),
-                                Text(
+                                const Gap(5),
+                                const Text(
                                   '10am-3pm',
                                   style: TextStyle(
                                       fontSize: 11,
@@ -111,14 +127,14 @@ class _viewhospitaldetailState extends ConsumerState<viewhospitaldetail> {
                   )
                 ],
               ),
-              Gap(30),
+              const Gap(30),
               const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20),
                   child: Text(
                     'About',
                     style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                   )),
-              Gap(10),
+              const Gap(10),
               const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20),
                   child: Text(
@@ -128,14 +144,14 @@ class _viewhospitaldetailState extends ConsumerState<viewhospitaldetail> {
                         fontWeight: FontWeight.w400,
                         color: Color(0xff706F6F)),
                   )),
-              Gap(20),
+              const Gap(20),
               const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20),
                   child: Text(
                     'Working Time',
                     style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                   )),
-              Gap(10),
+              const Gap(10),
               const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20),
                   child: Text(
@@ -145,20 +161,20 @@ class _viewhospitaldetailState extends ConsumerState<viewhospitaldetail> {
                         fontWeight: FontWeight.w400,
                         color: Color(0xff706F6F)),
                   )),
-              Gap(20),
+              const Gap(20),
               const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20),
                   child: Text(
                     'Available Sessions',
                     style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                   )),
-              Gap(10),
+              const Gap(10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    margin: EdgeInsets.only(left: 10),
-                    padding: EdgeInsets.all(5),
+                    margin: const EdgeInsets.only(left: 10),
+                    padding: const EdgeInsets.all(5),
                     height: 40,
                     width: 40,
                     decoration: BoxDecoration(
@@ -174,9 +190,9 @@ class _viewhospitaldetailState extends ConsumerState<viewhospitaldetail> {
                     height: 40,
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Color(0xffC1D3FF)),
-                        color: Color(0xffF3F7FF)),
-                    child: Align(
+                        border: Border.all(color: const Color(0xffC1D3FF)),
+                        color: const Color(0xffF3F7FF)),
+                    child: const Align(
                       alignment: Alignment.center,
                       child: Text(
                         '22 June 2023, 10:00am',
@@ -188,8 +204,8 @@ class _viewhospitaldetailState extends ConsumerState<viewhospitaldetail> {
                     ),
                   ),
                   Container(
-                    margin: EdgeInsets.only(right: 10),
-                    padding: EdgeInsets.all(5),
+                    margin: const EdgeInsets.only(right: 10),
+                    padding: const EdgeInsets.all(5),
                     height: 40,
                     width: 40,
                     decoration: BoxDecoration(
@@ -202,16 +218,16 @@ class _viewhospitaldetailState extends ConsumerState<viewhospitaldetail> {
                   ),
                 ],
               ),
-              Gap(20),
+              const Gap(20),
               const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20),
                   child: Text(
                     'Appointment Notes',
                     style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                   )),
-              Gap(10),
+              const Gap(10),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Container(
                   width: MediaQuery.of(context).size.width * 0.9,
                   height: 100,
@@ -237,7 +253,7 @@ class _viewhospitaldetailState extends ConsumerState<viewhospitaldetail> {
                   ),
                 ),
               ),
-              Gap(30),
+              const Gap(30),
               Align(
                   alignment: Alignment.center,
                   child: SizedBox(
@@ -256,13 +272,13 @@ class _viewhospitaldetailState extends ConsumerState<viewhospitaldetail> {
                 Navigator.pop(context);
               },
               child: Container(
-                margin: EdgeInsets.only(left: 20),
-                padding: EdgeInsets.all(5),
+                margin: const EdgeInsets.only(left: 20),
+                padding: const EdgeInsets.all(5),
                 height: 40,
                 width: 40,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(5),
-                    color: Color.fromARGB(255, 237, 237, 237)),
+                    color: const Color.fromARGB(255, 237, 237, 237)),
                 child: Image.asset(
                   'images/chevron-left.png',
                 ),

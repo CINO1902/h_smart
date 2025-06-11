@@ -2,13 +2,16 @@
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:go_router/go_router.dart';
 import 'package:h_smart/core/pageTransition.dart';
+import 'package:h_smart/features/Hospital/presentation/pages/hospitalDetailView.dart';
 import 'package:h_smart/features/SymptomsChecker/presentation/pages/symptomschecker.dart';
 import 'package:h_smart/features/TestAndResport/presentation/pages/testandreport.dart';
+import 'package:h_smart/features/auth/presentation/pages/ForgotPassword/EnterEmail.dart';
 
 import 'package:h_smart/features/chat/presentation/pages/chat.dart';
 import 'package:h_smart/features/doctorRecord/presentation/pages/Doctor.dart';
 import 'package:h_smart/features/doctorRecord/presentation/pages/aboutDoctor.dart';
 import 'package:h_smart/features/doctorRecord/presentation/pages/appointscheduled.dart';
+import 'package:h_smart/features/doctorRecord/presentation/pages/doctorDetailView.dart';
 import 'package:h_smart/features/doctorRecord/presentation/pages/rateexperience.dart';
 import 'package:h_smart/features/init/initpage.dart';
 import 'package:h_smart/features/medical_record/presentation/pages/index.dart';
@@ -17,13 +20,15 @@ import 'package:h_smart/features/myAppointment/presentation/pages/changepassword
 import 'package:h_smart/features/myAppointment/presentation/pages/myAppointment.dart';
 import 'package:h_smart/features/myAppointment/presentation/pages/settings.dart';
 
-import '../features/Hospital/presentation/pages/allGovernmentHospital.dart';
-import '../features/Hospital/presentation/pages/allprivatehospital.dart';
+import '../features/Hospital/presentation/pages/specificHospital.dart';
 import '../features/Hospital/presentation/pages/hospital.dart';
 import '../features/Hospital/presentation/pages/viewhospistaldetail.dart';
 import '../features/TestAndResport/presentation/pages/report.dart';
 import '../features/auth/presentation/pages/CompleteProfile.dart'
     show CompleteProfilePage;
+import '../features/auth/presentation/pages/ForgotPassword/changePassword.dart';
+import '../features/auth/presentation/pages/ForgotPassword/succesPasswordchange.dart';
+import '../features/auth/presentation/pages/ForgotPassword/verifyOtp.dart';
 import '../features/auth/presentation/pages/Login.dart' show LoginPage;
 import '../features/auth/presentation/pages/Register.dart' show RegisterPage;
 import '../features/auth/presentation/pages/profileComplete.dart'
@@ -87,6 +92,42 @@ final appRouter = GoRouter(
         context: context,
         state: state,
         child: const CompleteProfilePage(),
+      ),
+    ),
+    GoRoute(
+      path: '/forgot-password',
+      pageBuilder: (context, state) => buildPageWithDefaultTransition(
+        context: context,
+        state: state,
+        child: const ForgotPassword(),
+      ),
+    ),
+    GoRoute(
+      path: '/forgot-password/otp',
+      pageBuilder: (context, state) => buildPageWithDefaultTransition(
+        context: context,
+        state: state,
+        child: VerifyPasswordOtp(
+          email: (state.extra as Map)['email'],
+        ),
+      ),
+    ),
+    GoRoute(
+      path: '/forgot-password/changePassword',
+      pageBuilder: (context, state) => buildPageWithDefaultTransition(
+        context: context,
+        state: state,
+        child: Changepassword(
+          email: (state.extra as Map)['email'],
+        ),
+      ),
+    ),
+    GoRoute(
+      path: '/forgot-password/passwordchangecomplete',
+      pageBuilder: (context, state) => buildPageWithDefaultTransition(
+        context: context,
+        state: state,
+        child: const ChangeCompleteScreen(),
       ),
     ),
     GoRoute(
@@ -156,7 +197,7 @@ final appRouter = GoRouter(
               child: const MyAppointment(),
             )),
     GoRoute(
-        path: '/appointments/personal-info',
+        path: '/PersonalInfo',
         pageBuilder: (context, state) => buildPageWithDefaultTransition(
               context: context,
               state: state,
@@ -267,21 +308,37 @@ final appRouter = GoRouter(
         pageBuilder: (context, state) => buildPageWithDefaultTransition(
               context: context,
               state: state,
-              child: const viewhospitaldetail(),
+              child: viewhospitaldetail(
+                hospital: (state.extra as Map)['hospital'],
+              ),
             )),
+
     GoRoute(
-        path: '/hospital/government',
+        path: '/hospital/more-detail',
         pageBuilder: (context, state) => buildPageWithDefaultTransition(
               context: context,
               state: state,
-              child: const GovermentHospital(),
+              child: HospitalDetailView(
+                hospital: (state.extra as Map)['hospital'],
+              ),
             )),
     GoRoute(
-        path: '/hospital/private',
+        path: '/doctor/detail',
         pageBuilder: (context, state) => buildPageWithDefaultTransition(
               context: context,
               state: state,
-              child: const PrivateHosptal(),
+              child: DoctorDetailView(
+                doctor: (state.extra as Map)['doctor'],
+              ),
+            )),
+    GoRoute(
+        path: '/hospital/specific',
+        pageBuilder: (context, state) => buildPageWithDefaultTransition(
+              context: context,
+              state: state,
+              child: SpecificHospital(
+                title: (state.extra as Map)['title'],
+              ),
             )),
   ],
 );

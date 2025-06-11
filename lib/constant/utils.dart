@@ -33,15 +33,15 @@ class Utils {
             child,
           ],
           cancelButton: CupertinoActionSheetAction(
-            child: Text('Done'),
             onPressed: onClicked,
+            child: Text('Done'),
           ),
         ),
       );
 
   static void showSnackBar(BuildContext context, String text) {
     final snackBar = SnackBar(
-      content: Text(text, style: TextStyle(fontSize: 24)),
+      content: Text(text, style: const TextStyle(fontSize: 24)),
     );
 
     ScaffoldMessenger.of(context)

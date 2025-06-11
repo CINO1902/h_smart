@@ -21,29 +21,29 @@ class _TestAndReportState extends State<TestAndReport> {
               color: Colors.black,
               fontWeight: FontWeight.w600,
               fontFamily: 'Poppins'),
-          title: Text(
+          title: const Text(
             'Test & Lab Results',
             style: TextStyle(fontSize: 16),
           )),
       body: Container(
-        margin: EdgeInsets.all(20),
-        padding: EdgeInsets.all(10),
+        margin: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-            border: Border.all(color: Color(0xffC1D3FF)),
+            border: Border.all(color: const Color(0xffC1D3FF)),
             borderRadius: BorderRadius.circular(16),
-            color: Color(0xffF3F7FF)),
+            color: const Color(0xffF3F7FF)),
         child: ListView(
           shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           children: [
             recordtype('General Blood Test', 'Lenox Hill lab'),
-            Gap(10),
+            const Gap(10),
             recordtype('Thyroid Function Test', 'Lenox Hill lab'),
-            Gap(10),
+            const Gap(10),
             recordtype('Kidney Function Test', 'Lenox Hill lab'),
-            Gap(10),
+            const Gap(10),
             recordtype('Liver Function Test', 'Lenox Hill lab'),
-            Gap(10),
+            const Gap(10),
             recordtype('Lipid Profile', 'Lenox Hill lab'),
           ],
         ),
@@ -58,12 +58,12 @@ class _TestAndReportState extends State<TestAndReport> {
       },
       child: Container(
         height: 57,
-        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         width: double.infinity,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Color(0xffC1D3FF)),
+          border: Border.all(color: const Color(0xffC1D3FF)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -74,15 +74,15 @@ class _TestAndReportState extends State<TestAndReport> {
               children: [
                 Text(
                   title,
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                 ),
                 Text(
                   subtitle,
-                  style: TextStyle(fontSize: 11),
+                  style: const TextStyle(fontSize: 11),
                 ),
               ],
             ),
-            Text(
+            const Text(
               'July 30th, 2023',
               style: TextStyle(fontSize: 11),
             ),

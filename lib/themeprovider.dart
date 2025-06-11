@@ -32,10 +32,10 @@ class Themeprovider extends ChangeNotifier {
   }
 
   _saveToPrefs() async {
-    final _pref = await SharedPreferences.getInstance();
-    _pref.setBool('togg', togg);
-    _pref.setInt('group', group);
-    _pref.setString('theme', _theme);
+    final pref = await SharedPreferences.getInstance();
+    pref.setBool('togg', togg);
+    pref.setInt('group', group);
+    pref.setString('theme', _theme);
   }
 
   changetheme(value1) {
@@ -89,7 +89,7 @@ class myTheme {
           fontFamily: 'Poppins',
         ),
       ),
-      scaffoldBackgroundColor: Color.fromARGB(255, 34, 34, 34),
+      scaffoldBackgroundColor: const Color.fromARGB(255, 34, 34, 34),
       primaryColor: HexColor('#3772FF'),
       primaryColorLight: Colors.black,
       textSelectionTheme: TextSelectionThemeData(
@@ -106,7 +106,7 @@ class myTheme {
               systemNavigationBarColor: Colors.black)),
       primaryColorDark: Colors.white,
       colorScheme: const ColorScheme.dark(
-        onBackground: Color.fromARGB(255, 229, 229, 229),
+        onSurface: Color.fromARGB(255, 229, 229, 229),
         onTertiary: Color.fromARGB(255, 231, 231, 231),
         inverseSurface: Color(0xffF3F7FF),
         onInverseSurface: Colors.black,
@@ -120,7 +120,7 @@ class myTheme {
           fontFamily: 'Poppins',
         ),
       ),
-      scaffoldBackgroundColor: Color.fromARGB(255, 255, 255, 255),
+      scaffoldBackgroundColor: const Color.fromARGB(255, 255, 255, 255),
       primaryColor: HexColor('#3772FF'),
       iconTheme: IconThemeData(
         color: HexColor('#3772FF'),
@@ -137,7 +137,7 @@ class myTheme {
           )),
       primaryColorDark: Colors.black,
       colorScheme: const ColorScheme.light(
-        onBackground: Color.fromARGB(255, 114, 114, 114),
+        onSurface: Color.fromARGB(255, 114, 114, 114),
         onTertiary: Color.fromARGB(255, 255, 255, 255),
         primaryContainer: Colors.white,
         inverseSurface: Color(0xffF3F7FF),

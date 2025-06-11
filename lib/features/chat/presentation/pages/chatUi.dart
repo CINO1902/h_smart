@@ -171,7 +171,7 @@ class _ChatUIState extends ConsumerState<ChatUI> {
   }
 
   void deactivatescroll() {
-    Future.delayed(Duration(milliseconds: 100), () {
+    Future.delayed(const Duration(milliseconds: 100), () {
       print('object1');
       loaded = false;
     });
@@ -199,17 +199,17 @@ class _ChatUIState extends ConsumerState<ChatUI> {
               children: [
                 Expanded(
                   child: Container(
-                      margin: EdgeInsets.only(top: 70),
+                      margin: const EdgeInsets.only(top: 70),
                       child: _buildmessageList()),
                 ),
                 Container(
                   height: 47,
-                  margin: EdgeInsets.only(left: 20, right: 20, bottom: 10),
+                  margin: const EdgeInsets.only(left: 20, right: 20, bottom: 10),
                   decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Color(0xffEDEDED))),
-                  padding: EdgeInsets.all(10),
+                      border: Border.all(color: const Color(0xffEDEDED))),
+                  padding: const EdgeInsets.all(10),
                   child: Row(
                     children: [
                       Image.asset(
@@ -217,20 +217,20 @@ class _ChatUIState extends ConsumerState<ChatUI> {
                         height: 20,
                         width: 20,
                       ),
-                      Gap(5),
+                      const Gap(5),
                       Expanded(
                           child: TextField(
                         controller: messagecontroller,
                         minLines: 1,
                         maxLines: 3,
-                        style: TextStyle(fontSize: 14),
-                        decoration: InputDecoration(
+                        style: const TextStyle(fontSize: 14),
+                        decoration: const InputDecoration(
                             constraints: BoxConstraints(minHeight: 20),
                             contentPadding: EdgeInsets.symmetric(
                                 horizontal: 5, vertical: 0),
                             border: InputBorder.none),
                       )),
-                      Gap(5),
+                      const Gap(5),
                       InkWell(
                         onTap: _sendMessage,
                         child: Image.asset(
@@ -248,7 +248,7 @@ class _ChatUIState extends ConsumerState<ChatUI> {
           Container(
             color: Colors.white,
             height: 70,
-            padding: EdgeInsets.all(15),
+            padding: const EdgeInsets.all(15),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -266,7 +266,7 @@ class _ChatUIState extends ConsumerState<ChatUI> {
                             color: AppColors.kprimaryColor500,
                           )),
                     ),
-                    Gap(15),
+                    const Gap(15),
                     SizedBox(
                       height: 40,
                       width: 40,
@@ -288,23 +288,23 @@ class _ChatUIState extends ConsumerState<ChatUI> {
                           },
                           imageUrl: widget.profile_pic,
                           fit: BoxFit.cover,
-                          errorWidget: (context, url, error) => Icon(
+                          errorWidget: (context, url, error) => const Icon(
                             Icons.error,
                             color: Colors.red,
                           ),
                         ),
                       ),
                     ),
-                    Gap(15),
+                    const Gap(15),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SizedBox(
                           width: 180,
                           child: Text(
-                            widget.firstname + ' ' + widget.lastname,
+                            '${widget.firstname} ${widget.lastname}',
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 14),
                           ),
                         ),
@@ -317,8 +317,8 @@ class _ChatUIState extends ConsumerState<ChatUI> {
                               child: SvgPicture.asset('images/dot.svg',
                                   color: Colors.green),
                             ),
-                            Gap(5),
-                            Text(
+                            const Gap(5),
+                            const Text(
                               'Online',
                               style: TextStyle(
                                   fontSize: 12,
@@ -338,7 +338,7 @@ class _ChatUIState extends ConsumerState<ChatUI> {
                       height: 30,
                       width: 30,
                     ),
-                    Gap(10),
+                    const Gap(10),
                     Image.asset(
                       'images/video_call.png',
                       height: 30,
@@ -362,7 +362,7 @@ class _ChatUIState extends ConsumerState<ChatUI> {
           return Text('Error${snapshot.error}');
         }
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(
+          return const Center(
             child: CircularProgressIndicator(),
           );
         }
@@ -381,11 +381,7 @@ class _ChatUIState extends ConsumerState<ChatUI> {
               DateTime.parse(msg['timestamp']).toUtc().toLocal();
           return (msgTime.isAfter(newMessageThreshold) ||
                   msgTime.isAtSameMomentAs(newMessageThreshold)) &&
-              msg['sender'] !=
-                  ref
-                      .read(authProvider)
-                      .userData
-                      .id; // Exclude messages sent by you
+              msg['sender'] != '222022'; // Exclude messages sent by you
         }).toList();
 
         // Update our state with the new message count if it has changed.
@@ -405,7 +401,7 @@ class _ChatUIState extends ConsumerState<ChatUI> {
               DateTime.parse(msg['timestamp']).toUtc().toLocal();
           return (msgTime.isAfter(newMessageThreshold) ||
                   msgTime.isAtSameMomentAs(newMessageThreshold)) &&
-              msg['sender'] != ref.read(authProvider).userData.id;
+              msg['sender'] != '829922';
         });
         if (dividerIndex == -1 || newMessageCount == 0) {
           dividerIndex = -1;
@@ -440,12 +436,12 @@ class _ChatUIState extends ConsumerState<ChatUI> {
         : Alignment.centerLeft;
 
     return Container(
-        margin: EdgeInsets.only(bottom: 10),
+        margin: const EdgeInsets.only(bottom: 10),
         alignment: alignment,
         child: (document[index]['senderId'] == email)
             ? ChatBubble(
                 message: document[index]['message'],
-                color: Color(0xffF3F7FF),
+                color: const Color(0xffF3F7FF),
               )
             : length != index + 1
                 ? document[index]['recieverID'] !=
@@ -475,7 +471,7 @@ class _ChatUIState extends ConsumerState<ChatUI> {
                                 },
                                 imageUrl: widget.profile_pic,
                                 fit: BoxFit.cover,
-                                errorWidget: (context, url, error) => Icon(
+                                errorWidget: (context, url, error) => const Icon(
                                   Icons.error,
                                   color: Colors.red,
                                 ),
@@ -484,18 +480,18 @@ class _ChatUIState extends ConsumerState<ChatUI> {
                           ),
                           ChatBubble(
                             message: document[index]['message'],
-                            color: Color(0xffEDEDED),
+                            color: const Color(0xffEDEDED),
                           )
                         ],
                       )
                     : Row(
                         children: [
-                          SizedBox(
+                          const SizedBox(
                             width: 30,
                           ),
                           ChatBubble(
                             message: document[index]['message'],
-                            color: Color(0xffEDEDED),
+                            color: const Color(0xffEDEDED),
                           ),
                         ],
                       )
@@ -523,7 +519,7 @@ class _ChatUIState extends ConsumerState<ChatUI> {
                             },
                             imageUrl: widget.profile_pic,
                             fit: BoxFit.cover,
-                            errorWidget: (context, url, error) => Icon(
+                            errorWidget: (context, url, error) => const Icon(
                               Icons.error,
                               color: Colors.red,
                             ),
@@ -532,7 +528,7 @@ class _ChatUIState extends ConsumerState<ChatUI> {
                       ),
                       ChatBubble(
                         message: document[index]['message'],
-                        color: Color(0xffEDEDED),
+                        color: const Color(0xffEDEDED),
                       )
                     ],
                   ));
@@ -540,7 +536,7 @@ class _ChatUIState extends ConsumerState<ChatUI> {
 }
 
 class chatInput extends StatelessWidget {
-  chatInput({super.key, required this.sendmessages});
+  const chatInput({super.key, required this.sendmessages});
 
   final VoidCallback sendmessages;
   @override
@@ -557,7 +553,7 @@ class chatInput extends StatelessWidget {
               decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Color(0xffEDEDED))),
+                  border: Border.all(color: const Color(0xffEDEDED))),
               child: Row(
                 children: [
                   //emoji button

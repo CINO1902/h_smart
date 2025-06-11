@@ -24,7 +24,7 @@ class InkButton extends StatelessWidget {
           alignment: Alignment.center,
           child: Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
                 color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
           )),
     );

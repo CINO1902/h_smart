@@ -53,12 +53,12 @@ class _ChangePasswordState extends State<ChangePassword> {
                             ? Icon(
                                 Icons.visibility,
                                 color:
-                                    Theme.of(context).colorScheme.onBackground,
+                                    Theme.of(context).colorScheme.onSurface,
                               )
                             : Icon(
                                 Icons.visibility_off,
                                 color:
-                                    Theme.of(context).colorScheme.onBackground,
+                                    Theme.of(context).colorScheme.onSurface,
                               ),
                       ),
                       contentPadding: const EdgeInsets.only(top: 5, left: 10),
@@ -72,6 +72,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                       if (value!.trim().isEmpty) {
                         return "Password can't be empty";
                       }
+                      return null;
                     }),
               ),
               const Gap(20),
@@ -95,12 +96,12 @@ class _ChangePasswordState extends State<ChangePassword> {
                             ? Icon(
                                 Icons.visibility,
                                 color:
-                                    Theme.of(context).colorScheme.onBackground,
+                                    Theme.of(context).colorScheme.onSurface,
                               )
                             : Icon(
                                 Icons.visibility_off,
                                 color:
-                                    Theme.of(context).colorScheme.onBackground,
+                                    Theme.of(context).colorScheme.onSurface,
                               ),
                       ),
                       contentPadding: const EdgeInsets.only(top: 5, left: 10),
@@ -114,6 +115,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                       if (value!.trim().isEmpty) {
                         return "Password can't be empty";
                       }
+                      return null;
                     }),
               ),
               const Gap(20),
@@ -137,12 +139,12 @@ class _ChangePasswordState extends State<ChangePassword> {
                             ? Icon(
                                 Icons.visibility,
                                 color:
-                                    Theme.of(context).colorScheme.onBackground,
+                                    Theme.of(context).colorScheme.onSurface,
                               )
                             : Icon(
                                 Icons.visibility_off,
                                 color:
-                                    Theme.of(context).colorScheme.onBackground,
+                                    Theme.of(context).colorScheme.onSurface,
                               ),
                       ),
                       contentPadding: const EdgeInsets.only(top: 5, left: 10),
@@ -156,6 +158,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                       if (value!.trim().isEmpty) {
                         return "Password can't be empty";
                       }
+                      return null;
                     }),
               ),
             ],

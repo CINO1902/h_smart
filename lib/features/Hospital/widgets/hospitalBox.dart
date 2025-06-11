@@ -1,119 +1,191 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
+import 'package:h_smart/core/utils/appColor.dart';
+import 'package:h_smart/features/Hospital/domain/entities/GetHospital.dart';
 import 'package:h_smart/features/medical_record/presentation/widgets/AutoScrollText.dart';
 
-import '../presentation/provider/getHospitalProvider.dart';
-
 class HospitalWidget extends StatelessWidget {
-  const HospitalWidget(
-      {super.key,
-      required this.ref,
-      required this.index,
-      required this.hospitalCity,
-      required this.hospitalName});
+  const HospitalWidget({
+    super.key,
+    required this.ref,
+    required this.hospital,
+    this.enableHero = true,
+  });
 
   final WidgetRef ref;
-  final int index;
-  final String hospitalCity;
-  final String hospitalName;
+  final Hospital hospital;
+  final bool enableHero;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 158,
-      child: Stack(
+    const double cardHeight = 208;
+    const double imageHeight = cardHeight * 0.55;
+    return Container(
+      height: cardHeight,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.blue),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
         children: [
-          Align(
-            alignment: Alignment.bottomCenter,
+          // Top image section as background
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                ),
+                child: enableHero
+                    ? Hero(
+                        tag: hospital.id ?? '',
+                        child: _buildCoverImage(imageHeight),
+                      )
+                    : _buildCoverImage(imageHeight),
+              ),
+              // Logo avatar at bottom center
+              Positioned(
+                bottom: -15,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                      color: Colors.white,
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: hospital.logo != null && hospital.logo!.isNotEmpty
+                          ? CachedNetworkImage(
+                              imageUrl: hospital.logo!,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => Container(
+                                color: Colors.grey[200],
+                                child: const Center(
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                              ),
+                              errorWidget: (context, url, error) => const Icon(
+                                Icons.business,
+                                color: Colors.grey,
+                              ),
+                            )
+                          : const Icon(
+                              Icons.business,
+                              color: Colors.grey,
+                            ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          // Bottom content section
+          Expanded(
             child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 1),
-              padding: EdgeInsets.only(left: 10, bottom: 10, right: 10),
-              height: 100.0,
               width: double.infinity,
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: Colors.blue),
-                  borderRadius: BorderRadius.circular(16)),
-              child:
-                  Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-                SizedBox(
-                  height: 20,
-                  width: MediaQuery.of(context).size.width * .5,
-                  child: AutoScrollText(
-                    text: hospitalName,
-                    maxWidth: MediaQuery.of(context).size.width * .45,
-                    // textAlign: TextAlign.center,
-                    style: const TextStyle(
+              margin: const EdgeInsets.only(top: 5),
+              decoration: const BoxDecoration(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(16),
+                  bottomRight: Radius.circular(16),
+                ),
+              ),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Hospital Name
+                    AutoScrollText(
+                      text: hospital.hospitalName ?? '',
+                      maxWidth: MediaQuery.of(context).size.width * 0.4 - 10,
+                      style: const TextStyle(
                         color: Colors.black,
                         fontSize: 13,
-                        fontWeight: FontWeight.w700),
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      height: 15,
-                      width: 15,
-                      child: Image.asset('images/MapPin.png'),
-                    ),
-                    Gap(5),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * .2,
-                      child: AutoScrollText(
-                        text: hospitalCity,
-                        maxWidth: MediaQuery.of(context).size.width * .2,
-                        align: TextAlign.start,
-                        style: const TextStyle(
-                            fontSize: 11, fontWeight: FontWeight.w400),
+                        fontWeight: FontWeight.w700,
                       ),
-                    )
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      height: 15,
-                      width: 15,
-                      child: Image.asset('images/Clock.png'),
                     ),
-                    Gap(5),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * .2,
-                      child: const Text(
-                        '10am-3pm',
-                        style: TextStyle(
-                            fontSize: 11, fontWeight: FontWeight.w400),
-                      ),
-                    )
+                    // Location row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset('images/MapPin.png',
+                            height: 15, width: 15, color: Colors.blue),
+                        const Gap(4),
+                        Text(
+                          hospital.city ?? '',
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Gap(3),
+                    // Time row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SvgPicture.asset(
+                          'images/dot.svg',
+                          color: AppColors.kprimaryColor500,
+                          height: 10,
+                          width: 10,
+                        ),
+                        const Gap(6),
+                        const Text(
+                          '10am - 3pm',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
-                )
-              ]),
-            ),
-          ),
-          Align(
-            alignment: Alignment.topCenter,
-            child: ClipRRect(
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(16), topRight: Radius.circular(16)),
-              child: SizedBox(
-                height: 75,
-                child: Hero(
-                  tag: '${ref.watch(hospitalprovider).imagetag}'
-                      '${index}'
-                      '1',
-                  child: Image.asset(
-                    'images/hospital1.png',
-                    fit: BoxFit.cover,
-                  ),
                 ),
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildCoverImage(double imageHeight) {
+    return Container(
+      height: imageHeight,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: hospital.hospitalsCoverImage != null &&
+                  hospital.hospitalsCoverImage!.isNotEmpty
+              ? CachedNetworkImageProvider(hospital.hospitalsCoverImage!)
+              : const AssetImage('images/hospital1.png') as ImageProvider,
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: hospital.hospitalsCoverImage == null ||
+              hospital.hospitalsCoverImage!.isEmpty
+          ? const Center(child: Icon(Icons.error, color: Colors.red))
+          : null,
     );
   }
 }

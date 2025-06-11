@@ -41,7 +41,7 @@ class _prescription1State extends ConsumerState<prescription1> {
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
         //  height: 195,
         decoration: BoxDecoration(
-            border: Border.all(color: Color.fromARGB(255, 172, 197, 255)),
+            border: Border.all(color: const Color.fromARGB(255, 172, 197, 255)),
             borderRadius: BorderRadius.circular(16)),
         child: Column(
           children: [
@@ -50,7 +50,7 @@ class _prescription1State extends ConsumerState<prescription1> {
                 itemCount: widget.drug.length,
                 itemBuilder: (context, index) {
                   return Container(
-                    margin: EdgeInsets.only(bottom: 10),
+                    margin: const EdgeInsets.only(bottom: 10),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -60,18 +60,18 @@ class _prescription1State extends ConsumerState<prescription1> {
                           children: [
                             Text(
                               widget.drug[index].name,
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontWeight: FontWeight.w600, fontSize: 11),
                             ),
-                            Gap(5),
-                            Text(
+                            const Gap(5),
+                            const Text(
                               'One Caplet daily',
                               style: TextStyle(
                                   fontWeight: FontWeight.w400, fontSize: 11),
                             )
                           ],
                         ),
-                        Text(
+                        const Text(
                           'Capsule, 20mg',
                           style: TextStyle(
                               fontWeight: FontWeight.w400, fontSize: 11),

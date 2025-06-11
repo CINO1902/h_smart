@@ -21,11 +21,11 @@ class CustomeSnackbar extends StatelessWidget {
       clipBehavior: Clip.none,
       children: [
         Container(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           height: MediaQuery.of(context).size.height * 0.140,
           decoration: BoxDecoration(
             color: color1,
-            borderRadius: BorderRadius.all(Radius.circular(20)),
+            borderRadius: const BorderRadius.all(Radius.circular(20)),
           ),
           child: Row(children: [
             SizedBox(
@@ -35,22 +35,22 @@ class CustomeSnackbar extends StatelessWidget {
                 child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
+                SizedBox(
                   height: MediaQuery.of(context).size.width * 0.05,
                   child: FittedBox(
                     child: Text(
                       topic,
-                      style: TextStyle(
+                      style: const TextStyle(
                           color: Colors.white, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
-                Spacer(),
-                Container(
+                const Spacer(),
+                SizedBox(
                   height: MediaQuery.of(context).size.width * 0.1,
                   child: Text(
                     msg,
-                    style: TextStyle(
+                    style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w400,
                         fontSize: 18),
@@ -64,7 +64,7 @@ class CustomeSnackbar extends StatelessWidget {
         Positioned(
           bottom: 0,
           child: ClipRRect(
-            borderRadius: BorderRadius.only(
+            borderRadius: const BorderRadius.only(
               bottomLeft: Radius.circular(20),
             ),
             child: Stack(children: [

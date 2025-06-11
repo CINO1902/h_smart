@@ -1,6 +1,8 @@
-import 'dart:io';
+
+import 'package:h_smart/features/myAppointment/domain/entities/editProfie.dart';
+import 'package:h_smart/features/myAppointment/domain/usecases/appointmentStates.dart';
 
 abstract class UserDataSource {
-  Future<List<String>> edit_profile(
-      firstname, lastname, phone, email, address, File? image, imagelink);
+  Future<UpdateProfileResult> edit_profile(
+     EditProfile editDetails);
 }

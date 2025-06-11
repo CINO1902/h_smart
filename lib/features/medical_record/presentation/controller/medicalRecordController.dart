@@ -12,6 +12,7 @@ class MedicalRecordprovider extends ChangeNotifier {
   bool currentempty = false;
   List<Datum> pres = [];
   String clickdoctordescription = '';
+
   DoctorName clickeddoctorcategory = DoctorName(
       id: '',
       user: User(email: '', id: ''),

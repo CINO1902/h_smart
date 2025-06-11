@@ -3,13 +3,15 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:h_smart/constant/network_api.dart';
 import 'package:h_smart/features/auth/domain/entities/ContinueRegistrationModel.dart';
 import 'package:h_smart/features/auth/domain/entities/createaccount.dart';
-import 'package:h_smart/features/auth/domain/entities/loginResponse.dart';
+import 'package:h_smart/features/auth/domain/entities/loginResponse.dart'
+    hide Payload;
 import 'package:h_smart/features/auth/domain/entities/loginmodel.dart';
-import 'package:h_smart/features/auth/domain/entities/completeprofileRes.dart';
 import 'package:h_smart/features/auth/domain/repositories/authrepo.dart';
 import 'package:h_smart/features/auth/domain/usecases/authStates.dart';
+import 'package:h_smart/features/medical_record/domain/entities/userDetailsModel.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
@@ -18,25 +20,32 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// A provider class responsible for all authentication-related operations,
 /// including login, registration, OTP verification, and user profile management.
 class AuthProvider extends ChangeNotifier {
-  AuthProvider(this._authRepository);
+  AuthProvider(this._authRepository) {
+    // Call your “on-create” method here:
+    _init();
+  }
 
   final AuthRepository _authRepository;
+
+  Future<void> _init() async {
+    final prefs = await SharedPreferences.getInstance();
+    emailLogin = prefs.getString('emailLogin') ?? '';
+    // print(emailLogin);
+    notifyListeners();
+  }
 
   /// Local state fields
   File? _profileImage;
   bool _isImageLoading = false;
   bool _uploadImageError = false;
   bool _isLoggedOut = false;
-  bool _infoLoading = true;
+  final bool _infoLoading = true;
   bool _hasFetchedInfo = false;
 
   String _email = '';
   String _profilePicUrl = '';
-  String _firstName = '';
-  String _lastName = '';
-  String _address = '';
-  String _phone = '';
-  DateTime _dateOfBirth = DateTime.now();
+
+  String emailLogin = '';
 
   /// Controllers for image picking and other async tasks
   final ImagePicker _imagePicker = ImagePicker();
@@ -46,20 +55,29 @@ class AuthProvider extends ChangeNotifier {
     LoginResultStates.isIdle,
     LoginResponse(),
   );
+
+  SendTokenChangePasswordResult sendTokenChangePasswordResult =
+      SendTokenChangePasswordResult(
+    SendTokenChangePasswordResultStates.isIdle,
+    {},
+  );
+
+  ChangePasswordResult changePasswordResult =
+      ChangePasswordResult(ChangePasswordResultStates.isIdle, {});
   VerifyEmailResult verifyEmailResult = VerifyEmailResult(
     VerifyEmailResultStates.isIdle,
     {},
   );
-  GetInfoResult getInfoResult = GetInfoResult(
-    GetInfoResultStates.isIdle,
-    {},
+  GetUserResult getInfoResult = GetUserResult(
+    GetUserResultStates.isIdle,
+    UserDetails(),
   );
   RegisterResult registerResult = RegisterResult(
     RegisterResultStates.isIdle,
     {},
   );
 
-    EmailVerificationResult emailVerificationResult = EmailVerificationResult(
+  EmailVerificationResult emailVerificationResult = EmailVerificationResult(
     EmailVerificationResultState.isIdle,
     {},
   );
@@ -72,35 +90,9 @@ class AuthProvider extends ChangeNotifier {
     {},
   );
 
-  /// Data model for the fetched user
-  Data _userData = Data(
-    id: '',
-    user: '',
-    firstName: '',
-    couldinaryFileField: '',
-    lastName: '',
-    dateOfBirth: DateTime.now(),
-    address: '',
-    contactNumber: '',
-    hospital: '',
-    createdAt: DateTime.now(),
-    updatedAt: DateTime.now(),
-  );
+  Payload? _userData;
 
-  Map<String, dynamic> _localUserData = {
-    "firstname": "",
-    "lastname": "",
-    "userId": "",
-    "email": "",
-    "imageUrl": "",
-    "trading_experience": "",
-    "phoneNumber": "",
-    "verified": "",
-    "token": "",
-    "planId": "",
-    "dateExpired": "",
-    "datebought": "",
-  };
+  Payload? get userData => _userData;
 
   /// Getters for private fields
   File? get profileImage => _profileImage;
@@ -112,29 +104,6 @@ class AuthProvider extends ChangeNotifier {
 
   String get email => _email;
   String get profilePicUrl => _profilePicUrl;
-  String get firstName => _firstName;
-  String get lastName => _lastName;
-  String get address => _address;
-  String get phone => _phone;
-  DateTime get dateOfBirth => _dateOfBirth;
-
-  Data get userData => _userData;
-  Map<String, dynamic> get localUserData => _localUserData;
-
-  /// Fetches stored user info from SharedPreferences and updates localUserData
-  Future<void> retrieveUserData() async {
-    final prefs = await SharedPreferences.getInstance();
-    _localUserData = {
-      "firstname": prefs.getString("firstname") ?? "",
-      "lastname": prefs.getString("lastname") ?? "",
-      "email": prefs.getString("email") ?? "",
-      "profile_id": prefs.getString("profile_id") ?? "",
-      "imageUrl": prefs.getString("profilepic") ?? "",
-      "phoneNumber": prefs.getString("phone") ?? "",
-      "token": prefs.getString("jwt_token") ?? "",
-    };
-    notifyListeners();
-  }
 
   /// Performs login and stores JWT on success
   Future<void> login({
@@ -157,6 +126,28 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  ///Change Password for users
+  Future<void> changepassword({
+    required String changePasswordToken,
+    required String password,
+  }) async {
+    changePasswordResult =
+        ChangePasswordResult(ChangePasswordResultStates.isLoading, {});
+    notifyListeners();
+
+    final response =
+        await _authRepository.changepassword(changePasswordToken, password);
+    _isLoggedOut = false;
+
+    // if (response.state == ChangePasswordResultStates.isData) {
+    //   final token = response.response.payload?.accessToken;
+    //   final prefs = await SharedPreferences.getInstance();
+    //   await prefs.setString('jwt_token', token ?? '');
+    // }
+    changePasswordResult = response;
+    notifyListeners();
+  }
+
   /// Verifies OTP for email verification
   Future<void> verifyOtp(String otp) async {
     verifyEmailResult = VerifyEmailResult(
@@ -170,54 +161,95 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> sendotpChangePassword({required String email}) async {
+    sendTokenChangePasswordResult = SendTokenChangePasswordResult(
+      SendTokenChangePasswordResultStates.isLoading,
+      {},
+    );
+    notifyListeners();
+
+    final response = await _authRepository.sendtokenChangePassword(email);
+    sendTokenChangePasswordResult = response;
+    notifyListeners();
+  }
+
   /// Fetches user info from backend and caches into SharedPreferences
   Future<void> fetchUserInfo() async {
     final prefs = await SharedPreferences.getInstance();
-    _email = prefs.getString('email') ?? '';
 
-    getInfoResult = GetInfoResult(GetInfoResultStates.isLoading, {});
+    getInfoResult = GetUserResult(GetUserResultStates.isLoading, UserDetails());
     notifyListeners();
 
-    final response = await _authRepository.getinfo();
+    final response = await _authRepository.getuserdetails();
     getInfoResult = response;
-
-    if (response.state == GetInfoResultStates.isError) {
-      final message = response.response['message'] as String? ?? '';
+    if (response.state == GetUserResultStates.loggedOut) {
+      _isLoggedOut = true;
+      notifyListeners();
+    }
+    if (response.state == GetUserResultStates.isError) {
+      final message = response.response.message ?? '';
       if (message.contains('Given token not valid') ||
           message.contains('User not found')) {
-        _resetStaticInfo();
         _isLoggedOut = true;
       }
     } else {
-      _resetStaticInfo();
-      final dataList = response.response['data'] as List<dynamic>;
-      final decodedData = Data.fromJson(dataList[0] as Map<String, dynamic>);
-      _userData = decodedData;
+      final dataList = getInfoResult.response.payload;
 
-      await prefs.setString('profile_id', _userData.id);
-      await prefs.setString('email', _userData.user);
-      _email = _userData.user;
+      // _userData = dataList;
+      // ——— SAVE PAYLOAD INTO SharedPreferences ———
+      if (dataList != null) {
+        // 1. Convert Payload → Map → JSON string
+        final payloadMap = dataList.toJson();
+        final payloadJsonString = json.encode(payloadMap);
 
-      await prefs.setString('profilepic', _userData.couldinaryFileField);
-      _profilePicUrl = _userData.couldinaryFileField;
+        // 2. Write that string under a key, e.g. "user_payload"
+        await prefs.setString('user_payload', payloadJsonString);
+        loadSavedPayload();
+      }
 
-      await prefs.setString('first_name', _userData.firstName);
-      _firstName = _userData.firstName;
-
-      await prefs.setString('last_name', _userData.lastName);
-      _lastName = _userData.lastName;
-
-      await prefs.setString('address', _userData.address);
-      _address = _userData.address;
-
-      await prefs.setString('phone', _userData.contactNumber);
-      _phone = _userData.contactNumber;
-
-      _dateOfBirth = _userData.dateOfBirth;
+      //Save Payload here
     }
 
     notifyListeners();
   }
+
+  void resetLoggedOutUser() {
+    _isLoggedOut = false;
+    notifyListeners();
+  }
+
+  Future<Payload?> loadSavedPayload() async {
+    final prefs = await SharedPreferences.getInstance();
+    final storedString = prefs.getString('user_payload');
+    if (storedString == null) return null;
+
+    try {
+      final Map<String, dynamic> decoded = json.decode(storedString);
+      final restored = Payload.fromJson(decoded);
+      _userData = restored;
+      print(_userData);
+      notifyListeners();
+      return restored;
+    } catch (e) {
+      // If something went wrong (e.g. JSON is malformed), remove the bad entry:
+      await prefs.remove('user_payload');
+      return null;
+    }
+  }
+
+  Future<void> saveEmailLogin(email) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('emailLogin', email);
+  }
+
+  Future<void> unSaveEmailLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('emailLogin');
+  }
+
+  // Future<void> checkSaveEmail() async {
+  //   notifyListeners();
+  // }
 
   /// Clears user data on logout
   Future<void> logout() async {
@@ -233,10 +265,7 @@ class AuthProvider extends ChangeNotifier {
 
     _email = '';
     _profilePicUrl = '';
-    _firstName = '';
-    _lastName = '';
-    _address = '';
-    _phone = '';
+
     _isLoggedOut = false;
     notifyListeners();
   }
@@ -267,21 +296,16 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-    /// Handles user registration
-  Future<void> callActivation({
-
-    required String email
-
-  }) async {
+  /// Handles user registration
+  Future<void> callActivation({required String email}) async {
     emailVerificationResult = EmailVerificationResult(
       EmailVerificationResultState.isLoading,
       {},
     );
     notifyListeners();
 
-
-    final response = await _authRepository.createacount(email);
-    registerResult = response;
+    final response = await _authRepository.callActivationToken(email);
+    emailVerificationResult = response;
     notifyListeners();
   }
 
@@ -331,7 +355,7 @@ class AuthProvider extends ChangeNotifier {
     }
 
     final uri = Uri.parse(
-      'http://38.242.146.4:8030/api/v1/upload?privacy_level=public',
+      '$baseImageUrl/upload?privacy_level=public',
     );
 
     try {

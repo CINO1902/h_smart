@@ -50,7 +50,7 @@ class AutoScrollText extends StatelessWidget {
           blankSpace: 20.0,
           style: textStyle,
           velocity: 30.0,
-          pauseAfterRound: Duration(seconds: 2),
+          pauseAfterRound: const Duration(seconds: 2),
         ),
       );
     }

@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:flutter_sticky_header/flutter_sticky_header.dart';
+import 'package:go_router/go_router.dart';
 import 'package:h_smart/constant/SchimmerWidget.dart';
-import 'package:h_smart/features/Hospital/domain/entities/hospitalmodel.dart';
-
 import 'package:h_smart/features/Hospital/presentation/provider/getHospitalProvider.dart';
-import 'package:provider/provider.dart';
-import 'package:text_scroll/text_scroll.dart';
 
 import '../../domain/states/hospitalStates.dart';
-import '../../widgets/hospitalBox.dart';
+import '../widgets/hospitalBox.dart';
 
 class Hospital extends ConsumerStatefulWidget {
   const Hospital({super.key});
@@ -19,358 +17,242 @@ class Hospital extends ConsumerStatefulWidget {
 }
 
 class _HospitalState extends ConsumerState<Hospital> {
-  List HospitalName = [
-    'Lagos University Teaching Hospital (LUTH)',
-    'Ikorodu General Hospital',
-    'General Hospital Odan',
-    'Gbagada General Hospital.'
-  ];
+  late TextEditingController _searchController;
+  bool isSearching = false;
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    ref.read(hospitalprovider).getHospital();
+    _searchController = TextEditingController();
+    _searchController.addListener(_onSearchChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(hospitalprovider).getHospital();
+    });
+  }
+
+  void _onSearchChanged() {
+    final text = _searchController.text;
+    if (text.isEmpty) {
+      setState(() {
+        isSearching = false;
+      });
+    } else {
+      setState(() {
+        isSearching = true;
+      });
+      ref.read(hospitalprovider).searchHospital(text);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final hospitalProv = ref.watch(hospitalprovider);
+    final data =
+        isSearching ? hospitalProv.searchData : hospitalProv.hospitalData;
+
+    // Group hospitals by ownershipType
+    final Map<String, List> grouped = {};
+    for (var h in data) {
+      final key = h.ownershiptype ?? 'Unknown';
+      grouped.putIfAbsent(key, () => []);
+      grouped[key]!.add(h);
+    }
+
     return Scaffold(
       appBar: AppBar(
-          centerTitle: true,
-          elevation: 0,
-          titleSpacing: 0.1,
-          foregroundColor: Colors.black,
-          surfaceTintColor: Colors.transparent,
-          titleTextStyle: const TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.w600,
-              fontFamily: 'Poppins'),
-          title: const Text(
-            'Hospitals',
-            style: TextStyle(fontSize: 17),
-          )),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: ListView(
-          children: [
-            const SizedBox(
-              height: 44,
-              child: TextField(
-                  decoration: InputDecoration(
-                contentPadding: EdgeInsets.only(top: 10),
-                prefixIcon: Icon(Icons.search),
-                prefixIconColor: Colors.grey,
-                hintText: 'Search',
-                focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(16)),
-                    borderSide: BorderSide(color: Colors.grey, width: 2)),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(16)),
-                    borderSide: BorderSide(color: Colors.grey)),
-              )),
-            ),
-            const Gap(30),
-            // const Text(
-            //   'My Hospital',
-            //   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            // ),
-            // const Gap(15),
-            // InkWell(
-            //   onTap: () {
-            //     Navigator.pushNamed(context, '/viewhospitaldetail');
-            //   },
-            //   child: Container(
-            //     height: 158,
-            //     child: Stack(
-            //       children: [
-            //         Align(
-            //           alignment: Alignment.bottomCenter,
-            //           child: Container(
-            //             margin: EdgeInsets.symmetric(horizontal: 1),
-            //             padding:
-            //                 EdgeInsets.only(left: 10, bottom: 10, right: 10),
-            //             height: 100.0,
-            //             width: double.infinity,
-            //             decoration: BoxDecoration(
-            //                 color: Colors.white,
-            //                 border: Border.all(color: Colors.blue),
-            //                 borderRadius: BorderRadius.circular(16)),
-            //             child: Align(
-            //               alignment: Alignment.bottomCenter,
-            //               child: Row(
-            //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //                   crossAxisAlignment: CrossAxisAlignment.end,
-            //                   children: [
-            //                     SizedBox(
-            //                       width: MediaQuery.of(context).size.width * .5,
-            //                       child: const Text(
-            //                         'Lagos University Teaching Hospital (LUTH)',
-            //                         style: TextStyle(
-            //                             color: Colors.black,
-            //                             fontSize: 13,
-            //                             fontWeight: FontWeight.w700),
-            //                       ),
-            //                     ),
-            //                     Column(
-            //                         mainAxisAlignment: MainAxisAlignment.end,
-            //                         children: [
-            //                           Row(
-            //                             children: [
-            //                               SizedBox(
-            //                                 height: 15,
-            //                                 width: 15,
-            //                                 child: Image.asset(
-            //                                     'images/MapPin.png'),
-            //                               ),
-            //                               Gap(5),
-            //                               SizedBox(
-            //                                 width: MediaQuery.of(context)
-            //                                         .size
-            //                                         .width *
-            //                                     .2,
-            //                                 child: const Text(
-            //                                   'Idi-Araba',
-            //                                   style: TextStyle(
-            //                                       fontSize: 13,
-            //                                       fontWeight: FontWeight.w400),
-            //                                 ),
-            //                               )
-            //                             ],
-            //                           ),
-            //                           Row(
-            //                             children: [
-            //                               SizedBox(
-            //                                 height: 15,
-            //                                 width: 15,
-            //                                 child:
-            //                                     Image.asset('images/Clock.png'),
-            //                               ),
-            //                               Gap(5),
-            //                               SizedBox(
-            //                                 width: MediaQuery.of(context)
-            //                                         .size
-            //                                         .width *
-            //                                     .2,
-            //                                 child: const Text(
-            //                                   '10am-3pm',
-            //                                   style: TextStyle(
-            //                                       fontSize: 13,
-            //                                       fontWeight: FontWeight.w400),
-            //                                 ),
-            //                               )
-            //                             ],
-            //                           )
-            //                         ])
-            //                   ]),
-            //             ),
-            //           ),
-            //         ),
-            //         Align(
-            //           alignment: Alignment.topCenter,
-            //           child: ClipRRect(
-            //             borderRadius: BorderRadius.only(
-            //                 topLeft: Radius.circular(16),
-            //                 topRight: Radius.circular(16)),
-            //             child: SizedBox(
-            //               height: 100,
-            //               width: double.infinity,
-            //               child: Hero(
-            //                 tag: 'hospitalheadimage',
-            //                 child: Image.asset(
-            //                   'images/hospital1.png',
-            //                   fit: BoxFit.cover,
-            //                 ),
-            //               ),
-            //             ),
-            //           ),
-            //         ),
-            //       ],
-            //     ),
-            //   ),
-            // ),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Government Hospitals',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-                InkWell(
-                    onTap: () {
-                      ref.watch(hospitalprovider).disablehero();
-                      Navigator.pushNamed(context, '/governmenthospital');
-                    },
-                    child: const Text('See All'))
-              ],
-            ),
-            Gap(20),
-            SizedBox(
-              height: 330,
-              child: Builder(builder: (context) {
-                if (ref.watch(hospitalprovider).hospitalResult.state ==
-                    HospitalResultStates.isLoading) {
-                  return GridView.builder(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              childAspectRatio: 6 / 5,
-                              crossAxisSpacing: 20,
-                              mainAxisSpacing: 20),
-                      itemCount: 4,
-                      itemBuilder: (context, index) {
-                        return ShimmerWidget.rectangle(width: 130, height: 158);
-                      });
-                }
-                if (ref.watch(hospitalprovider).hospitalResult.state ==
-                    HospitalResultStates.isError) {
-                  return Center(
-                    child: Text(ref
-                            .watch(hospitalprovider)
-                            .hospitalResult
-                            .response
-                            .msg ??
-                        'Something Went Wrong'),
-                  );
-                }
-                return GridView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 6 / 5,
-                      crossAxisSpacing: 20,
-                      mainAxisSpacing: 20),
-                  itemCount:
-                      ref.watch(hospitalprovider).governmenthospital.length,
-                  itemBuilder: (context, index) {
-                    return InkWell(
-                      onTap: () {
-                        ref.read(hospitalprovider).getClickedHospital(
-                              index,
-                              0,
-                              ref
-                                  .watch(hospitalprovider)
-                                  .governmenthospital[index]
-                                  .name,
-                              ref
-                                  .watch(hospitalprovider)
-                                  .governmenthospital[index]
-                                  .city,
-                            );
-                        ref.read(hospitalprovider).createimagetag();
-                        Navigator.pushNamed(context, '/viewhospitaldetail');
-                      },
-                      child: HospitalWidget(
-                        ref: ref,
-                        index: index,
-                        hospitalCity: ref
-                            .watch(hospitalprovider)
-                            .governmenthospital[index]
-                            .city!,
-                        hospitalName: ref
-                            .watch(hospitalprovider)
-                            .governmenthospital[index]
-                            .name!,
-                      ),
-                    );
-                  },
-                );
-              }),
-            ),
-            const Gap(30),
-            ref.watch(hospitalprovider).privatehospital.isEmpty
-                ? const SizedBox()
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Private Hospitals',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w600),
-                      ),
-                      InkWell(
-                          onTap: () {
-                            ref.watch(hospitalprovider).disablehero();
-                            Navigator.pushNamed(context, '/privatehospital');
-                          },
-                          child: const Text('See All'))
-                    ],
-                  ),
-            Gap(20),
-            SizedBox(
-              height: 330,
-              child: Builder(builder: (context) {
-                if (ref.watch(hospitalprovider).hospitalResult.state ==
-                    HospitalResultStates.isLoading) {
-                  return GridView.builder(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              childAspectRatio: 6 / 5,
-                              crossAxisSpacing: 20,
-                              mainAxisSpacing: 20),
-                      itemCount: 4,
-                      itemBuilder: (context, index) {
-                        return const ShimmerWidget.rectangle(
-                            width: 130, height: 158);
-                      });
-                }
-                if (ref.watch(hospitalprovider).hospitalResult.state ==
-                    HospitalResultStates.isError) {
-                  return Center(
-                    child: Text(ref
-                            .watch(hospitalprovider)
-                            .hospitalResult
-                            .response
-                            .msg ??
-                        'Something Went Wrong'),
-                  );
-                }
-                return GridView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 6 / 5,
-                      crossAxisSpacing: 20,
-                      mainAxisSpacing: 20),
-                  itemCount: ref.watch(hospitalprovider).privatehospital.length,
-                  itemBuilder: (context, index) {
-                    return InkWell(
-                      onTap: () {
-                        ref.read(hospitalprovider).getClickedHospital(
-                              index,
-                              1,
-                              ref
-                                  .watch(hospitalprovider)
-                                  .privatehospital[index]
-                                  .name,
-                              ref
-                                  .watch(hospitalprovider)
-                                  .governmenthospital[index]
-                                  .city,
-                            );
-                        ref.watch(hospitalprovider).createimagetag();
-                        Navigator.pushNamed(context, '/viewhospitaldetail');
-                      },
-                      child: HospitalWidget(
-                        ref: ref,
-                        index: index,
-                        hospitalCity: ref
-                            .watch(hospitalprovider)
-                            .privatehospital[index]
-                            .city!,
-                        hospitalName: ref
-                            .watch(hospitalprovider)
-                            .privatehospital[index]
-                            .name!,
-                      ),
-                    );
-                  },
-                );
-              }),
-            ),
-          ],
+        centerTitle: true,
+        elevation: 0,
+        titleSpacing: 0.1,
+        foregroundColor: Colors.black,
+        surfaceTintColor: Colors.transparent,
+        titleTextStyle: const TextStyle(
+          color: Colors.black,
+          fontWeight: FontWeight.w600,
+          fontFamily: 'Poppins',
         ),
+        title: const Text('Hospitals', style: TextStyle(fontSize: 17)),
+      ),
+      body: CustomScrollView(
+        slivers: [
+          // Search Field
+          SliverToBoxAdapter(
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 44,
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: const InputDecoration(
+                        contentPadding: EdgeInsets.only(top: 10),
+                        prefixIcon: Icon(Icons.search),
+                        prefixIconColor: Colors.grey,
+                        hintText: 'Search',
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(16)),
+                          borderSide: BorderSide(color: Colors.grey, width: 2),
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(16)),
+                          borderSide: BorderSide(color: Colors.grey),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Gap(10),
+                ],
+              ),
+            ),
+          ),
+
+          // SEARCH LOADING SHIMMER
+          if (isSearching &&
+              hospitalProv.searchResult.state == HospitalResultStates.isLoading)
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 20)
+                  .copyWith(top: 10, bottom: 30),
+              sliver: SliverGrid(
+                delegate: SliverChildBuilderDelegate(
+                  (context, idx) =>
+                      const ShimmerWidget.rectangle(width: 130, height: 158),
+                  childCount: 8,
+                ),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 6 / 7,
+                  crossAxisSpacing: 20,
+                  mainAxisSpacing: 20,
+                ),
+              ),
+            )
+          // SEARCH EMPTY STATE
+          else if (isSearching &&
+              hospitalProv.searchResult.state == HospitalResultStates.isEmpty)
+            const SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.search_off_rounded,
+                      size: 64,
+                      color: Colors.grey,
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'No hospitals found',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Try searching with different keywords',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          // NORMAL LOADING SHIMMER
+          else if (!isSearching &&
+              hospitalProv.hospitalResult.state ==
+                  HospitalResultStates.isLoading)
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 20)
+                  .copyWith(top: 10, bottom: 30),
+              sliver: SliverGrid(
+                delegate: SliverChildBuilderDelegate(
+                  (context, idx) =>
+                      const ShimmerWidget.rectangle(width: 130, height: 158),
+                  childCount: 8,
+                ),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 6 / 7,
+                  crossAxisSpacing: 20,
+                  mainAxisSpacing: 20,
+                ),
+              ),
+            )
+          // NORMAL/SEARCH RESULTS
+          else ...[
+            // Sticky headers per section
+            for (var entry in grouped.entries)
+              if (entry.value.isNotEmpty)
+                SliverStickyHeader(
+                  header: Container(
+                    color: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '${entry.key} Hospitals',
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w600),
+                        ),
+                        if (entry.value.length > 3)
+                          InkWell(
+                            onTap: () {
+                              // ref.read(hospitalprovider).disablehero();
+                              context.push('/hospital/specific',
+                                  extra: {"title": entry.key});
+                            },
+                            child: const Text(
+                              'See All',
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.blue),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  sliver: SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20)
+                        .copyWith(top: 10, bottom: 30),
+                    sliver: SliverGrid(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, idx) {
+                          final items = entry.value;
+                          final hospital = items[idx];
+                          // final globalIndex = data.indexOf(hospital);
+                          return InkWell(
+                            onTap: () {
+                              context.push('/hospital/more-detail',
+                                  extra: {"hospital": hospital});
+                            },
+                            child: HospitalWidget(
+                              ref: ref,
+                              hospital: hospital,
+                            ),
+                          );
+                        },
+                        childCount:
+                            entry.value.length > 4 ? 4 : entry.value.length,
+                      ),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 6 / 7,
+                        crossAxisSpacing: 20,
+                        mainAxisSpacing: 20,
+                      ),
+                    ),
+                  ),
+                ),
+          ],
+        ],
       ),
     );
   }

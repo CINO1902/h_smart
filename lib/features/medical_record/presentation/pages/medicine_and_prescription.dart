@@ -51,10 +51,10 @@ class _MedicineAndPresState extends ConsumerState<MedicineAndPres>
             child: Container(
               width: 250,
               height: 50,
-              padding: EdgeInsets.all(5),
+              padding: const EdgeInsets.all(5),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                color: Color(0xffF3F7FF),
+                color: const Color(0xffF3F7FF),
               ),
               child: Center(
                 child: ListView(
@@ -72,7 +72,7 @@ class _MedicineAndPresState extends ConsumerState<MedicineAndPres>
                           borderRadius: BorderRadius.circular(10),
                           color: controller.index == 0
                               ? AppColors.kprimaryColor500
-                              : Color(0xffF3F7FF),
+                              : const Color(0xffF3F7FF),
                         ),
                         child: Center(
                           child: Text(
@@ -105,13 +105,13 @@ class _MedicineAndPresState extends ConsumerState<MedicineAndPres>
                               : BorderRadius.zero,
                           color: controller.index == 1
                               ? AppColors.kprimaryColor500
-                              : Color(0xffF3F7FF),
+                              : const Color(0xffF3F7FF),
                         ),
                         child: Center(
                           child: Text(
                             "Past",
                             style: controller.index == 1
-                                ? TextStyle(color: AppColors.kprimaryColor500)
+                                ? const TextStyle(color: AppColors.kprimaryColor500)
                                 : TextStyle(
                                     color: Theme.of(context)
                                         .colorScheme
@@ -128,7 +128,7 @@ class _MedicineAndPresState extends ConsumerState<MedicineAndPres>
           ),
           Expanded(
               child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: TabBarView(
               controller: controller,
               children: [
@@ -136,17 +136,17 @@ class _MedicineAndPresState extends ConsumerState<MedicineAndPres>
                   final medicalRecord = ref.watch(medicalRecordProvider);
 
                   if (medicalRecord.loading) {
-                    return Center(
+                    return const Center(
                       child: CircularProgressIndicator(
                         color: AppColors.kprimaryColor500,
                       ),
                     );
                   } else if (medicalRecord.error) {
-                    return Center(
+                    return const Center(
                       child: Text('Something Went Wrong'),
                     );
                   } else if (medicalRecord.currentempty) {
-                    return Center(
+                    return const Center(
                       child: Text('The List is Empty'),
                     );
                   } else {
@@ -169,16 +169,16 @@ class _MedicineAndPresState extends ConsumerState<MedicineAndPres>
                   }
                 }),
                 ListView(
-                  padding: EdgeInsets.only(top: 20),
+                  padding: const EdgeInsets.only(top: 20),
                   children: [
                     Prescription(),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Prescription(),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Prescription(),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Prescription(),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Prescription(),
                   ],
                 ),
@@ -192,11 +192,11 @@ class _MedicineAndPresState extends ConsumerState<MedicineAndPres>
 
   Container Prescription11(drfirstname, drlastname, bio, number) {
     return Container(
-        margin: EdgeInsets.only(bottom: 20),
-        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+        margin: const EdgeInsets.only(bottom: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
         //  height: 195,
         decoration: BoxDecoration(
-            border: Border.all(color: Color.fromARGB(255, 172, 197, 255)),
+            border: Border.all(color: const Color.fromARGB(255, 172, 197, 255)),
             borderRadius: BorderRadius.circular(16)),
         child: Column(
           children: [
@@ -263,14 +263,14 @@ class _MedicineAndPresState extends ConsumerState<MedicineAndPres>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Container(
+                    SizedBox(
                       width: MediaQuery.of(context).size.width * 0.8,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
                             'Prescribed by: Dr. $drfirstname $drlastname',
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontWeight: FontWeight.w600, fontSize: 11),
                           ),
                           SizedBox(
@@ -341,10 +341,10 @@ class _MedicineAndPresState extends ConsumerState<MedicineAndPres>
 
   Container Prescription() {
     return Container(
-        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
         height: 195,
         decoration: BoxDecoration(
-            border: Border.all(color: Color.fromARGB(255, 172, 197, 255)),
+            border: Border.all(color: const Color.fromARGB(255, 172, 197, 255)),
             borderRadius: BorderRadius.circular(16)),
         child: Column(
           children: [

@@ -26,13 +26,13 @@ class _SupportState extends State<Support> {
             style: TextStyle(fontSize: 19),
           )),
       body: Container(
-        margin: EdgeInsets.all(20),
-        padding: EdgeInsets.all(10),
+        margin: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(10),
         height: 125,
         decoration: BoxDecoration(
-            border: Border.all(color: Color(0xffC1D3FF)),
+            border: Border.all(color: const Color(0xffC1D3FF)),
             borderRadius: BorderRadius.circular(16),
-            color: Color(0xffF3F7FF)),
+            color: const Color(0xffF3F7FF)),
         child: Column(
           children: [
             InkWell(
@@ -40,7 +40,7 @@ class _SupportState extends State<Support> {
                   Navigator.pushNamed(context, '/feedback');
                 },
                 child: recordtype('Feedback')),
-            Gap(10),
+            const Gap(10),
             InkWell(
                 onTap: () {
                   Navigator.pushNamed(context, '/faq');
@@ -55,12 +55,12 @@ class _SupportState extends State<Support> {
   Container recordtype(title) {
     return Container(
       height: 44,
-      padding: EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Color(0xffC1D3FF)),
+        border: Border.all(color: const Color(0xffC1D3FF)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

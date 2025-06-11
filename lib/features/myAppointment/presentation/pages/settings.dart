@@ -31,13 +31,13 @@ class _SettingsState extends State<Settings> {
             style: TextStyle(fontSize: 19),
           )),
       body: Container(
-        margin: EdgeInsets.all(20),
-        padding: EdgeInsets.all(10),
+        margin: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(10),
         height: 180,
         decoration: BoxDecoration(
-            border: Border.all(color: Color(0xffC1D3FF)),
+            border: Border.all(color: const Color(0xffC1D3FF)),
             borderRadius: BorderRadius.circular(16),
-            color: Color(0xffF3F7FF)),
+            color: const Color(0xffF3F7FF)),
         child: Column(
           children: [
             InkWell(
@@ -45,25 +45,25 @@ class _SettingsState extends State<Settings> {
                   Navigator.pushNamed(context, '/ChangePassword');
                 },
                 child: recordtype('Change Password')),
-            Gap(10),
+            const Gap(10),
             Container(
               height: 44,
-              padding: EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               width: double.infinity,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Color(0xffC1D3FF)),
+                border: Border.all(color: const Color(0xffC1D3FF)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Notification'),
+                  const Text('Notification'),
                   AdvancedSwitch(
                     controller: _controller,
                     activeColor: AppColors.kprimaryColor500,
                     inactiveColor: Colors.grey,
-                    borderRadius: BorderRadius.all(const Radius.circular(15)),
+                    borderRadius: const BorderRadius.all(Radius.circular(15)),
                     width: 35.0,
                     height: 20.0,
                     enabled: true,
@@ -72,25 +72,25 @@ class _SettingsState extends State<Settings> {
                 ],
               ),
             ),
-            Gap(10),
+            const Gap(10),
             Container(
               height: 44,
-              padding: EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               width: double.infinity,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Color(0xffC1D3FF)),
+                border: Border.all(color: const Color(0xffC1D3FF)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Reminder'),
+                  const Text('Reminder'),
                   AdvancedSwitch(
                     controller: _controller,
                     activeColor: AppColors.kprimaryColor500,
                     inactiveColor: Colors.grey,
-                    borderRadius: BorderRadius.all(const Radius.circular(15)),
+                    borderRadius: const BorderRadius.all(Radius.circular(15)),
                     width: 35.0,
                     height: 20.0,
                     enabled: true,
@@ -108,12 +108,12 @@ class _SettingsState extends State<Settings> {
   Container recordtype(title) {
     return Container(
       height: 44,
-      padding: EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Color(0xffC1D3FF)),
+        border: Border.all(color: const Color(0xffC1D3FF)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

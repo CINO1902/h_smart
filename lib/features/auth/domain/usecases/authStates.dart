@@ -1,3 +1,4 @@
+import '../../../medical_record/domain/entities/userDetailsModel.dart';
 import '../entities/loginResponse.dart';
 
 class LoginResult {
@@ -8,6 +9,24 @@ class LoginResult {
 }
 
 enum LoginResultStates { isLoading, isError, isData, isIdle }
+
+class SendTokenChangePasswordResult {
+  final SendTokenChangePasswordResultStates state;
+  final Map<String, dynamic> response;
+
+  SendTokenChangePasswordResult(this.state, this.response);
+}
+
+enum SendTokenChangePasswordResultStates { isLoading, isError, isData, isIdle }
+
+class ChangePasswordResult {
+  final ChangePasswordResultStates state;
+  final Map<String, dynamic> response;
+
+  ChangePasswordResult(this.state, this.response);
+}
+
+enum ChangePasswordResultStates { isLoading, isError, isData, isIdle }
 
 class RegisterResult {
   final RegisterResultStates state;
@@ -45,15 +64,14 @@ class VerifyEmailResult {
 
 enum VerifyEmailResultStates { isLoading, isError, isData, isIdle }
 
-class GetInfoResult {
-  final GetInfoResultStates state;
-  final Map<String, dynamic> response;
+class GetUserResult {
+  final GetUserResultStates state;
+  final UserDetails response;
 
-  GetInfoResult(this.state, this.response);
+  GetUserResult(this.state, this.response);
 }
 
-enum GetInfoResultStates { isLoading, isError, isData, isIdle }
-
+enum GetUserResultStates { isLoading, isError, isData, isIdle, loggedOut }
 
 class EmailVerificationResult {
   final EmailVerificationResultState state;

@@ -14,7 +14,7 @@ class _AppointmentScheduledState extends State<AppointmentScheduled> {
   bool exceeded = false;
   bool exceeded1 = false;
   void checkoverflow() {
-    var span = TextSpan(
+    var span = const TextSpan(
       text: 'General Practioner',
     );
     var tp = TextPainter(
@@ -31,7 +31,7 @@ class _AppointmentScheduledState extends State<AppointmentScheduled> {
     setState(() {
       exceeded = tp.didExceedMaxLines;
     });
-    var span1 = TextSpan(
+    var span1 = const TextSpan(
       text: 'Lenox Hill Hospital, Hospital',
     );
     var tp1 = TextPainter(
@@ -79,7 +79,7 @@ class _AppointmentScheduledState extends State<AppointmentScheduled> {
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Gap(10),
+            const Gap(10),
             Container(
               padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
               height: 76,
@@ -122,7 +122,7 @@ class _AppointmentScheduledState extends State<AppointmentScheduled> {
                             allowHalfRating: true,
                             itemCount: 5,
                             itemSize: 15,
-                            itemPadding: EdgeInsets.symmetric(horizontal: 0.0),
+                            itemPadding: const EdgeInsets.symmetric(horizontal: 0.0),
                             itemBuilder: (context, _) => const Icon(
                               Icons.star,
                               color: Colors.amber,
@@ -145,10 +145,10 @@ class _AppointmentScheduledState extends State<AppointmentScheduled> {
                             width: 12,
                             child: Image.asset(
                               'images/Doctors.png',
-                              color: Color(0xff3772FF),
+                              color: const Color(0xff3772FF),
                             ),
                           ),
-                          Gap(5),
+                          const Gap(5),
                           exceeded
                               ? const SizedBox(
                                   width: 90,
@@ -181,16 +181,16 @@ class _AppointmentScheduledState extends State<AppointmentScheduled> {
                                         fontWeight: FontWeight.w600),
                                   ),
                                 ),
-                          Gap(5),
+                          const Gap(5),
                           SizedBox(
                             height: 12,
                             width: 12,
                             child: Image.asset(
                               'images/MapPin.png',
-                              color: Color(0xff3772FF),
+                              color: const Color(0xff3772FF),
                             ),
                           ),
-                          Gap(5),
+                          const Gap(5),
                           exceeded
                               ? const SizedBox(
                                   width: 90,
@@ -230,12 +230,12 @@ class _AppointmentScheduledState extends State<AppointmentScheduled> {
                 )
               ]),
             ),
-            Gap(20),
+            const Gap(20),
             const Text(
               'Date and Time',
               style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
             ),
-            Gap(10),
+            const Gap(10),
             const Text(
               'Friday, July 21th, 2023 (10:00am - 10:30am)',
               style: TextStyle(
@@ -248,7 +248,7 @@ class _AppointmentScheduledState extends State<AppointmentScheduled> {
               'Location',
               style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
             ),
-            Gap(10),
+            const Gap(10),
             const Text(
               '12 Idowu St, Ikeja, Lagos',
               style: TextStyle(
@@ -261,7 +261,7 @@ class _AppointmentScheduledState extends State<AppointmentScheduled> {
               'Reason for visit',
               style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
             ),
-            Gap(10),
+            const Gap(10),
             const Text(
               'General Health Checkup: Routine checkup to assess overall health status and address any concerns.',
               style: TextStyle(
@@ -283,7 +283,7 @@ class _AppointmentScheduledState extends State<AppointmentScheduled> {
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                                color: Color(0xff3772FF), width: 1.5)),
+                                color: const Color(0xff3772FF), width: 1.5)),
                         child: const Align(
                           alignment: Alignment.center,
                           child: Text(

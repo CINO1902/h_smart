@@ -29,9 +29,9 @@ class _MyAppointmentState extends State<MyAppointment>
               color: Colors.black,
               fontWeight: FontWeight.w600,
               fontFamily: 'Poppins'),
-          title: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: const Text(
+          title: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12.0),
+            child: Text(
               'My Appointments',
               style: TextStyle(fontSize: 20),
             ),
@@ -43,10 +43,10 @@ class _MyAppointmentState extends State<MyAppointment>
             child: Container(
               width: 250,
               height: 50,
-              padding: EdgeInsets.all(5),
+              padding: const EdgeInsets.all(5),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                color: Color(0xffF3F7FF),
+                color: const Color(0xffF3F7FF),
               ),
               child: Center(
                 child: ListView(
@@ -64,7 +64,7 @@ class _MyAppointmentState extends State<MyAppointment>
                           borderRadius: BorderRadius.circular(10),
                           color: controller.index == 0
                               ? AppColors.kprimaryColor500
-                              : Color(0xffF3F7FF),
+                              : const Color(0xffF3F7FF),
                         ),
                         child: Center(
                           child: Text(
@@ -97,13 +97,13 @@ class _MyAppointmentState extends State<MyAppointment>
                               : BorderRadius.zero,
                           color: controller.index == 1
                               ? AppColors.kprimaryColor500
-                              : Color(0xffF3F7FF),
+                              : const Color(0xffF3F7FF),
                         ),
                         child: Center(
                           child: Text(
                             "Past",
                             style: controller.index == 1
-                                ? TextStyle(color: AppColors.kprimaryColor500)
+                                ? const TextStyle(color: AppColors.kprimaryColor500)
                                 : TextStyle(
                                     color: Theme.of(context)
                                         .colorScheme
@@ -120,17 +120,17 @@ class _MyAppointmentState extends State<MyAppointment>
           ),
           Expanded(
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: TabBarView(controller: controller, children: [
                 ListView(
                   children: [
-                    Gap(20),
+                    const Gap(20),
                     Container(
                       padding:
-                          EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                          const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                       height: 60,
                       decoration: BoxDecoration(
-                          border: Border.all(color: Color(0xffEBF1FF)),
+                          border: Border.all(color: const Color(0xffEBF1FF)),
                           borderRadius: BorderRadius.circular(16)),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -145,13 +145,13 @@ class _MyAppointmentState extends State<MyAppointment>
                                   'images/doctorimage.png',
                                 )),
                               ),
-                              Gap(20),
+                              const Gap(20),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(
+                                  const Text(
                                     'Dr. Alis William',
                                     style: TextStyle(
                                         fontSize: 13,
@@ -175,7 +175,7 @@ class _MyAppointmentState extends State<MyAppointment>
                               ),
                             ],
                           ),
-                          Text(
+                          const Text(
                             'Upcoming',
                             style: TextStyle(
                                 fontSize: 11, color: Color(0xffFFAC32)),
@@ -187,13 +187,13 @@ class _MyAppointmentState extends State<MyAppointment>
                 ),
                 ListView(
                   children: [
-                    Gap(20),
+                    const Gap(20),
                     Container(
                       padding:
-                          EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                          const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                       height: 60,
                       decoration: BoxDecoration(
-                          border: Border.all(color: Color(0xffEBF1FF)),
+                          border: Border.all(color: const Color(0xffEBF1FF)),
                           borderRadius: BorderRadius.circular(16)),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -208,13 +208,13 @@ class _MyAppointmentState extends State<MyAppointment>
                                   'images/doctorimage.png',
                                 )),
                               ),
-                              Gap(20),
+                              const Gap(20),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(
+                                  const Text(
                                     'Dr. Alis William',
                                     style: TextStyle(
                                         fontSize: 13,
@@ -238,20 +238,20 @@ class _MyAppointmentState extends State<MyAppointment>
                               ),
                             ],
                           ),
-                          Text(
+                          const Text(
                             'Completed',
                             style: TextStyle(fontSize: 11, color: Colors.green),
                           )
                         ],
                       ),
                     ),
-                    Gap(10),
+                    const Gap(10),
                     Container(
                       padding:
-                          EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                          const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                       height: 60,
                       decoration: BoxDecoration(
-                          border: Border.all(color: Color(0xffEBF1FF)),
+                          border: Border.all(color: const Color(0xffEBF1FF)),
                           borderRadius: BorderRadius.circular(16)),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -266,13 +266,13 @@ class _MyAppointmentState extends State<MyAppointment>
                                   'images/doctorimage.png',
                                 )),
                               ),
-                              Gap(20),
+                              const Gap(20),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(
+                                  const Text(
                                     'Dr. Alis William',
                                     style: TextStyle(
                                         fontSize: 13,
@@ -296,7 +296,7 @@ class _MyAppointmentState extends State<MyAppointment>
                               ),
                             ],
                           ),
-                          Text(
+                          const Text(
                             'Cancelled',
                             style: TextStyle(fontSize: 11, color: Colors.red),
                           )

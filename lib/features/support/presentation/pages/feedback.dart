@@ -22,7 +22,7 @@ class _FeedbacksState extends State<Feedbacks> {
               color: Colors.black,
               fontWeight: FontWeight.w600,
               fontFamily: 'Poppins'),
-          title: Text(
+          title: const Text(
             'Feedback',
             style: TextStyle(fontSize: 16),
           )),
@@ -32,14 +32,14 @@ class _FeedbacksState extends State<Feedbacks> {
           children: [
             ListView(
               children: [
-                Text('Lodge a feedback'),
-                Gap(10),
+                const Text('Lodge a feedback'),
+                const Gap(10),
                 Container(
                   width: MediaQuery.of(context).size.width * 0.9,
                   height: 180,
                   decoration: BoxDecoration(
                       color: Colors.white,
-                      border: Border.all(color: Color(0xffC1D3FF)),
+                      border: Border.all(color: const Color(0xffC1D3FF)),
                       borderRadius: BorderRadius.circular(7)),
                   child: TextFormField(
                     //controller: keystonecontroller,

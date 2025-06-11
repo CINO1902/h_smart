@@ -69,7 +69,7 @@ class _ListDoctorsState extends ConsumerState<ListDoctors> {
                     ),
                   ],
                 ),
-                Gap(20),
+                const Gap(20),
                 const Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -83,7 +83,7 @@ class _ListDoctorsState extends ConsumerState<ListDoctors> {
                 const Gap(10),
                 Builder(builder: (context) {
                   if (ref.watch(doctorprovider).loading == true) {
-                    return Center(
+                    return const Center(
                       child: CircularProgressIndicator(),
                     );
                   } else if (ref.watch(doctorprovider).error == true) {
@@ -178,7 +178,7 @@ class _ListDoctorsState extends ConsumerState<ListDoctors> {
                                               .docProfilePicture,
                                           fit: BoxFit.cover,
                                           errorWidget: (context, url, error) =>
-                                              Icon(
+                                              const Icon(
                                             Icons.error,
                                             color: Colors.red,
                                           ),
@@ -203,20 +203,18 @@ class _ListDoctorsState extends ConsumerState<ListDoctors> {
                                           SizedBox(
                                               width: 150,
                                               child: Text(
-                                                ref
+                                                '${ref
                                                         .watch(doctorprovider)
                                                         .doctorcategory[
                                                             widget.index]
                                                         .doctors[index]
-                                                        .firstName +
-                                                    ' ' +
-                                                    ref
+                                                        .firstName} ${ref
                                                         .watch(doctorprovider)
                                                         .doctorcategory[
                                                             widget.index]
                                                         .doctors[index]
-                                                        .lastName,
-                                                style: TextStyle(
+                                                        .lastName}',
+                                                style: const TextStyle(
                                                     fontSize: 13,
                                                     fontWeight:
                                                         FontWeight.w600),
@@ -225,7 +223,7 @@ class _ListDoctorsState extends ConsumerState<ListDoctors> {
                                               width: 150,
                                               child: Text(
                                                 widget.appbartitle,
-                                                style: TextStyle(
+                                                style: const TextStyle(
                                                   fontSize: 11,
                                                 ),
                                               ))

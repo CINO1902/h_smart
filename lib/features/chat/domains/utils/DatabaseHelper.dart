@@ -533,7 +533,7 @@ class DatabaseHelper {
         for (var convo in newConvo) {
           int? convoInsertedId;
 
-          final email = 'Admin';
+          const email = 'Admin';
 // Extract message IDs safely
           final convoIdSender = convo['conversationId_sender'];
           final convoIdReceiver = convo['conversationId_receiver'];

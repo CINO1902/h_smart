@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:h_smart/constant/SchimmerWidget.dart';
+import 'package:h_smart/constant/snackbar.dart';
+import 'package:h_smart/features/auth/presentation/controller/auth_controller.dart';
 import 'package:h_smart/features/auth/presentation/provider/auth_provider.dart';
 import 'package:h_smart/features/medical_record/presentation/provider/medicalRecord.dart';
 
@@ -29,6 +32,10 @@ class _HomePageState extends ConsumerState<HomePage>
     _prescriptionController =
         ScrollController(); // initialize the dedicated controller
     _startPrescriptionAutoScroll();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      ref.read(authProvider).loadSavedPayload();
+      ref.read(authProvider).fetchUserInfo();
+    });
   }
 
   @override
@@ -43,7 +50,6 @@ class _HomePageState extends ConsumerState<HomePage>
       if (_prescriptionController.hasClients) {
         final minExt = _prescriptionController.position.minScrollExtent;
         final maxExt = _prescriptionController.position.maxScrollExtent;
-
         // Only start auto‐scroll if there is actually something to scroll.
         if (maxExt > minExt) {
           _autoScrollLoop(maxExt, minExt, maxExt);
@@ -68,6 +74,19 @@ class _HomePageState extends ConsumerState<HomePage>
 
   @override
   Widget build(BuildContext context) {
+    // Listen for logout state inside build:
+    ref.listen<AuthProvider>(authProvider, (previous, next) {
+      if (next.isLoggedOut && mounted) {
+        SnackBarService.notifyAction(context,
+            message: 'Access token has expired', status: SnackbarStatus.fail);
+        ref.read(authProvider).resetLoggedOutUser();
+        ref.read(authProvider).logout();
+        context.go('/login');
+      }
+    });
+
+    final userdata = ref.watch(authProvider).userData;
+
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -78,7 +97,7 @@ class _HomePageState extends ConsumerState<HomePage>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Gap(5),
+                  const Gap(5),
                   Padding(
                     padding:
                         const EdgeInsets.only(left: 20.0, top: 10, right: 20),
@@ -89,7 +108,7 @@ class _HomePageState extends ConsumerState<HomePage>
                           width: 188,
                           height: 64,
                           child: Text(
-                            'Welcome back,\n${ref.read(authProvider).firstName}',
+                            'Welcome back,\n${userdata?.firstName ?? ''}',
                             style: const TextStyle(
                                 fontSize: 23, fontWeight: FontWeight.w600),
                           ),
@@ -270,8 +289,7 @@ class _HomePageState extends ConsumerState<HomePage>
                               const Color(0xffFFEFEF), 'First Aid'),
                         ),
                         InkWell(
-                          onTap: () =>
-                              Navigator.pushNamed(context, '/Hospital'),
+                          onTap: () => context.push('/hospital'),
                           child: QuickAction('images/hospital.png',
                               const Color(0xffFDFCED), 'Hospital'),
                         ),
@@ -354,7 +372,7 @@ class _HomePageState extends ConsumerState<HomePage>
               scale: 4,
             ),
           ),
-          Gap(5),
+          const Gap(5),
           SizedBox(
             width: 90,
             height: 15,

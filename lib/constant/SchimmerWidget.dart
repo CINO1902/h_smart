@@ -5,7 +5,7 @@ class ShimmerWidget extends StatelessWidget {
   const ShimmerWidget({super.key, required this.height, required this.width});
   final double height, width;
 
-  const ShimmerWidget.rectangle({
+  const ShimmerWidget.rectangle({super.key, 
     required this.width,
     required this.height,
   });

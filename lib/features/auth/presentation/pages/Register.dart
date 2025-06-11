@@ -180,6 +180,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: IntlPhoneField(
+        
         initialCountryCode: 'NG',
         controller: _phoneController,
         decoration: InputDecoration(

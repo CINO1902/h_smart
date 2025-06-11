@@ -57,7 +57,7 @@ class WelcomePage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                           color: AppColors.kprimaryColor500, width: 1)),
-                  child: Center(
+                  child: const Center(
                       child: Text(
                     'Sign In',
                     style: TextStyle(color: AppColors.kprimaryColor500),

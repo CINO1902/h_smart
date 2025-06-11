@@ -31,7 +31,7 @@ class _facdocState extends State<facdoc> {
               children: [
                 Text(
                   widget.title,
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontSize: 13, color: Color.fromARGB(255, 93, 93, 93)),
                 ),
                 show
@@ -46,16 +46,16 @@ class _facdocState extends State<facdoc> {
               ],
             ),
           ),
-          Gap(10),
+          const Gap(10),
           show
               ? Text(
                   widget.decr,
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontSize: 13,
-                      color: const Color.fromARGB(255, 93, 93, 93)),
+                      color: Color.fromARGB(255, 93, 93, 93)),
                 )
-              : SizedBox(),
-          Gap(10),
+              : const SizedBox(),
+          const Gap(10),
         ],
       ),
     );

@@ -66,6 +66,29 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
     SmartDialog.showLoading();
     await ref.read(authProvider).callActivation(email: widget.email);
     SmartDialog.dismiss();
+    final verifyState = ref.read(authProvider).emailVerificationResult.state;
+    final responseMsg = ref
+            .read(authProvider)
+            .emailVerificationResult
+            .response['message'] as String? ??
+        'Unknown error';
+    if (verifyState == EmailVerificationResultState.isError) {
+      SnackBarService.showSnackBar(
+        context,
+        title: 'Error',
+        body: responseMsg,
+        status: SnackbarStatus.fail,
+      );
+    } else {
+      SnackBarService.showSnackBar(
+        context,
+        title: 'Success',
+        body: responseMsg,
+        status: SnackbarStatus.success,
+      );
+
+      // Navigate to profile completion and remove this page from history
+    }
   }
 
   Future<void> _verifyAndContinue() async {
@@ -109,7 +132,7 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
       );
 
       // Navigate to profile completion and remove this page from history
-      context.replace('/CompleteProfilePage');
+      context.go('/login');
     }
   }
 
@@ -196,8 +219,8 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
                 ),
               ),
               const Gap(40),
-              Center(
-                child: const Text(
+              const Center(
+                child: Text(
                   'Didn\'t receive the email?',
                   style: TextStyle(fontSize: 13),
                 ),

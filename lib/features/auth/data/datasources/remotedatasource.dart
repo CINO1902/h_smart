@@ -1,7 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
 
-import 'package:dio/dio.dart';
 import 'package:h_smart/core/service/http_service.dart';
 import 'package:h_smart/features/auth/data/repositories/auth_repo.dart';
 import 'package:h_smart/features/auth/domain/entities/ContinueRegistrationModel.dart';
@@ -10,6 +8,7 @@ import 'package:h_smart/features/auth/domain/entities/loginmodel.dart';
 import 'package:h_smart/features/auth/domain/entities/setuphealthissue.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../constant/enum.dart';
+import '../../../medical_record/domain/entities/userDetailsModel.dart';
 import '../../domain/entities/createaccount.dart';
 import '../../domain/usecases/authStates.dart';
 
@@ -122,25 +121,22 @@ class AuthDatasourceImp implements AuthDatasource {
   }
 
   @override
-  Future<GetInfoResult> getinfo() async {
-    GetInfoResult getInfoResult =
-        GetInfoResult(GetInfoResultStates.isLoading, {});
-    final pref = await SharedPreferences.getInstance();
-    String token = pref.getString('jwt_token') ?? '';
-    httpService.header = {
-      'Authorization': 'Bearer $token',
-      'content-Type': 'application/json',
-    };
+  Future<GetUserResult> getuserdetails() async {
+    GetUserResult changePasswordResult =
+        GetUserResult(GetUserResultStates.isLoading, UserDetails());
+
     final response = await httpService.request(
-      url: '/User-Profile/',
-      methodrequest: RequestMethod.get,
+      url: '/auth/profile',
+      methodrequest: RequestMethod.getWithToken,
     );
 
     if (response.statusCode == 200) {
-      getInfoResult = GetInfoResult(GetInfoResultStates.isData, response.data);
+      final decodedresponse = UserDetails.fromJson(response.data);
+      changePasswordResult =
+          GetUserResult(GetUserResultStates.isData, decodedresponse);
     }
 
-    return getInfoResult;
+    return changePasswordResult;
   }
 
   @override
@@ -159,5 +155,42 @@ class AuthDatasourceImp implements AuthDatasource {
     }
 
     return emailVerificationResult;
+  }
+
+  @override
+  Future<SendTokenChangePasswordResult> sendtokenChangePassword(email) async {
+    SendTokenChangePasswordResult sendTokenChangePasswordResult =
+        SendTokenChangePasswordResult(
+            SendTokenChangePasswordResultStates.isLoading, {});
+
+    final response = await httpService.request(
+        url: '/auth/activate_token',
+        methodrequest: RequestMethod.post,
+        data: jsonEncode({"email": email}));
+
+    if (response.statusCode == 200) {
+      sendTokenChangePasswordResult = SendTokenChangePasswordResult(
+          SendTokenChangePasswordResultStates.isData, response.data);
+    }
+
+    return sendTokenChangePasswordResult;
+  }
+
+  @override
+  Future<ChangePasswordResult> changepassword(token, password) async {
+    ChangePasswordResult changePasswordResult =
+        ChangePasswordResult(ChangePasswordResultStates.isLoading, {});
+
+    final response = await httpService.request(
+        url: '/auth/change_password',
+        methodrequest: RequestMethod.post,
+        data: jsonEncode({"token": token, "password": password}));
+
+    if (response.statusCode == 200) {
+      changePasswordResult = ChangePasswordResult(
+          ChangePasswordResultStates.isData, response.data);
+    }
+
+    return changePasswordResult;
   }
 }

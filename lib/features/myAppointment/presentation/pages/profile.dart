@@ -7,248 +7,307 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:gap/gap.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:go_router/go_router.dart';
+import 'package:h_smart/constant/snackbar.dart';
+import 'package:h_smart/features/myAppointment/presentation/Widget/profileItem.dart';
+
 import '../../../../core/utils/appColor.dart' show AppColors;
+import '../../../auth/domain/usecases/authStates.dart';
+import '../../../auth/presentation/controller/auth_controller.dart';
 import '../../../auth/presentation/provider/auth_provider.dart';
 
-class Profile extends ConsumerStatefulWidget {
-  const Profile({super.key});
+class ProfileScreen extends ConsumerStatefulWidget {
+  const ProfileScreen({Key? key}) : super(key: key);
 
   @override
-  ConsumerState<Profile> createState() => _ProfileState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileState extends ConsumerState<Profile> {
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
-
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+    final userData = authState.userData;
+    final profileUrl = userData?.patientMetadata?.profileUrl;
+
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Column(
         children: [
           Stack(
+            clipBehavior: Clip.none,
             children: [
+              // Blurred background/banner
               Container(
                 height: 195,
                 decoration: const BoxDecoration(
-                  color: Color(0xffF3F7FF),
+                  color: Color(0xFFF3F7FF),
                 ),
                 child: ClipRRect(
                   borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(20),
-                      bottomRight: Radius.circular(20)),
+                    bottomLeft: Radius.circular(20),
+                    bottomRight: Radius.circular(20),
+                  ),
                   child: ImageFiltered(
                     imageFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: ref.watch(authProvider).profilePicUrl == ''
-                        ? const CircleAvatar(
-                            radius: 14,
-                            backgroundColor: AppColors.kprimaryColor500,
-                            child: const Icon(Icons.camera_alt,
-                                size: 16, color: Colors.white),
+                    child: profileUrl == null
+                        ? const Center(
+                            child: CircleAvatar(
+                              radius: 40,
+                              backgroundColor: AppColors.kprimaryColor500,
+                              child: Icon(
+                                Icons.camera_alt,
+                                size: 32,
+                                color: Colors.white,
+                              ),
+                            ),
                           )
                         : CachedNetworkImage(
-                            progressIndicatorBuilder: (context, url, progress) {
-                              return Center(
-                                child: SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    value: progress.progress,
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                              );
-                            },
-                            imageUrl: ref.watch(authProvider).profilePicUrl,
+                            imageUrl: profileUrl,
                             fit: BoxFit.cover,
                             width: double.infinity,
-                            errorWidget: (context, url, error) => Icon(
-                              Icons.error,
-                              color: Colors.red,
+                            placeholder: (context, url) => const Center(
+                              child: SizedBox(
+                                height: 24,
+                                width: 24,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => const Center(
+                              child: Icon(Icons.error, color: Colors.red),
                             ),
                           ),
                   ),
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
-                child: SafeArea(
-                    child: Stack(
-                  children: <Widget>[
-                    // Stroked text as border.
-                    Text(
-                      'Profile',
-                      style: TextStyle(
-                        fontSize: 16,
-                        foreground: Paint()
-                          ..style = PaintingStyle.stroke
-                          ..strokeWidth = 4
-                          ..color = Colors.white,
+              // AppBar Title
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 20.0, vertical: 12),
+                  child: Stack(
+                    children: [
+                      Text(
+                        'Profile',
+                        style: TextStyle(
+                          fontSize: 18,
+                          foreground: Paint()
+                            ..style = PaintingStyle.stroke
+                            ..strokeWidth = 4
+                            ..color = Colors.white,
+                        ),
                       ),
-                    ),
-                    // Solid text as fill.
-                    const Text(
-                      'Profile',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black,
+                      const Text(
+                        'Profile',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                  ],
-                )),
+                    ],
+                  ),
+                ),
               ),
-              Center(
-                child: Container(
-                    padding: EdgeInsets.all(5),
-                    margin: EdgeInsets.only(top: 150),
-                    height: 100,
+              // Profile picture (circle)
+              Positioned(
+                top: 140,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Container(
                     width: 100,
-                    decoration: BoxDecoration(
-                      color: Color(0xffEDEDED),
-                      borderRadius: BorderRadius.circular(50),
+                    height: 100,
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFEDEDED),
+                      shape: BoxShape.circle,
                     ),
-                    child: ref.watch(authProvider).profilePicUrl == ''
-                        ? const CircleAvatar(
-                            radius: 14,
-                            backgroundColor: AppColors.kprimaryColor500,
-                            child: const Icon(Icons.camera_alt,
-                                size: 16, color: Colors.white),
-                          )
-                        : ClipRRect(
-                            borderRadius: BorderRadius.circular(50),
-                            child: CachedNetworkImage(
-                              progressIndicatorBuilder:
-                                  (context, url, progress) {
-                                return Center(
-                                  child: SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      value: progress.progress,
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                                );
-                              },
-                              imageUrl: ref.watch(authProvider).profilePicUrl,
+                    child: ClipOval(
+                      child: profileUrl == null
+                          ? Container(
+                              color: AppColors.kprimaryColor500,
+                              child: const Icon(
+                                Icons.camera_alt,
+                                size: 32,
+                                color: Colors.white,
+                              ),
+                            )
+                          : CachedNetworkImage(
+                              imageUrl: profileUrl,
                               fit: BoxFit.cover,
-                              errorWidget: (context, url, error) => Icon(
+                              placeholder: (context, url) => const Center(
+                                child: SizedBox(
+                                  height: 24,
+                                  width: 24,
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2),
+                                ),
+                              ),
+                              errorWidget: (context, url, error) => const Icon(
                                 Icons.error,
                                 color: Colors.red,
+                                size: 32,
                               ),
                             ),
-                          )),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
-          Center(
-            child: Text(
-              '${ref.watch(authProvider).firstName} ${ref.watch(authProvider).lastName}',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          const Gap(60),
+          // User name
+          if (userData != null)
+            Text(
+              '${userData.firstName} ${userData.lastName}',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
             ),
-          ),
-          Gap(10),
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.53,
+          const Gap(16),
+          // Options list
+          Expanded(
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
                 Container(
-                  margin: EdgeInsets.all(20),
-                  padding: EdgeInsets.all(10),
-                  height: 365,
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                      border: Border.all(color: Color(0xffC1D3FF)),
-                      borderRadius: BorderRadius.circular(16),
-                      color: Color(0xffF3F7FF)),
+                    color: const Color(0xFFF3F7FF),
+                    border: Border.all(color: const Color(0xFFC1D3FF)),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   child: Column(
                     children: [
-                      InkWell(
-                          onTap: () {
-                            if (ref.watch(authProvider).infoLoading == true) {
-                              SmartDialog.showToast('System is busy');
-                              return;
-                            }
-                            Navigator.pushNamed(context, '/PersonalInfo');
-                          },
-                          child: profilelink('Personal Info', 'UserCircle')),
-                      Gap(15),
-                      InkWell(
-                          onTap: () {
-                            Navigator.pushNamed(context, '/MedicalRecord');
-                          },
-                          child: profilelink('Medical Records', 'Vector-3')),
-                      Gap(15),
-                      profilelink('Payments', 'CreditCard'),
-                      Gap(15),
-                      InkWell(
-                          onTap: () {
-                            Navigator.pushNamed(context, '/Settings');
-                          },
-                          child: profilelink('Settings', 'Sliders')),
-                      Gap(15),
-                      InkWell(
-                          onTap: () {
-                            Navigator.pushNamed(context, '/Support');
-                          },
-                          child: profilelink('Supports', 'UsersThree')),
-                      Gap(15),
-                      InkWell(
-                          onTap: () {
-                            Navigator.pushNamed(context, '/Legal');
-                          },
-                          child: profilelink('Legal', 'Info'))
+                      ProfileItem(
+                        title: 'Personal Info',
+                        iconName: 'UserCircle',
+                        onTap: () async {
+                          // If user info is loading, show snackbar
+                          if (authState.getInfoResult.state ==
+                              GetUserResultStates.isLoading) {
+                            SnackBarService.notifyAction(
+                              context,
+                              message: 'System is busy',
+                            );
+                            return;
+                          }
+                          // If an error occurred fetching info, attempt to refetch
+                          if (authState.getInfoResult.state ==
+                              GetUserResultStates.isError) {
+                            SnackBarService.notifyAction(
+                              context,
+                              message:
+                                  'An error occurred while trying to gather your information. Let\'s try again.',
+                              status: SnackbarStatus.fail,
+                            );
+                            await ref.read(authProvider).fetchUserInfo();
+                            // Listen for changes in getInfoResult to navigate or show errors
+                            ref.listen<AuthProvider>(authProvider,
+                                (previous, next) {
+                              if (next.getInfoResult.state ==
+                                      GetUserResultStates.isData &&
+                                  mounted) {
+                                SnackBarService.notifyAction(
+                                  context,
+                                  message: 'Access token has expired',
+                                  status: SnackbarStatus.fail,
+                                );
+                                context.push('/PersonalInfo');
+                              } else if (next.getInfoResult.state ==
+                                  GetUserResultStates.isError) {
+                                SnackBarService.notifyAction(
+                                  context,
+                                  message:
+                                      'An error occurred. Please check your internet and try again.',
+                                  status: SnackbarStatus.fail,
+                                );
+                              }
+                            });
+                            return;
+                          }
+                          // If data is already available, navigate directly
+                          if (authState.getInfoResult.state ==
+                              GetUserResultStates.isData) {
+                            context.push('/PersonalInfo');
+                          }
+                        },
+                      ),
+                      const Gap(12),
+                      ProfileItem(
+                        title: 'Medical Records',
+                        iconName: 'Vector-3',
+                        onTap: () => context.push('/MedicalRecord'),
+                      ),
+                      const Gap(12),
+                      ProfileItem(
+                        title: 'Payments',
+                        iconName: 'CreditCard',
+                        onTap: () {
+                          // Add navigation or logic for Payments
+                        },
+                      ),
+                      const Gap(12),
+                      ProfileItem(
+                        title: 'Settings',
+                        iconName: 'Sliders',
+                        onTap: () => context.push('/Settings'),
+                      ),
+                      const Gap(12),
+                      ProfileItem(
+                        title: 'Support',
+                        iconName: 'UsersThree',
+                        onTap: () => context.push('/Support'),
+                      ),
+                      const Gap(12),
+                      ProfileItem(
+                        title: 'Legal',
+                        iconName: 'Info',
+                        onTap: () => context.push('/Legal'),
+                      ),
                     ],
                   ),
                 ),
-                InkWell(
-                  onTap: () {
-                    AwesomeDialog(
-                      context: context,
-                      dialogType: DialogType.warning,
-                      headerAnimationLoop: false,
-                      animType: AnimType.topSlide,
-                      title: 'Warning',
-                      desc: 'This action would Log you out of your account',
-                      btnCancelOnPress: () {},
-                      onDismissCallback: (type) {},
-                      btnOkOnPress: () async {
-                        SmartDialog.showLoading();
-
-                        ref.watch(authProvider).logout();
-
-                        context.pushReplacement('/login');
-                        SmartDialog.dismiss();
-                      },
-                    ).show();
-                  },
-                  child: Container(
-                    margin: EdgeInsets.all(20),
-                    height: 44,
-                    decoration: BoxDecoration(
+                const Gap(20),
+                // Log out button
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: GestureDetector(
+                    onTap: () => _showLogoutDialog(context),
+                    child: Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFEFEF),
+                        border: Border.all(color: const Color(0xFFFFBCBD)),
                         borderRadius: BorderRadius.circular(16),
-                        color: Color(0xffFFEFEF),
-                        border: Border.all(color: Color(0xffFFBCBD))),
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              'Log out',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 13,
-                                  color: Colors.red),
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Log out',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.red,
                             ),
-                            Image.asset('images/SignOut.png'),
-                          ]),
+                          ),
+                          Image.asset(
+                            'images/SignOut.png',
+                            width: 24,
+                            height: 24,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
+                const Gap(20),
               ],
             ),
           ),
@@ -257,24 +316,20 @@ class _ProfileState extends ConsumerState<Profile> {
     );
   }
 
-  Container profilelink(title, image) {
-    return Container(
-      height: 44,
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: Colors.white,
-          border: Border.all(color: Color(0xffC1D3FF))),
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Row(children: [
-          Image.asset('images/$image.png'),
-          Gap(10),
-          Text(
-            title,
-            style: TextStyle(fontWeight: FontWeight.w400, fontSize: 13),
-          )
-        ]),
-      ),
-    );
+  void _showLogoutDialog(BuildContext context) {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.warning,
+      animType: AnimType.topSlide,
+      title: 'Warning',
+      desc: 'This will log you out of your account.',
+      btnCancelOnPress: () {},
+      btnOkOnPress: () {
+        SmartDialog.showLoading();
+        ref.read(authProvider).logout();
+        context.pushReplacement('/login');
+        SmartDialog.dismiss();
+      },
+    ).show();
   }
 }

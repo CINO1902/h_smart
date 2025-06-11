@@ -30,7 +30,7 @@ class _ReportState extends State<Report> {
         child: Stack(children: [
           Container(
             height: 57,
-            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             width: double.infinity,
             decoration: BoxDecoration(
               color: Colors.white,
@@ -61,18 +61,18 @@ class _ReportState extends State<Report> {
             ),
           ),
           Container(
-            margin: EdgeInsets.only(top: 54, bottom: 50),
+            margin: const EdgeInsets.only(top: 54, bottom: 50),
             child: ListView(
               children: [
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(
+                  const Text(
                     'Result:',
                     style: TextStyle(fontSize: 13),
                   ),
-                  Gap(10),
+                  const Gap(10),
                   ListView(
                     shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
+                    physics: const NeverScrollableScrollPhysics(),
                     children: [
                       Padding(
                         padding: const EdgeInsets.only(left: 15.0),
@@ -80,13 +80,13 @@ class _ReportState extends State<Report> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               '1.',
                               style: TextStyle(fontSize: 13),
                             ),
                             SizedBox(
                               width: MediaQuery.of(context).size.width * 0.82,
-                              child: Text(
+                              child: const Text(
                                 'Hemoglobin (Hb): 14.5 g/dL (Normal range: 12.0 - 16.0 g/dL)',
                                 style: TextStyle(fontSize: 13),
                               ),
@@ -94,20 +94,20 @@ class _ReportState extends State<Report> {
                           ],
                         ),
                       ),
-                      Gap(5),
+                      const Gap(5),
                       Padding(
                         padding: const EdgeInsets.only(left: 15.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               '2.',
                               style: TextStyle(fontSize: 13),
                             ),
                             SizedBox(
                               width: MediaQuery.of(context).size.width * 0.82,
-                              child: Text(
+                              child: const Text(
                                 'White Blood Cell (WBC) Count: 7.2 x 10^3/μL (Normal range: 4.5 - 11.0 x 10^3/μL)',
                                 style: TextStyle(fontSize: 13),
                               ),
@@ -115,20 +115,20 @@ class _ReportState extends State<Report> {
                           ],
                         ),
                       ),
-                      Gap(5),
+                      const Gap(5),
                       Padding(
                         padding: const EdgeInsets.only(left: 15.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               '3.',
                               style: TextStyle(fontSize: 13),
                             ),
                             SizedBox(
                               width: MediaQuery.of(context).size.width * 0.82,
-                              child: Text(
+                              child: const Text(
                                 'Red Blood Cell (RBC) Count: 4.8 x 10^6/μL (Normal range: 4.5 - 5.5 x 10^6/μL)',
                                 style: TextStyle(fontSize: 13),
                               ),
@@ -136,20 +136,20 @@ class _ReportState extends State<Report> {
                           ],
                         ),
                       ),
-                      Gap(5),
+                      const Gap(5),
                       Padding(
                         padding: const EdgeInsets.only(left: 15.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               '4.',
                               style: TextStyle(fontSize: 13),
                             ),
                             SizedBox(
                               width: MediaQuery.of(context).size.width * 0.82,
-                              child: Text(
+                              child: const Text(
                                 'Hematocrit (Hct): 42.0% (Normal range: 38.0% - 52.0%)',
                                 style: TextStyle(fontSize: 13),
                               ),
@@ -157,20 +157,20 @@ class _ReportState extends State<Report> {
                           ],
                         ),
                       ),
-                      Gap(5),
+                      const Gap(5),
                       Padding(
                         padding: const EdgeInsets.only(left: 15.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               '5.',
                               style: TextStyle(fontSize: 13),
                             ),
                             SizedBox(
                               width: MediaQuery.of(context).size.width * 0.82,
-                              child: Text(
+                              child: const Text(
                                 'Mean Corpuscular Volume (MCV): 87.5 fL (Normal range: 80.0 - 100.0 fL)',
                                 style: TextStyle(fontSize: 13),
                               ),
@@ -178,20 +178,20 @@ class _ReportState extends State<Report> {
                           ],
                         ),
                       ),
-                      Gap(5),
+                      const Gap(5),
                       Padding(
                         padding: const EdgeInsets.only(left: 15.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               '6.',
                               style: TextStyle(fontSize: 13),
                             ),
                             SizedBox(
                               width: MediaQuery.of(context).size.width * 0.82,
-                              child: Text(
+                              child: const Text(
                                 'Mean Corpuscular Hemoglobin (MCH): 29.0 pg (Normal range: 27.0 - 33.0 pg)',
                                 style: TextStyle(fontSize: 13),
                               ),
@@ -199,20 +199,20 @@ class _ReportState extends State<Report> {
                           ],
                         ),
                       ),
-                      Gap(5),
+                      const Gap(5),
                       Padding(
                         padding: const EdgeInsets.only(left: 15.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               '7.',
                               style: TextStyle(fontSize: 13),
                             ),
                             SizedBox(
                               width: MediaQuery.of(context).size.width * 0.82,
-                              child: Text(
+                              child: const Text(
                                 'Mean Corpuscular Hemoglobin Concentration (MCHC): 33.1 g/dL (Normal range: 32.0 - 36.0 g/dL)',
                                 style: TextStyle(fontSize: 13),
                               ),
@@ -220,20 +220,20 @@ class _ReportState extends State<Report> {
                           ],
                         ),
                       ),
-                      Gap(5),
+                      const Gap(5),
                       Padding(
                         padding: const EdgeInsets.only(left: 15.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               '8.',
                               style: TextStyle(fontSize: 13),
                             ),
                             SizedBox(
                               width: MediaQuery.of(context).size.width * 0.82,
-                              child: Text(
+                              child: const Text(
                                 'Platelet Count: 220 x 10^3/μL (Normal range: 150 - 400 x 10^3/μL)',
                                 style: TextStyle(fontSize: 13),
                               ),
@@ -241,9 +241,9 @@ class _ReportState extends State<Report> {
                           ],
                         ),
                       ),
-                      Gap(20),
-                      MySeparator(),
-                      Gap(20),
+                      const Gap(20),
+                      const MySeparator(),
+                      const Gap(20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -251,14 +251,14 @@ class _ReportState extends State<Report> {
                           SvgPicture.asset('images/dot.svg'),
                           SizedBox(
                             width: MediaQuery.of(context).size.width * 0.82,
-                            child: Text(
+                            child: const Text(
                               'Mary\'s hemoglobin level (Hb) is within the normal range, indicating that his blood has an appropriate amount of oxygen-carrying red blood cells.',
                               style: TextStyle(fontSize: 13),
                             ),
                           ),
                         ],
                       ),
-                      Gap(10),
+                      const Gap(10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -266,14 +266,14 @@ class _ReportState extends State<Report> {
                           SvgPicture.asset('images/dot.svg'),
                           SizedBox(
                             width: MediaQuery.of(context).size.width * 0.82,
-                            child: Text(
+                            child: const Text(
                               'The white blood cell count (WBC) is slightly elevated but still within the normal range, suggesting a normal immune response to infection or inflammation.',
                               style: TextStyle(fontSize: 13),
                             ),
                           ),
                         ],
                       ),
-                      Gap(10),
+                      const Gap(10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -281,7 +281,7 @@ class _ReportState extends State<Report> {
                           SvgPicture.asset('images/dot.svg'),
                           SizedBox(
                             width: MediaQuery.of(context).size.width * 0.82,
-                            child: Text(
+                            child: const Text(
                               'Other parameters, including red blood cell count (RBC), hematocrit (Hct), and platelet count, are also within the normal ranges.',
                               style: TextStyle(fontSize: 13),
                             ),
@@ -307,7 +307,7 @@ class _ReportState extends State<Report> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
+                        const Text(
                           'Share',
                           style: TextStyle(color: Colors.blue),
                         ),

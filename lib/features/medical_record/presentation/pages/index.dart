@@ -21,17 +21,17 @@ class _indexpageState extends State<indexpage> {
   bool canpop = true;
   @override
   Widget build(BuildContext context) {
-    List<Widget> _widgetOptions = <Widget>[
-      HomePage(),
+    List<Widget> widgetOptions = <Widget>[
+      const HomePage(),
       const MyAppointment(),
       const Chat(),
-      const Profile(),
+      const ProfileScreen(),
     ];
     return PopScope(
       canPop: canpop,
       child: Scaffold(
         body: Center(
-          child: _widgetOptions.elementAt(_selectedIndex),
+          child: widgetOptions.elementAt(_selectedIndex),
         ),
         bottomNavigationBar: Container(
           decoration: BoxDecoration(

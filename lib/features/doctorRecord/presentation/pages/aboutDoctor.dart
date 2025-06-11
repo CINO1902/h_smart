@@ -93,7 +93,7 @@ class _AboutDoctorState extends ConsumerState<AboutDoctor> {
                                     .clickeddoctorcategory
                                     .docProfilePicture,
                         fit: BoxFit.cover,
-                        errorWidget: (context, url, error) => Icon(
+                        errorWidget: (context, url, error) => const Icon(
                           Icons.error,
                           color: Colors.red,
                         ),
@@ -104,7 +104,7 @@ class _AboutDoctorState extends ConsumerState<AboutDoctor> {
                 Container(
                   height: 50,
                   width: double.infinity,
-                  margin: EdgeInsets.only(top: 250),
+                  margin: const EdgeInsets.only(top: 250),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
@@ -133,7 +133,7 @@ class _AboutDoctorState extends ConsumerState<AboutDoctor> {
                           width: 12,
                           child: Image.asset(
                             'images/Doctors.png',
-                            color: Color(0xff3772FF),
+                            color: const Color(0xff3772FF),
                           ),
                         ),
                         const Gap(5),
@@ -157,7 +157,7 @@ class _AboutDoctorState extends ConsumerState<AboutDoctor> {
                           width: 12,
                           child: Image.asset(
                             'images/MapPin.png',
-                            color: Color(0xff3772FF),
+                            color: const Color(0xff3772FF),
                           ),
                         ),
                         const Gap(5),
@@ -176,7 +176,7 @@ class _AboutDoctorState extends ConsumerState<AboutDoctor> {
                                       .clickeddoctorcategory
                                       .hospital
                                       .name,
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontSize: 11, fontWeight: FontWeight.w500),
                         ),
                       ],
@@ -185,16 +185,16 @@ class _AboutDoctorState extends ConsumerState<AboutDoctor> {
                 )
               ],
             ),
-            Gap(30),
+            const Gap(30),
             const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
                   'About',
                   style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                 )),
-            Gap(10),
+            const Gap(10),
             Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
                   ref.watch(doctorprovider).doctorclicked
                       ? ref.watch(doctorprovider).clickeddoctorcategory.bio
@@ -216,7 +216,7 @@ class _AboutDoctorState extends ConsumerState<AboutDoctor> {
                   'Working Time',
                   style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                 )),
-            Gap(10),
+            const Gap(10),
             const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
@@ -226,20 +226,20 @@ class _AboutDoctorState extends ConsumerState<AboutDoctor> {
                       fontWeight: FontWeight.w400,
                       color: Color(0xff706F6F)),
                 )),
-            Gap(20),
+            const Gap(20),
             const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
                   'Available Sessions',
                   style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                 )),
-            Gap(10),
+            const Gap(10),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  margin: EdgeInsets.only(left: 10),
-                  padding: EdgeInsets.all(5),
+                  margin: const EdgeInsets.only(left: 10),
+                  padding: const EdgeInsets.all(5),
                   height: 40,
                   width: 40,
                   decoration: BoxDecoration(
@@ -255,8 +255,8 @@ class _AboutDoctorState extends ConsumerState<AboutDoctor> {
                   height: 40,
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Color(0xffC1D3FF)),
-                      color: Color(0xffF3F7FF)),
+                      border: Border.all(color: const Color(0xffC1D3FF)),
+                      color: const Color(0xffF3F7FF)),
                   child: const Align(
                     alignment: Alignment.center,
                     child: Text(
@@ -269,8 +269,8 @@ class _AboutDoctorState extends ConsumerState<AboutDoctor> {
                   ),
                 ),
                 Container(
-                  margin: EdgeInsets.only(right: 10),
-                  padding: EdgeInsets.all(5),
+                  margin: const EdgeInsets.only(right: 10),
+                  padding: const EdgeInsets.all(5),
                   height: 40,
                   width: 40,
                   decoration: BoxDecoration(
@@ -283,16 +283,16 @@ class _AboutDoctorState extends ConsumerState<AboutDoctor> {
                 ),
               ],
             ),
-            Gap(20),
+            const Gap(20),
             const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
                   'Appointment Notes',
                   style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                 )),
-            Gap(10),
+            const Gap(10),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Container(
                 width: MediaQuery.of(context).size.width * 0.9,
                 height: 100,
@@ -318,7 +318,7 @@ class _AboutDoctorState extends ConsumerState<AboutDoctor> {
                 ),
               ),
             ),
-            Gap(30),
+            const Gap(30),
             Align(
                 alignment: Alignment.center,
                 child: SizedBox(
@@ -338,13 +338,13 @@ class _AboutDoctorState extends ConsumerState<AboutDoctor> {
                     Navigator.pop(context);
                   },
                   child: Container(
-                    margin: EdgeInsets.only(left: 20),
-                    padding: EdgeInsets.all(5),
+                    margin: const EdgeInsets.only(left: 20),
+                    padding: const EdgeInsets.all(5),
                     height: 40,
                     width: 40,
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(5),
-                        color: Color.fromARGB(255, 237, 237, 237)),
+                        color: const Color.fromARGB(255, 237, 237, 237)),
                     child: Image.asset(
                       'images/chevron-left.png',
                     ),
@@ -361,8 +361,8 @@ class _AboutDoctorState extends ConsumerState<AboutDoctor> {
                           SmartDialog.showToast(ref.watch(doctorprovider).msg);
                         },
                         child: Container(
-                          margin: EdgeInsets.only(right: 20),
-                          padding: EdgeInsets.all(5),
+                          margin: const EdgeInsets.only(right: 20),
+                          padding: const EdgeInsets.all(5),
                           height: 40,
                           width: 40,
                           decoration: BoxDecoration(
@@ -403,8 +403,8 @@ class _AboutDoctorState extends ConsumerState<AboutDoctor> {
                                   ref.watch(doctorprovider).msg);
                             },
                             child: Container(
-                              margin: EdgeInsets.only(right: 20),
-                              padding: EdgeInsets.all(5),
+                              margin: const EdgeInsets.only(right: 20),
+                              padding: const EdgeInsets.all(5),
                               height: 40,
                               width: 40,
                               decoration: BoxDecoration(
@@ -432,7 +432,7 @@ class _AboutDoctorState extends ConsumerState<AboutDoctor> {
                                         ),
                             ),
                           )
-                        : SizedBox(),
+                        : const SizedBox(),
               ],
             ),
           ),

@@ -1,30 +1,42 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:h_smart/constant/network_api.dart';
+import 'package:h_smart/features/myAppointment/domain/entities/editProfie.dart';
+import 'package:h_smart/features/myAppointment/domain/usecases/appointmentStates.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:h_smart/features/myAppointment/domain/repositories/user_repo.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http_parser/http_parser.dart';
+import 'package:phone_numbers_parser/phone_numbers_parser.dart';
 
 class Mydashprovider extends ChangeNotifier {
   final UserRepository userRepository;
 
   Mydashprovider(this.userRepository);
-  bool loading = false;
-  bool error = false;
-  bool uploadimageerror = false;
+
   String message = '';
   String email = '';
   String profilepic = '';
   String firstname = '';
-  String es = '';
   DateTime dob = DateTime.now();
   File? image;
   String lastname = '';
   String address = '';
   String phone = '';
   String imageurl = '';
+  String phoneNumber = '';
+  String? updateImageUrl;
+  UploadImageResult uploadImageResult = UploadImageResult(
+    UploadImageResultStates.isIdle,
+    '',
+  );
 
+  UpdateProfileResult updateProfileResult = UpdateProfileResult(
+    UpdateProfileResultStates.isIdle,
+    '',
+  );
   Future<void> pickimageupdate() async {
     try {
       final result = await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -34,53 +46,95 @@ class Mydashprovider extends ChangeNotifier {
       final ImageTemporary = File(result!.path);
 
       image = ImageTemporary;
+    } catch (e) {}
+    notifyListeners();
+  }
+
+  void splitNumberPureDart(String raw) {
+    try {
+      final parsed = PhoneNumber.parse(raw);
+
+      // parsed.countryCode is an int (e.g. 1, 44, 234, etc.)
+      // parsed.nsn         is the rest of the digits (national significant number)
+      print('Country code : +${parsed.countryCode}');
+      print('Subscriber   : ${parsed.nsn}');
+      phoneNumber = parsed.nsn;
+      notifyListeners();
     } catch (e) {
-      error = true;
-      es = e.toString();
-      print(es);
+      print('Could not parse "$raw": $e');
     }
+  }
+
+  Future<void> uploadimage() async {
+    uploadImageResult = UploadImageResult(
+      UploadImageResultStates.isLoading,
+      '',
+    );
+    notifyListeners();
+    final uri = Uri.parse(
+      '$baseImageUrl/upload?privacy_level=public',
+    );
+
+    try {
+      final request = http.MultipartRequest('POST', uri)
+        ..files.add(
+          await http.MultipartFile.fromPath(
+            'file',
+            image!.path,
+            contentType: MediaType('image', 'jpeg'),
+          ),
+        );
+
+      final streamedResponse =
+          await request.send().timeout(const Duration(seconds: 15));
+      print('update image response $streamedResponse');
+      final responseBody = await streamedResponse.stream.bytesToString();
+
+      if (streamedResponse.statusCode != 200) {
+        throw Exception(
+            'Image upload failed with status ${streamedResponse.statusCode}');
+      }
+
+      final jsonMap = jsonDecode(responseBody) as Map<String, dynamic>;
+      final returnedUrl = jsonMap['payload']['file_url'] as String?;
+
+      updateImageUrl = returnedUrl;
+      if (returnedUrl == null) {
+        throw Exception('Upload succeeded but no URL returned');
+      }
+
+      uploadImageResult = UploadImageResult(
+        UploadImageResultStates.isData,
+        'Success',
+      );
+    } on TimeoutException {
+      uploadImageResult = UploadImageResult(
+        UploadImageResultStates.isIdle,
+        'Request Timed out',
+      );
+    } catch (e) {
+      uploadImageResult = UploadImageResult(
+        UploadImageResultStates.isIdle,
+        'Something went wrong',
+      );
+    }
+
     notifyListeners();
   }
 
-  Future<void> uploadbook() async {
-    uploadimageerror = false;
-    final url = Uri.parse('https://api.cloudinary.com/v1_1/dlsavisdq/upload');
-    final request = http.MultipartRequest('POST', url)
-      ..fields['upload_preset'] = 'image_preset_hSmart'
-      ..files.add(await http.MultipartFile.fromPath('file', image!.path));
-    final response = await request.send();
-    print(response.statusCode);
+  Future<void> editprofile(firstname, lastname, phone, address) async {
+    updateProfileResult = UpdateProfileResult(
+      UpdateProfileResultStates.isLoading,
+      '',
+    );
+    EditProfile editProfile = EditProfile(
+        firstName: firstname,
+        lastName: lastname,
+        profileUrl: updateImageUrl,
+        address: address);
 
-    if (response.statusCode == 200) {
-      final responseData = await response.stream.toBytes();
-      final responseString = String.fromCharCodes(responseData);
-      final jsonMap = jsonDecode(responseString);
-
-      final url = jsonMap['url'];
-      imageurl = url;
-    } else {
-      uploadimageerror = true;
-    }
+    final response = await userRepository.edit_profile(editProfile);
+    updateProfileResult = response;
     notifyListeners();
   }
-
-  Future<void> editprofile(firstname, lastname, phone, email, address) async {
-    loading = true;
-
-    final response = await userRepository.edit_profile(
-        firstname, lastname, phone, email, address, image, imageurl);
-    if (response[0].contains('1')) {
-      error = false;
-      message = response[1];
-    } else {
-      error = true;
-      message = response[1];
-    }
-    final pref = await SharedPreferences.getInstance();
-    pref.setBool('prfilepicset', false);
-    loading = false;
-    notifyListeners();
-  }
-
- 
 }

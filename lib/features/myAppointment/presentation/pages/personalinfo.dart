@@ -1,374 +1,412 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_multi_formatter/formatters/phone_input_formatter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:gap/gap.dart';
-import 'package:h_smart/constant/Inkbutton.dart';
-import 'package:h_smart/features/myAppointment/presentation/provider/mydashprovider.dart';
+import 'package:h_smart/constant/snackbar.dart';
+import 'package:h_smart/features/myAppointment/domain/usecases/appointmentStates.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:intl_phone_field/phone_number.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../../../constant/customesnackbar.dart';
-import '../../../auth/presentation/provider/auth_provider.dart';
+
+import 'package:h_smart/constant/Inkbutton.dart';
+import 'package:h_smart/constant/customesnackbar.dart';
+import 'package:h_smart/features/myAppointment/presentation/provider/mydashprovider.dart';
+import 'package:h_smart/features/auth/presentation/provider/auth_provider.dart';
 
 class PersonalInfo extends ConsumerStatefulWidget {
-  const PersonalInfo({super.key});
+  const PersonalInfo({Key? key}) : super(key: key);
 
   @override
   ConsumerState<PersonalInfo> createState() => _PersonalInfoState();
 }
 
 class _PersonalInfoState extends ConsumerState<PersonalInfo> {
-  bool updatechange = false;
+  final _formKey = GlobalKey<FormState>();
+
+  late TextEditingController _firstNameController;
+  late TextEditingController _lastNameController;
+  late TextEditingController _emailController;
+  late TextEditingController _addressController;
+  late TextEditingController _phoneController;
+
+  bool _isEditing = false;
+  PhoneNumber? _phoneNumber;
 
   @override
-  void setState(VoidCallback fn) {
-    // TODO: implement setState
-    super.setState(fn);
-    PhoneInputFormatter.replacePhoneMask(
-      countryCode: 'NG',
-      newMask: '+000 000 000 0000',
+  void initState() {
+    super.initState();
+
+    // Initialize controllers with empty strings; actual values will be set after provider read
+    _firstNameController = TextEditingController();
+    _lastNameController = TextEditingController();
+    _emailController = TextEditingController();
+    _addressController = TextEditingController();
+    _phoneController = TextEditingController();
+
+    // After first frame, read existing user data and split phone number
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authState = ref.read(authProvider);
+      final userData = authState.userData;
+      if (userData != null) {
+        // Populate text fields
+        _firstNameController.text = userData.firstName ?? '';
+        _lastNameController.text = userData.lastName ?? '';
+        _emailController.text = userData.email ?? '';
+        _addressController.text = userData.patientMetadata?.address ?? '';
+
+        // Use appointmentProvider to split and store numeric phone part
+        final rawPhone = userData.phone ?? '';
+        ref.read(appointmentProvider).splitNumberPureDart(rawPhone);
+
+        // Read the split phone into our local controller
+        final splitPhone = ref.read(appointmentProvider).phoneNumber;
+        _phoneController.text = splitPhone;
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _emailController.dispose();
+    _addressController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveChanges() async {
+    // Validate form first
+    if (!_formKey.currentState!.validate()) return;
+
+    final uploadProv = ref.read(appointmentProvider);
+    if (uploadProv.updateProfileResult.state ==
+        UpdateProfileResultStates.isLoading) {
+      return;
+    }
+
+    // 1) Upload image if changed
+    if (uploadProv.image != null) {
+      SmartDialog.showLoading(msg: 'Updating Image...');
+      await uploadProv.uploadimage();
+      SmartDialog.dismiss();
+      if (uploadProv.uploadImageResult.state ==
+          UploadImageResultStates.isError) {
+        SmartDialog.dismiss();
+        SnackBarService.showSnackBar(context,
+            status: SnackbarStatus.fail,
+            title: 'Error',
+            body: 'There was an issue uploading the image.');
+        return;
+      }
+    }
+
+    // 2) Commit profile edits
+    final firstName = _firstNameController.text.trim();
+    final lastName = _lastNameController.text.trim();
+    final phone = _phoneController.text.trim();
+    final address = _addressController.text.trim();
+    SmartDialog.showLoading(msg: 'Updating Profile...');
+    await uploadProv.editprofile(
+      firstName,
+      lastName,
+      phone,
+      address,
     );
+    await ref.read(authProvider).fetchUserInfo();
+    ref.read(authProvider).loadSavedPayload();
+    SmartDialog.dismiss();
+
+    if (uploadProv.updateProfileResult.state ==
+        UpdateProfileResultStates.isError) {
+      SnackBarService.showSnackBar(context,
+          status: SnackbarStatus.fail,
+          title: 'Error',
+          body: 'There was an issue updating the image.');
+    } else {
+      SnackBarService.showSnackBar(context,
+          status: SnackbarStatus.success,
+          title: 'Error',
+          body: 'Profile has been updated successfully');
+
+      // Optionally refresh auth provider data here:
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final uploadprovider = ref.watch(appointmentProvider);
-    TextEditingController _firstname =
-        TextEditingController(text: ref.watch(authProvider).firstName);
-    TextEditingController lastname =
-        TextEditingController(text: ref.watch(authProvider).lastName);
-    TextEditingController phone =
-        TextEditingController(text: ref.watch(authProvider).phone);
-    TextEditingController email =
-        TextEditingController(text: ref.watch(authProvider).email);
-    TextEditingController address =
-        TextEditingController(text: ref.watch(authProvider).address);
+    final authState = ref.watch(authProvider);
+    final userData = authState.userData;
+    final uploadProv = ref.watch(appointmentProvider);
+
+    final profileUrl = userData?.patientMetadata?.profileUrl;
+
     return Scaffold(
       appBar: AppBar(
-          centerTitle: true,
-          elevation: 0,
-          titleSpacing: 0.1,
-          foregroundColor: Colors.black,
-          titleTextStyle: const TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.w600,
-              fontFamily: 'Poppins'),
-          actions: [
-            updatechange
-                ? SizedBox()
-                : Padding(
-                    padding: const EdgeInsets.only(right: 20.0),
-                    child: InkWell(
-                        onTap: () {
-                          setState(() {
-                            updatechange = true;
-                          });
-                        },
-                        child: const Icon(Icons.edit_outlined)),
-                  )
-          ],
-          title: const Text(
-            'Personal Info',
-            style: TextStyle(fontSize: 19),
-          )),
+        centerTitle: true,
+        elevation: 0,
+        foregroundColor: Colors.black,
+        titleTextStyle: const TextStyle(
+          color: Colors.black,
+          fontWeight: FontWeight.w600,
+          fontFamily: 'Poppins',
+        ),
+        actions: [
+          if (!_isEditing)
+            Padding(
+              padding: const EdgeInsets.only(right: 20),
+              child: InkWell(
+                onTap: () => setState(() => _isEditing = true),
+                child: const Icon(Icons.edit_outlined),
+              ),
+            ),
+        ],
+        title: const Text(
+          'Personal Info',
+          style: TextStyle(fontSize: 19),
+        ),
+      ),
       body: ListView(
+        padding: EdgeInsets.zero,
         children: [
           Center(
             child: Stack(
               children: [
                 Container(
-                    padding: const EdgeInsets.all(5),
-                    margin: const EdgeInsets.only(top: 20),
-                    height: 100,
-                    width: 100,
-                    decoration: BoxDecoration(
-                      color: const Color(0xffEDEDED),
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(50),
-                      child: ref.watch(appointmentProvider).image != null
-                          ? Image.file(
-                              ref.watch(appointmentProvider).image!,
-                              height: 140,
-                              width: 140,
-                              fit: BoxFit.cover,
-                            )
-                          : CachedNetworkImage(
-                              imageUrl: ref.watch(authProvider).profilePicUrl,
-                              fit: BoxFit.cover,
-                              errorWidget: (context, url, error) =>
-                                  Icon(Icons.error),
+                  margin: const EdgeInsets.only(top: 20),
+                  width: 100,
+                  height: 100,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFEDEDED),
+                    shape: BoxShape.circle,
+                  ),
+                  child: ClipOval(
+                    child: uploadProv.image != null
+                        ? Image.file(
+                            uploadProv.image!,
+                            fit: BoxFit.cover,
+                          )
+                        : (profileUrl != null && profileUrl.isNotEmpty)
+                            ? CachedNetworkImage(
+                                imageUrl: profileUrl,
+                                fit: BoxFit.cover,
+                                errorWidget: (_, __, ___) =>
+                                    const Icon(Icons.error),
+                              )
+                            : const Icon(
+                                Icons.person,
+                                size: 60,
+                                color: Colors.grey,
+                              ),
+                  ),
+                ),
+                if (_isEditing)
+                  Positioned(
+                    bottom: 0,
+                    right: 4,
+                    child: InkWell(
+                      onTap: uploadProv.pickimageupdate,
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 4,
+                              offset: Offset(0, 2),
                             ),
-                    )),
-                updatechange
-                    ? InkWell(
-                        onTap: () {
-                          uploadprovider.pickimageupdate();
-                        },
-                        child: Container(
-                          padding: EdgeInsets.only(left: 70),
-                          margin: EdgeInsets.only(top: 90),
-                          child: SizedBox(
-                            height: 30,
-                            width: 30,
-                            child: Image.asset(
-                              'images/camera.png',
-                            ),
-                          ),
+                          ],
                         ),
-                      )
-                    : const SizedBox()
+                        padding: const EdgeInsets.all(6),
+                        child: const Icon(
+                          Icons.camera_alt,
+                          size: 20,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
-          Gap(20),
-          Container(
-            margin: const EdgeInsets.all(20),
-            padding: const EdgeInsets.all(10),
-            height: 420,
-            width: double.infinity,
-            decoration: BoxDecoration(
+          const Gap(20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF3F7FF),
                 borderRadius: BorderRadius.circular(16),
-                color: const Color(0xffF3F7FF)),
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text('First name'),
-              const Gap(5),
-              SizedBox(
-                height: 44,
-                child: TextFormField(
-                  controller: _firstname,
-                  cursorHeight: 20,
-                  readOnly: !updatechange,
-                  decoration: InputDecoration(
-                    fillColor:
-                        updatechange ? Colors.white : const Color(0xffEAECF0),
-                    filled: true,
-                    contentPadding: const EdgeInsets.only(
-                      top: 5,
-                      left: 10,
+              ),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // First Name
+                    const Text('First Name'),
+                    const Gap(5),
+                    TextFormField(
+                      controller: _firstNameController,
+                      readOnly: !_isEditing,
+                      cursorHeight: 20,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor:
+                            _isEditing ? Colors.white : const Color(0xFFEAECF0),
+                        contentPadding: const EdgeInsets.only(
+                          top: 5,
+                          left: 10,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      validator: (value) {
+                        if (_isEditing &&
+                            (value == null || value.trim().isEmpty)) {
+                          return 'First name cannot be empty';
+                        }
+                        return null;
+                      },
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide:
-                          const BorderSide(width: 0, color: Color(0xffEAECF0)),
+                    const Gap(10),
+
+                    // Last Name
+                    const Text('Last Name'),
+                    const Gap(5),
+                    TextFormField(
+                      controller: _lastNameController,
+                      readOnly: !_isEditing,
+                      cursorHeight: 20,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor:
+                            _isEditing ? Colors.white : const Color(0xFFEAECF0),
+                        contentPadding: const EdgeInsets.only(
+                          top: 5,
+                          left: 10,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      validator: (value) {
+                        if (_isEditing &&
+                            (value == null || value.trim().isEmpty)) {
+                          return 'Last name cannot be empty';
+                        }
+                        return null;
+                      },
                     ),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                            color: Color.fromARGB(255, 126, 67, 40))),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide:
-                          const BorderSide(width: 0, color: Color(0xffEAECF0)),
+                    const Gap(10),
+
+                    // Phone Number
+                    const Text('Phone Number'),
+                    const Gap(5),
+                    IntlPhoneField(
+                      initialCountryCode: 'NG',
+                      controller: _phoneController,
+                      readOnly: !_isEditing,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor:
+                            _isEditing ? Colors.white : const Color(0xFFEAECF0),
+                        contentPadding: const EdgeInsets.only(
+                          top: 5,
+                          left: 10,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      onChanged:
+                          _isEditing ? (number) => _phoneNumber = number : null,
+                      validator: (value) {
+                        if (_isEditing) {
+                          if (value == null || !value.isValidNumber()) {
+                            return 'Enter a valid phone number';
+                          }
+                        }
+                        return null;
+                      },
                     ),
-                  ),
+                    const Gap(10),
+
+                    // Address
+                    const Text('Address'),
+                    const Gap(5),
+                    TextFormField(
+                      controller: _addressController,
+                      readOnly: !_isEditing,
+                      cursorHeight: 20,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor:
+                            _isEditing ? Colors.white : const Color(0xFFEAECF0),
+                        contentPadding: const EdgeInsets.only(
+                          top: 5,
+                          left: 10,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      validator: (value) {
+                        if (_isEditing &&
+                            (value == null || value.trim().isEmpty)) {
+                          return 'Address cannot be empty';
+                        }
+                        return null;
+                      },
+                    ),
+                    const Gap(10),
+
+                    // Email (always read-only)
+                    const Text('Email'),
+                    const Gap(5),
+                    TextFormField(
+                      controller: _emailController,
+                      readOnly: true,
+                      cursorHeight: 20,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: const Color(0xFFEAECF0),
+                        contentPadding: const EdgeInsets.only(
+                          top: 5,
+                          left: 10,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              Gap(10),
-              Text('Last name'),
-              Gap(5),
-              SizedBox(
-                height: 44,
-                child: TextFormField(
-                  controller: lastname,
-                  cursorHeight: 20,
-                  readOnly: !updatechange,
-                  decoration: InputDecoration(
-                    fillColor: updatechange ? Colors.white : Color(0xffEAECF0),
-                    filled: true,
-                    contentPadding: EdgeInsets.only(
-                      top: 5,
-                      left: 10,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide:
-                          const BorderSide(width: 0, color: Color(0xffEAECF0)),
-                    ),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                            color: Color.fromARGB(255, 126, 67, 40))),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide:
-                          const BorderSide(width: 0, color: Color(0xffEAECF0)),
-                    ),
-                  ),
-                ),
-              ),
-              Gap(10),
-              Text('Phone number'),
-              Gap(5),
-              SizedBox(
-                height: 44,
-                child: TextFormField(
-                  controller: phone,
-                  inputFormatters: [PhoneInputFormatter()],
-                  cursorHeight: 20,
-                  readOnly: !updatechange,
-                  decoration: InputDecoration(
-                    fillColor: updatechange ? Colors.white : Color(0xffEAECF0),
-                    filled: true,
-                    contentPadding: EdgeInsets.only(
-                      top: 5,
-                      left: 10,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide:
-                          const BorderSide(width: 0, color: Color(0xffEAECF0)),
-                    ),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                            color: Color.fromARGB(255, 126, 67, 40))),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide:
-                          const BorderSide(width: 0, color: Color(0xffEAECF0)),
-                    ),
-                  ),
-                ),
-              ),
-              Text('Address'),
-              Gap(5),
-              SizedBox(
-                height: 44,
-                child: TextFormField(
-                  controller: address,
-                  cursorHeight: 20,
-                  readOnly: !updatechange,
-                  decoration: InputDecoration(
-                    fillColor: updatechange ? Colors.white : Color(0xffEAECF0),
-                    filled: true,
-                    contentPadding: EdgeInsets.only(
-                      top: 5,
-                      left: 10,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide:
-                          const BorderSide(width: 0, color: Color(0xffEAECF0)),
-                    ),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                            color: Color.fromARGB(255, 126, 67, 40))),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide:
-                          const BorderSide(width: 0, color: Color(0xffEAECF0)),
-                    ),
-                  ),
-                ),
-              ),
-              Gap(10),
-              Text('Email'),
-              Gap(5),
-              SizedBox(
-                height: 44,
-                child: TextFormField(
-                  controller: email,
-                  cursorHeight: 20,
-                  readOnly: true,
-                  decoration: InputDecoration(
-                    fillColor: Color(0xffEAECF0),
-                    filled: true,
-                    contentPadding: EdgeInsets.only(
-                      top: 5,
-                      left: 10,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide:
-                          const BorderSide(width: 0, color: Color(0xffEAECF0)),
-                    ),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                            color: Color.fromARGB(255, 126, 67, 40))),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide:
-                          const BorderSide(width: 0, color: Color(0xffEAECF0)),
-                    ),
-                  ),
-                ),
-              )
-            ]),
+            ),
           ),
-          Gap(50),
-          updatechange
-              ? SizedBox(
-                  height: 50,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: InkWell(
-                        onTap: () async {
-                          if (ref.watch(appointmentProvider).loading == true) {
-                            return;
-                          }
-                          SmartDialog.showLoading();
-                          await ref.watch(appointmentProvider).uploadbook();
-                          if (ref.watch(appointmentProvider).uploadimageerror ==
-                              true) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: CustomeSnackbar(
-                                topic: 'Oh Snap!',
-                                msg: 'There is an issue uploading the image',
-                                color1: Color.fromARGB(255, 171, 51, 42),
-                                color2: Color.fromARGB(255, 127, 39, 33),
-                              ),
-                              behavior: SnackBarBehavior.floating,
-                              backgroundColor: Colors.transparent,
-                              elevation: 0,
-                            ));
-                            SmartDialog.dismiss();
-                          } else {
-                            await ref.watch(appointmentProvider).editprofile(
-                                _firstname.text,
-                                lastname.text,
-                                phone.text,
-                                email.text,
-                                address.text);
-                            if (ref.watch(appointmentProvider).error == true) {
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(SnackBar(
-                                content: CustomeSnackbar(
-                                  topic: 'Oh Snap!',
-                                  msg: ref.watch(appointmentProvider).message,
-                                  color1: Color.fromARGB(255, 171, 51, 42),
-                                  color2: Color.fromARGB(255, 127, 39, 33),
-                                ),
-                                behavior: SnackBarBehavior.floating,
-                                backgroundColor: Colors.transparent,
-                                elevation: 0,
-                              ));
-                              SmartDialog.dismiss();
-                            } else {
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(SnackBar(
-                                content: CustomeSnackbar(
-                                  topic: 'Great!',
-                                  msg: ref.watch(appointmentProvider).message,
-                                  color1: Color.fromARGB(255, 25, 107, 52),
-                                  color2: Color.fromARGB(255, 19, 95, 40),
-                                ),
-                                behavior: SnackBarBehavior.floating,
-                                backgroundColor: Colors.transparent,
-                                elevation: 0,
-                              ));
-                              await ref.read(authProvider).retrieveUserData();
-                              SmartDialog.dismiss();
-                              Navigator.pop(context);
-                            }
-                          }
-                        },
-                        child: InkButton(title: 'Update Changes')),
-                  ))
-              : SizedBox()
+          const Gap(50),
+          if (_isEditing)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: SizedBox(
+                height: 50,
+                child: InkWell(
+                  onTap: _saveChanges,
+                  child: InkButton(title: 'Update Changes'),
+                ),
+              ),
+            ),
         ],
       ),
     );

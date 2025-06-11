@@ -36,6 +36,12 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
   final _addressController = TextEditingController();
   final _emergencyNameController = TextEditingController();
 
+  // FocusNodes
+  late FocusNode _dobFocusNode;
+  late FocusNode _addressFocusNode;
+  late FocusNode _emergencyNameFocusNode;
+  late FocusNode _phoneFocusNode;
+
   DateTime _selectedDate = DateTime.now();
   bool _dateChosen = false;
   late PhoneNumber _phoneNumber;
@@ -64,6 +70,10 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
   @override
   void initState() {
     super.initState();
+    _dobFocusNode = FocusNode();
+    _addressFocusNode = FocusNode();
+    _emergencyNameFocusNode = FocusNode();
+    _phoneFocusNode = FocusNode();
   }
 
   @override
@@ -71,6 +81,12 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
     _dobController.dispose();
     _addressController.dispose();
     _emergencyNameController.dispose();
+
+    // Dispose focus nodes
+    _dobFocusNode.dispose();
+    _addressFocusNode.dispose();
+    _emergencyNameFocusNode.dispose();
+    _phoneFocusNode.dispose();
     super.dispose();
   }
 
@@ -114,7 +130,9 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
     print(_selectedAllergies);
     final auth = ref.read(authProvider);
     if (auth.continueRegisterResult.state ==
-        ContinueRegisterResultStates.isLoading) return;
+        ContinueRegisterResultStates.isLoading) {
+      return;
+    }
     if (!_formKey.currentState!.validate()) return;
     if (!_dateChosen) {
       SnackBarService.notifyAction(
@@ -177,7 +195,7 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
         ),
         elevation: 0,
         backgroundColor: Colors.white,
-        iconTheme: IconThemeData(color: AppColors.kprimaryColor500),
+        iconTheme: const IconThemeData(color: AppColors.kprimaryColor500),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -197,7 +215,119 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
                     key: _formKey,
                     child: Column(
                       children: [
-                        _buildDateField(),
+                        // ─── Date of Birth Field ─────────────────────────────────
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: TextFormField(
+                            controller: _dobController,
+                            focusNode: _dobFocusNode,
+                            readOnly: true,
+                            textInputAction: TextInputAction.next,
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
+                            decoration: InputDecoration(
+                              labelText: 'Date of Birth',
+                              hintText: 'YYYY-MM-DD',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              suffixIcon: const Icon(Icons.calendar_today),
+                            ),
+                            onTap: _pickDate,
+                            // When user taps “Next” on keyboard, jump to address field
+                            onFieldSubmitted: (_) {
+                              FocusScope.of(context)
+                                  .requestFocus(_addressFocusNode);
+                            },
+                            validator: (value) =>
+                                (value == null || value.isEmpty)
+                                    ? 'Date of birth is required'
+                                    : null,
+                          ),
+                        ),
+
+                        // ─── Address Field ───────────────────────────────────────
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: TextFormField(
+                            controller: _addressController,
+                            focusNode: _addressFocusNode,
+                            textInputAction: TextInputAction.next,
+                            keyboardType: TextInputType.text,
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
+                            decoration: InputDecoration(
+                              labelText: 'Address',
+                              hintText: 'Enter your address',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            onFieldSubmitted: (_) {
+                              FocusScope.of(context)
+                                  .requestFocus(_emergencyNameFocusNode);
+                            },
+                            validator: (value) =>
+                                (value == null || value.trim().isEmpty)
+                                    ? 'Address can\'t be empty'
+                                    : null,
+                          ),
+                        ),
+
+                        // ─── Emergency Contact Name Field ───────────────────────
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: TextFormField(
+                            controller: _emergencyNameController,
+                            focusNode: _emergencyNameFocusNode,
+                            textInputAction: TextInputAction.next,
+                            keyboardType: TextInputType.text,
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
+                            decoration: InputDecoration(
+                              labelText: 'Emergency Contact Name',
+                              hintText: 'Enter your emergency contact\'s name',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            onFieldSubmitted: (_) {
+                              FocusScope.of(context)
+                                  .requestFocus(_phoneFocusNode);
+                            },
+                            validator: (value) =>
+                                (value == null || value.trim().isEmpty)
+                                    ? 'Emergency Contact Name can\'t be empty'
+                                    : null,
+                          ),
+                        ),
+
+                        // ─── Phone Number Field ─────────────────────────────────
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: IntlPhoneField(
+                            controller: _phoneController,
+                            focusNode: _phoneFocusNode,
+                            initialCountryCode: 'NG',
+                            decoration: InputDecoration(
+                              labelText: 'Phone Number',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            textInputAction: TextInputAction.done,
+                            onChanged: (phone) => _phoneNumber = phone,
+                            // When the user hits “done” on keyboard, you might want to close the keyboard:
+                            onSubmitted: (_) =>
+                                FocusScope.of(context).unfocus(),
+                            validator: (value) =>
+                                value == null || !value.isValidNumber()
+                                    ? 'Enter a valid phone number'
+                                    : null,
+                          ),
+                        ),
+
+                        // ─── Gender / Blood Type / Multi-selects ─────────────────
                         _buildDropdown(
                           label: 'Gender',
                           value: _selectedGender,
@@ -212,12 +342,6 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
                           onChanged: (val) =>
                               setState(() => _selectedBloodType = val),
                         ),
-                        _buildTextField(
-                            controller: _addressController, label: 'Address'),
-                        _buildTextField(
-                            controller: _emergencyNameController,
-                            label: 'Emergency Contact Name'),
-                        _buildPhoneField(),
                         _buildMultiSelect(
                           label: 'Allergies',
                           options: _allergyOptions,
@@ -232,6 +356,7 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
                           onConfirm: (vals) => setState(
                               () => _selectedConditions = vals.cast<String>()),
                         ),
+
                         const Gap(80),
                       ],
                     ),
@@ -239,6 +364,8 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
                 ],
               ),
             ),
+
+            // Continue button…
             SafeArea(
               child: GestureDetector(
                 onTap: _onContinue,
@@ -246,14 +373,17 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
                   width: double.infinity,
                   height: 48,
                   decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      color: AppColors.kprimaryColor500),
+                    borderRadius: BorderRadius.circular(16),
+                    color: AppColors.kprimaryColor500,
+                  ),
                   child: const Center(
-                    child: Text("Continue",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500)),
+                    child: Text(
+                      "Continue",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500),
+                    ),
                   ),
                 ),
               ),
@@ -323,7 +453,7 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
           labelText: 'Date of Birth',
           hintText: 'YYYY-MM-DD',
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          suffixIcon: Icon(Icons.calendar_today),
+          suffixIcon: const Icon(Icons.calendar_today),
         ),
         onTap: _pickDate,
         validator: (value) => (value == null || value.isEmpty)
@@ -443,6 +573,7 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: MultiSelectBottomSheetField<String?>(
+        selectedColor: AppColors.kprimaryColor500,
         initialChildSize: 0.3,
         minChildSize: 0.3,
         maxChildSize: 0.5,

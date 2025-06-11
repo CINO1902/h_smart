@@ -80,7 +80,7 @@ class _FirstAidState extends State<FirstAid> {
                 },
               ),
             ),
-            Gap(20),
+            const Gap(20),
             Expanded(
               child: ListView.builder(
                 itemCount: suggestAfirstaid.length,
@@ -95,7 +95,7 @@ class _FirstAidState extends State<FirstAid> {
                           ));
                     },
                     child: Container(
-                      margin: EdgeInsets.only(bottom: 10),
+                      margin: const EdgeInsets.only(bottom: 10),
                       decoration: BoxDecoration(
                           border: Border(
                               bottom: BorderSide(
@@ -107,7 +107,7 @@ class _FirstAidState extends State<FirstAid> {
                         children: [
                           Text(
                             suggestAfirstaid[index],
-                            style: TextStyle(fontSize: 13),
+                            style: const TextStyle(fontSize: 13),
                           ),
                           SizedBox(
                               height: 20,

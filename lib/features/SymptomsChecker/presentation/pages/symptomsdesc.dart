@@ -25,18 +25,18 @@ class _SymptomsDescState extends State<SymptomsDesc> {
               fontFamily: 'Poppins'),
           title: Text(
             widget.title,
-            style: TextStyle(fontSize: 16),
+            style: const TextStyle(fontSize: 16),
           )),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: ListView(
           children: [
             Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(
+              const Text(
                 'Symptom Information:',
                 style: TextStyle(fontSize: 13),
               ),
-              Gap(10),
+              const Gap(10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,7 +44,7 @@ class _SymptomsDescState extends State<SymptomsDesc> {
                   SvgPicture.asset('images/dot.svg'),
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.82,
-                    child: Text(
+                    child: const Text(
                       'Fever is a temporary increase in body temperature, often in response to an infection or illness. It\'s a natural defense mechanism as it helps the body fight off infections.',
                       style: TextStyle(fontSize: 13),
                     ),
@@ -52,15 +52,15 @@ class _SymptomsDescState extends State<SymptomsDesc> {
                 ],
               )
             ]),
-            Gap(20),
-            MySeparator(),
-            Gap(20),
+            const Gap(20),
+            const MySeparator(),
+            const Gap(20),
             Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(
+              const Text(
                 'Common Causes::',
                 style: TextStyle(fontSize: 13),
               ),
-              Gap(10),
+              const Gap(10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,7 +68,7 @@ class _SymptomsDescState extends State<SymptomsDesc> {
                   SvgPicture.asset('images/dot.svg'),
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.82,
-                    child: Text(
+                    child: const Text(
                       'Fever can be caused by various factors, including viral or bacterial infections, the flu, common cold, urinary tract infections, or other health conditions.',
                       style: TextStyle(fontSize: 13),
                     ),
@@ -76,15 +76,15 @@ class _SymptomsDescState extends State<SymptomsDesc> {
                 ],
               )
             ]),
-            Gap(20),
-            MySeparator(),
-            Gap(20),
+            const Gap(20),
+            const MySeparator(),
+            const Gap(20),
             Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(
+              const Text(
                 'Self-Help Tips:',
                 style: TextStyle(fontSize: 13),
               ),
-              Gap(10),
+              const Gap(10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,7 +92,7 @@ class _SymptomsDescState extends State<SymptomsDesc> {
                   SvgPicture.asset('images/dot.svg'),
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.82,
-                    child: Text(
+                    child: const Text(
                       'If you have a mild fever, it\'s essential to rest, stay hydrated, and keep cool by taking a lukewarm bath. Over-the-counter fever reducers like acetaminophen or ibuprofen can help lower the fever. However, if your fever is severe, persistent, or accompanied by other concerning symptoms, it\'s important to seek medical advice.',
                       style: TextStyle(fontSize: 13),
                     ),
@@ -100,15 +100,15 @@ class _SymptomsDescState extends State<SymptomsDesc> {
                 ],
               )
             ]),
-            Gap(20),
-            MySeparator(),
-            Gap(20),
+            const Gap(20),
+            const MySeparator(),
+            const Gap(20),
             Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(
+              const Text(
                 'When to Seek Medical Attention:',
                 style: TextStyle(fontSize: 13),
               ),
-              Gap(10),
+              const Gap(10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,7 +116,7 @@ class _SymptomsDescState extends State<SymptomsDesc> {
                   SvgPicture.asset('images/dot.svg'),
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.82,
-                    child: Text(
+                    child: const Text(
                       'Contact a healthcare provider if your fever persists for more than a few days, is very high (above 39°C), is accompanied by severe headache, difficulty breathing, chest pain, rash, or confusion, or if you have underlying health conditions.',
                       style: TextStyle(fontSize: 13),
                     ),

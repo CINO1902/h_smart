@@ -5,3 +5,7 @@ import '../controller/hospitalController.dart';
 
 final hospitalprovider =
     ChangeNotifierProvider((ref) => GetHospitalProvider(locator()));
+
+
+final expandedSectionProvider = StateProvider<String?>((_) => null);
+

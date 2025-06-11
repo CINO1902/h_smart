@@ -31,16 +31,25 @@ void main() async {
   }
 
   FlutterNativeSplash.preserve(
-      widgetsBinding: WidgetsFlutterBinding.ensureInitialized());
+    widgetsBinding: WidgetsFlutterBinding.ensureInitialized(),
+  );
+
   await FirebaseApi().requestpermission();
   FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
 
-  runApp(ProviderScope(child: MyApp()));
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
+
   setup();
 }
 
 class MyApp extends ConsumerStatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({
+    Key? key,
+  }) : super(key: key);
 
   @override
   ConsumerState<MyApp> createState() => _MyAppState();
@@ -50,6 +59,7 @@ class _MyAppState extends ConsumerState<MyApp> {
   @override
   void initState() {
     super.initState();
+    // Now that we’ve decided which screen to show, we can remove the splash:
     FlutterNativeSplash.remove();
   }
 

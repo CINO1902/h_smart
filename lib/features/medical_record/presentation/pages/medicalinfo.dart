@@ -80,7 +80,7 @@ class _MedicalInfoState extends State<MedicalInfo> {
                         width: 25,
                         decoration: BoxDecoration(
                             border: Border.all(color: Colors.blue),
-                            color: Color(0xffF3F7FF),
+                            color: const Color(0xffF3F7FF),
                             borderRadius: BorderRadius.circular(15)),
                         child: const Icon(
                           Icons.add,
@@ -88,25 +88,25 @@ class _MedicalInfoState extends State<MedicalInfo> {
                         )),
                   ],
                 ),
-                Gap(20),
+                const Gap(20),
                 Container(
                   //  margin: EdgeInsets.all(20),
                   padding: const EdgeInsets.all(10),
                   height: 125,
                   decoration: BoxDecoration(
-                      border: Border.all(color: Color(0xffC1D3FF)),
+                      border: Border.all(color: const Color(0xffC1D3FF)),
                       borderRadius: BorderRadius.circular(16),
                       color: const Color(0xffF3F7FF)),
                   child: Column(
                     children: [
                       Container(
                         height: 44,
-                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
                         width: double.infinity,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Color(0xffC1D3FF)),
+                          border: Border.all(color: const Color(0xffC1D3FF)),
                         ),
                         child: const Align(
                           alignment: Alignment.centerLeft,
@@ -116,15 +116,15 @@ class _MedicalInfoState extends State<MedicalInfo> {
                           ),
                         ),
                       ),
-                      Gap(10),
+                      const Gap(10),
                       Container(
                         height: 44,
-                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
                         width: double.infinity,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Color(0xffC1D3FF)),
+                          border: Border.all(color: const Color(0xffC1D3FF)),
                         ),
                         child: const Align(
                           alignment: Alignment.centerLeft,
@@ -151,7 +151,7 @@ class _MedicalInfoState extends State<MedicalInfo> {
                         width: 25,
                         decoration: BoxDecoration(
                             border: Border.all(color: Colors.blue),
-                            color: Color(0xffF3F7FF),
+                            color: const Color(0xffF3F7FF),
                             borderRadius: BorderRadius.circular(15)),
                         child: const Icon(
                           Icons.add,
@@ -159,25 +159,25 @@ class _MedicalInfoState extends State<MedicalInfo> {
                         )),
                   ],
                 ),
-                Gap(20),
+                const Gap(20),
                 Container(
                   //  margin: EdgeInsets.all(20),
                   padding: const EdgeInsets.all(10),
                   height: 125,
                   decoration: BoxDecoration(
-                      border: Border.all(color: Color(0xffC1D3FF)),
+                      border: Border.all(color: const Color(0xffC1D3FF)),
                       borderRadius: BorderRadius.circular(16),
                       color: const Color(0xffF3F7FF)),
                   child: Column(
                     children: [
                       Container(
                         height: 44,
-                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
                         width: double.infinity,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Color(0xffC1D3FF)),
+                          border: Border.all(color: const Color(0xffC1D3FF)),
                         ),
                         child: const Align(
                           alignment: Alignment.centerLeft,
@@ -187,15 +187,15 @@ class _MedicalInfoState extends State<MedicalInfo> {
                           ),
                         ),
                       ),
-                      Gap(10),
+                      const Gap(10),
                       Container(
                         height: 44,
-                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
                         width: double.infinity,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Color(0xffC1D3FF)),
+                          border: Border.all(color: const Color(0xffC1D3FF)),
                         ),
                         child: const Align(
                           alignment: Alignment.centerLeft,

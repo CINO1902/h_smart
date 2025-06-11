@@ -5,6 +5,8 @@ import 'package:h_smart/features/medical_record/presentation/pages/index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DeciderScreen extends StatefulWidget {
+  const DeciderScreen({super.key});
+
   @override
   _DeciderScreenState createState() => _DeciderScreenState();
 }
@@ -21,6 +23,7 @@ class _DeciderScreenState extends State<DeciderScreen> {
   Future<void> checkOnboardingStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString('jwt_token');
+
     setState(() {
       // hasSeenOnboarding = seen;
       token = prefs.getString('jwt_token');

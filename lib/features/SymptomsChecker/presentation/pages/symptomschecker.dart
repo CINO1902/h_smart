@@ -87,10 +87,10 @@ class _SymptomsCheckerState extends State<SymptomsChecker>
             child: Container(
               width: 250,
               height: 50,
-              padding: EdgeInsets.all(5),
+              padding: const EdgeInsets.all(5),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                color: Color(0xffF3F7FF),
+                color: const Color(0xffF3F7FF),
               ),
               child: Center(
                 child: ListView(
@@ -108,7 +108,7 @@ class _SymptomsCheckerState extends State<SymptomsChecker>
                           borderRadius: BorderRadius.circular(10),
                           color: controller.index == 0
                               ? AppColors.kprimaryColor500
-                              : Color(0xffF3F7FF),
+                              : const Color(0xffF3F7FF),
                         ),
                         child: Center(
                           child: Text(
@@ -141,13 +141,13 @@ class _SymptomsCheckerState extends State<SymptomsChecker>
                               : BorderRadius.zero,
                           color: controller.index == 1
                               ? AppColors.kprimaryColor500
-                              : Color(0xffF3F7FF),
+                              : const Color(0xffF3F7FF),
                         ),
                         child: Center(
                           child: Text(
                             "Children",
                             style: controller.index == 1
-                                ? TextStyle(color: AppColors.kprimaryColor500)
+                                ? const TextStyle(color: AppColors.kprimaryColor500)
                                 : TextStyle(
                                     color: Theme.of(context)
                                         .colorScheme
@@ -164,7 +164,7 @@ class _SymptomsCheckerState extends State<SymptomsChecker>
           ),
           Expanded(
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: TabBarView(controller: controller, children: [
                 Column(
                   children: [
@@ -194,7 +194,7 @@ class _SymptomsCheckerState extends State<SymptomsChecker>
                         },
                       ),
                     ),
-                    Gap(20),
+                    const Gap(20),
                     Expanded(
                       child: ListView.builder(
                         itemCount: suggestAdult.length,
@@ -209,7 +209,7 @@ class _SymptomsCheckerState extends State<SymptomsChecker>
                                   ));
                             },
                             child: Container(
-                              margin: EdgeInsets.only(bottom: 10),
+                              margin: const EdgeInsets.only(bottom: 10),
                               decoration: BoxDecoration(
                                   border: Border(
                                       bottom: BorderSide(
@@ -222,7 +222,7 @@ class _SymptomsCheckerState extends State<SymptomsChecker>
                                 children: [
                                   Text(
                                     suggestAdult[index],
-                                    style: TextStyle(fontSize: 13),
+                                    style: const TextStyle(fontSize: 13),
                                   ),
                                   SizedBox(
                                       height: 20,
@@ -264,13 +264,13 @@ class _SymptomsCheckerState extends State<SymptomsChecker>
                         },
                       ),
                     ),
-                    Gap(20),
+                    const Gap(20),
                     Expanded(
                       child: ListView.builder(
                         itemCount: suggestchild.length,
                         itemBuilder: (context, index) {
                           return Container(
-                            margin: EdgeInsets.only(bottom: 10),
+                            margin: const EdgeInsets.only(bottom: 10),
                             decoration: BoxDecoration(
                                 border: Border(
                                     bottom: BorderSide(
@@ -282,7 +282,7 @@ class _SymptomsCheckerState extends State<SymptomsChecker>
                               children: [
                                 Text(
                                   suggestchild[index],
-                                  style: TextStyle(fontSize: 13),
+                                  style: const TextStyle(fontSize: 13),
                                 ),
                                 SizedBox(
                                     height: 20,

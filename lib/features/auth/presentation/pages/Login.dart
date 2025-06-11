@@ -32,6 +32,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Future<void> _onLogin() async {
+    if (_rememberMe) {
+      ref.read(authProvider).saveEmailLogin(_emailController.text);
+    } else {
+      ref.read(authProvider).unSaveEmailLogin();
+    }
+
     if (!_formKey.currentState!.validate()) return;
 
     final auth = ref.read(authProvider);
@@ -63,11 +69,38 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       );
 
       final isComplete = result.response.payload?.isProfileComplete ?? true;
-      if (isComplete) {
-        context.go('/home');
+      final emailVerified = result.response.payload?.status ?? '';
+      if (emailVerified == 'active') {
+        if (isComplete) {
+          context.go('/home');
+        } else {
+          context.push('/complete-profile');
+        }
       } else {
-        context.push('/complete-profile');
+        context.push('/verify-email', extra: {
+          "email": _emailController.text,
+        });
       }
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      ref.read(authProvider);
+    });
+
+    updateEmailField();
+  }
+
+  updateEmailField() async {
+    await Future.delayed(const Duration(microseconds: 500));
+    final savedEmail = ref.read(authProvider).emailLogin;
+    if (savedEmail.isNotEmpty) {
+      _emailController.text = savedEmail;
+      // _rememberMe = true;
     }
   }
 
@@ -97,7 +130,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 children: [
                   _buildTextField(
                     controller: _emailController,
-                    label: 'Email / Phone',
+                    label: 'Email',
                     keyboardType: TextInputType.emailAddress,
                   ),
                   _buildPasswordField(),
@@ -180,7 +213,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             ],
           ),
           TextButton(
-            onPressed: () {},
+            onPressed: () {
+              context.push('/forgot-password');
+            },
             child: const Text('Forgot Password?'),
           ),
         ],

@@ -86,7 +86,7 @@ class _ChatState extends ConsumerState<Chat> {
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
             height: 60,
             decoration: BoxDecoration(
-                border: Border.all(color: Color(0xffEBF1FF)),
+                border: Border.all(color: const Color(0xffEBF1FF)),
                 borderRadius: BorderRadius.circular(16)),
             child: Row(
               children: [
@@ -98,7 +98,7 @@ class _ChatState extends ConsumerState<Chat> {
                     'images/bot.png',
                   )),
                 ),
-                Gap(20),
+                const Gap(20),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -126,7 +126,7 @@ class _ChatState extends ConsumerState<Chat> {
               ],
             ),
           ),
-          Gap(20),
+          const Gap(20),
           StreamBuilder<List<Map<String, dynamic>>>(
             stream: _dbHelper.conversationStream,
             builder: (context, snapshot) {

@@ -1,11 +1,12 @@
 import 'dart:developer';
-import 'dart:io';
 
+import 'package:h_smart/constant/enum.dart';
 import 'package:h_smart/core/exceptions/network_exception.dart';
 import 'package:h_smart/features/auth/data/repositories/auth_repo.dart';
 import 'package:h_smart/features/auth/domain/entities/ContinueRegistrationModel.dart';
 
-import '../../../../constant/enum.dart';
+import '../../../medical_record/domain/entities/userDetailsModel.dart';
+
 import '../entities/loginResponse.dart';
 import '../usecases/authStates.dart';
 
@@ -13,8 +14,10 @@ abstract class AuthRepository {
   Future<RegisterResult> createacount(createaccount);
   Future<EmailVerificationResult> callActivationToken(email);
   Future<LoginResult> login(login);
+  Future<ChangePasswordResult> changepassword(token, password);
   Future<VerifyEmailResult> Verifyemail(otp);
-  Future<GetInfoResult> getinfo();
+  Future<SendTokenChangePasswordResult> sendtokenChangePassword(email);
+  Future<GetUserResult> getuserdetails();
   Future<SetUpHealthResult> setuphealthissues(setup);
   Future<ContinueRegisterResult> continueRegistration(
       ContinueRegistrationModel continuemodel);
@@ -137,25 +140,30 @@ class AuthRepositoryImp implements AuthRepository {
   }
 
   @override
-  Future<GetInfoResult> getinfo() async {
-    GetInfoResult getInfoResult =
-        GetInfoResult(GetInfoResultStates.isLoading, {});
+  Future<GetUserResult> getuserdetails() async {
+    GetUserResult registerResult =
+        GetUserResult(GetUserResultStates.isLoading, UserDetails());
+
     try {
-      getInfoResult = await authDatasource.getinfo();
+      registerResult = await authDatasource.getuserdetails();
     } catch (e) {
       log(e.toString());
-
       if (e.runtimeType == NetworkException) {
         NetworkException exp = e as NetworkException;
         final message = exp.errorMessage ?? e.message;
-        getInfoResult =
-            GetInfoResult(GetInfoResultStates.isError, {"message": message});
+        if (exp.type == NetworkExceptionType.unauthorizedRequest) {
+          registerResult = GetUserResult(
+              GetUserResultStates.loggedOut, UserDetails(message: message));
+        } else {
+          registerResult = GetUserResult(
+              GetUserResultStates.isError, UserDetails(message: message));
+        }
       } else {
-        getInfoResult = GetInfoResult(
-            GetInfoResultStates.isError, {"message": "Something Went Wrong"});
+        registerResult = GetUserResult(
+            GetUserResultStates.isError, UserDetails(message: ''));
       }
     }
-    return getInfoResult;
+    return registerResult;
   }
 
   @override
@@ -179,5 +187,54 @@ class AuthRepositoryImp implements AuthRepository {
       }
     }
     return emailVerificationResult;
+  }
+
+  @override
+  Future<SendTokenChangePasswordResult> sendtokenChangePassword(email) async {
+    SendTokenChangePasswordResult sendTokenChangePasswordResult =
+        SendTokenChangePasswordResult(
+            SendTokenChangePasswordResultStates.isLoading, {});
+    try {
+      sendTokenChangePasswordResult =
+          await authDatasource.sendtokenChangePassword(email);
+    } catch (e) {
+      log(e.toString());
+
+      if (e.runtimeType == NetworkException) {
+        NetworkException exp = e as NetworkException;
+        final message = exp.errorMessage ?? e.message;
+        sendTokenChangePasswordResult = SendTokenChangePasswordResult(
+            SendTokenChangePasswordResultStates.isError, {"message": message});
+      } else {
+        sendTokenChangePasswordResult = SendTokenChangePasswordResult(
+            SendTokenChangePasswordResultStates.isError,
+            {"message": "Something Went Wrong"});
+      }
+    }
+    return sendTokenChangePasswordResult;
+  }
+
+  @override
+  Future<ChangePasswordResult> changepassword(token, password) async {
+    ChangePasswordResult changePasswordResult =
+        ChangePasswordResult(ChangePasswordResultStates.isLoading, {});
+    try {
+      changePasswordResult =
+          await authDatasource.changepassword(token, password);
+    } catch (e) {
+      log(e.toString());
+
+      if (e.runtimeType == NetworkException) {
+        NetworkException exp = e as NetworkException;
+        final message = exp.errorMessage ?? e.message;
+        changePasswordResult = ChangePasswordResult(
+            ChangePasswordResultStates.isError, {"message": message});
+      } else {
+        changePasswordResult = ChangePasswordResult(
+            ChangePasswordResultStates.isError,
+            {"message": "Something Went Wrong"});
+      }
+    }
+    return changePasswordResult;
   }
 }
