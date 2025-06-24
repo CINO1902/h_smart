@@ -463,14 +463,27 @@ class DatabaseHelper {
     }
   }
 
+  /// Get messages for a specific conversation
+  Stream<List<Map<String, dynamic>>> getMessagesForConversation(
+      String conversationId) async* {
+    final db = await database;
+    final messages = await db.query(
+      'messages',
+      where: 'conversationId = ?',
+      whereArgs: [conversationId],
+      orderBy: 'timestamp DESC',
+    );
+    yield messages;
+  }
+
+  /// Get all messages for a conversation
   Future<List<Map<String, dynamic>>> getMessages(String conversationId) async {
-    print(conversationId);
     final db = await database;
     return await db.query(
       'messages',
       where: 'conversationId = ?',
       whereArgs: [conversationId],
-      orderBy: 'timestamp ASC',
+      orderBy: 'timestamp DESC',
     );
   }
 

@@ -17,12 +17,11 @@ class Hospital extends ConsumerStatefulWidget {
 }
 
 class _HospitalState extends ConsumerState<Hospital> {
-  late TextEditingController _searchController;
+  final TextEditingController _searchController = TextEditingController();
   bool isSearching = false;
   @override
   void initState() {
     super.initState();
-    _searchController = TextEditingController();
     _searchController.addListener(_onSearchChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(hospitalprovider).getHospital();
@@ -45,6 +44,7 @@ class _HospitalState extends ConsumerState<Hospital> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final hospitalProv = ref.watch(hospitalprovider);
     final data =
         isSearching ? hospitalProv.searchData : hospitalProv.hospitalData;
@@ -58,49 +58,94 @@ class _HospitalState extends ConsumerState<Hospital> {
     }
 
     return Scaffold(
+      backgroundColor: theme.colorScheme.background,
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
-        titleSpacing: 0.1,
-        foregroundColor: Colors.black,
         surfaceTintColor: Colors.transparent,
-        titleTextStyle: const TextStyle(
-          color: Colors.black,
-          fontWeight: FontWeight.w600,
-          fontFamily: 'Poppins',
+        titleSpacing: 0.1,
+        title: Text(
+          'Hospitals',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
         ),
-        title: const Text('Hospitals', style: TextStyle(fontSize: 17)),
       ),
       body: CustomScrollView(
         slivers: [
           // Search Field
           SliverToBoxAdapter(
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                boxShadow: [
+                  BoxShadow(
+                    color: theme.colorScheme.shadow.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(
-                    height: 44,
+                  Text(
+                    'Find Hospitals',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onBackground,
+                    ),
+                  ),
+                  const Gap(8),
+                  Text(
+                    'Search for hospitals in your area',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: theme.colorScheme.onBackground.withOpacity(0.6),
+                    ),
+                  ),
+                  const Gap(20),
+                  Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: theme.colorScheme.outline.withOpacity(0.3),
+                        width: 1,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: theme.colorScheme.shadow.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
                     child: TextField(
                       controller: _searchController,
-                      decoration: const InputDecoration(
-                        contentPadding: EdgeInsets.only(top: 10),
-                        prefixIcon: Icon(Icons.search),
-                        prefixIconColor: Colors.grey,
-                        hintText: 'Search',
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(16)),
-                          borderSide: BorderSide(color: Colors.grey, width: 2),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.only(top: 12),
+                        border: InputBorder.none,
+                        hintText: 'Search hospitals',
+                        hintStyle: TextStyle(
+                          color: theme.colorScheme.onSurface.withOpacity(0.5),
                         ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(16)),
-                          borderSide: BorderSide(color: Colors.grey),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: theme.colorScheme.onSurface.withOpacity(0.5),
                         ),
                       ),
                     ),
                   ),
-                  const Gap(10),
                 ],
               ),
             ),
@@ -111,7 +156,7 @@ class _HospitalState extends ConsumerState<Hospital> {
               hospitalProv.searchResult.state == HospitalResultStates.isLoading)
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 20)
-                  .copyWith(top: 10, bottom: 30),
+                  .copyWith(top: 20, bottom: 30),
               sliver: SliverGrid(
                 delegate: SliverChildBuilderDelegate(
                   (context, idx) =>
@@ -129,7 +174,7 @@ class _HospitalState extends ConsumerState<Hospital> {
           // SEARCH EMPTY STATE
           else if (isSearching &&
               hospitalProv.searchResult.state == HospitalResultStates.isEmpty)
-            const SliverFillRemaining(
+            SliverFillRemaining(
               hasScrollBody: false,
               child: Center(
                 child: Column(
@@ -138,23 +183,23 @@ class _HospitalState extends ConsumerState<Hospital> {
                     Icon(
                       Icons.search_off_rounded,
                       size: 64,
-                      color: Colors.grey,
+                      color: theme.colorScheme.onBackground.withOpacity(0.6),
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Text(
                       'No hospitals found',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black87,
+                        color: theme.colorScheme.onBackground,
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
                       'Try searching with different keywords',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey,
+                        color: theme.colorScheme.onBackground.withOpacity(0.6),
                       ),
                     ),
                   ],
@@ -167,7 +212,7 @@ class _HospitalState extends ConsumerState<Hospital> {
                   HospitalResultStates.isLoading)
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 20)
-                  .copyWith(top: 10, bottom: 30),
+                  .copyWith(top: 20, bottom: 30),
               sliver: SliverGrid(
                 delegate: SliverChildBuilderDelegate(
                   (context, idx) =>
@@ -189,30 +234,33 @@ class _HospitalState extends ConsumerState<Hospital> {
               if (entry.value.isNotEmpty)
                 SliverStickyHeader(
                   header: Container(
-                    color: Colors.white,
+                    color: theme.colorScheme.surface,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 10),
+                        horizontal: 20, vertical: 15),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           '${entry.key} Hospitals',
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w600),
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.onBackground,
+                          ),
                         ),
                         if (entry.value.length > 3)
                           InkWell(
                             onTap: () {
-                              // ref.read(hospitalprovider).disablehero();
                               context.push('/hospital/specific',
                                   extra: {"title": entry.key});
                             },
-                            child: const Text(
+                            child: Text(
                               'See All',
                               style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.blue),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: theme.colorScheme.primary,
+                              ),
                             ),
                           ),
                       ],
@@ -226,7 +274,6 @@ class _HospitalState extends ConsumerState<Hospital> {
                         (context, idx) {
                           final items = entry.value;
                           final hospital = items[idx];
-                          // final globalIndex = data.indexOf(hospital);
                           return InkWell(
                             onTap: () {
                               context.push('/hospital/more-detail',

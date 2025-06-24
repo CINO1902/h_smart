@@ -42,9 +42,6 @@ class AuthProvider extends ChangeNotifier {
   final bool _infoLoading = true;
   bool _hasFetchedInfo = false;
 
-  String _email = '';
-  String _profilePicUrl = '';
-
   String emailLogin = '';
 
   /// Controllers for image picking and other async tasks
@@ -102,9 +99,6 @@ class AuthProvider extends ChangeNotifier {
   bool get infoLoading => _infoLoading;
   bool get hasFetchedInfo => _hasFetchedInfo;
 
-  String get email => _email;
-  String get profilePicUrl => _profilePicUrl;
-
   /// Performs login and stores JWT on success
   Future<void> login({
     required String email,
@@ -119,8 +113,10 @@ class AuthProvider extends ChangeNotifier {
 
     if (response.state == LoginResultStates.isData) {
       final token = response.response.payload?.accessToken;
+      final profileCompleted = response.response.payload?.isProfileComplete;
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('jwt_token', token ?? '');
+      await prefs.setBool('profile_completed', profileCompleted ?? false);
     }
     loginResult = response;
     notifyListeners();
@@ -227,7 +223,6 @@ class AuthProvider extends ChangeNotifier {
       final Map<String, dynamic> decoded = json.decode(storedString);
       final restored = Payload.fromJson(decoded);
       _userData = restored;
-      print(_userData);
       notifyListeners();
       return restored;
     } catch (e) {
@@ -255,17 +250,8 @@ class AuthProvider extends ChangeNotifier {
   Future<void> logout() async {
     _hasFetchedInfo = false;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('profile_id');
-    await prefs.remove('email');
-    await prefs.remove('first_name');
-    await prefs.remove('last_name');
-    await prefs.remove('address');
-    await prefs.remove('phone');
+    await prefs.remove('user_payload');
     await prefs.remove('jwt_token');
-
-    _email = '';
-    _profilePicUrl = '';
-
     _isLoggedOut = false;
     notifyListeners();
   }
@@ -383,7 +369,7 @@ class AuthProvider extends ChangeNotifier {
         throw Exception('Upload succeeded but no URL returned');
       }
 
-      await _continueRegistration(
+      await continueRegistration(
         gender: gender,
         dob: dob,
         address: address,
@@ -410,16 +396,18 @@ class AuthProvider extends ChangeNotifier {
   }
 
   /// Continues registration after image upload
-  Future<void> _continueRegistration({
+  Future<void> continueRegistration({
     required String gender,
     required DateTime dob,
     required String address,
     String? bloodType,
     String? emergencyContactName,
-    required String emergencyContactPhone,
+    String? emergencyContactPhone,
+    String? insuranceProvider,
+    String? insuranceNumber,
     required List<String?> allergies,
     required List<String?> medicalConditions,
-    required String profileUrl,
+    String? profileUrl,
   }) async {
     continueRegisterResult = ContinueRegisterResult(
       ContinueRegisterResultStates.isLoading,
@@ -441,10 +429,5 @@ class AuthProvider extends ChangeNotifier {
     final response = await _authRepository.continueRegistration(continueModel);
     continueRegisterResult = response;
     notifyListeners();
-  }
-
-  /// Clears static flags after fetching user info
-  void _resetStaticInfo() {
-    _hasFetchedInfo = true;
   }
 }

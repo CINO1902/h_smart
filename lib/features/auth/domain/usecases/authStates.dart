@@ -44,7 +44,7 @@ class ContinueRegisterResult {
   ContinueRegisterResult(this.state, this.response);
 }
 
-enum ContinueRegisterResultStates { isLoading, isError, isData, isIdle }
+enum ContinueRegisterResultStates { isLoading,islogout, isError, isData, isIdle }
 
 class SetUpHealthResult {
   final SetUpHealthResultStates state;

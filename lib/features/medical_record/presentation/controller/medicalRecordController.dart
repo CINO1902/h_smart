@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:h_smart/features/medical_record/domain/entities/GetOverView.dart';
 import 'package:h_smart/features/medical_record/domain/entities/prescription.dart';
 import 'package:h_smart/features/medical_record/domain/repositories/MedicalRecord_repo.dart';
+import 'package:h_smart/features/medical_record/domain/usecases/userStates.dart';
 
 class MedicalRecordprovider extends ChangeNotifier {
   final MedicalRecordRepo medicalRecordRepo;
@@ -12,7 +14,8 @@ class MedicalRecordprovider extends ChangeNotifier {
   bool currentempty = false;
   List<Datum> pres = [];
   String clickdoctordescription = '';
-
+  GetOverResult overview =
+      GetOverResult(status: GetOverResultStates.idle, data: GetOverView());
   DoctorName clickeddoctorcategory = DoctorName(
       id: '',
       user: User(email: '', id: ''),
@@ -58,17 +61,22 @@ class MedicalRecordprovider extends ChangeNotifier {
         currentempty = true;
       } else {
         print(response[1]);
-        final decodedres =
-            Prescription.fromJson(response[1] as Map<String, dynamic>);
+        // final decodedres =
+        //     Prescription.fromJson(response[1] as Map<String, dynamic>);
 
-        pres = decodedres.data;
+        // pres = decodedres.data;
       }
     }
     notifyListeners();
   }
 
-  void getclickeddoctor(index1) {
-    // clickdoctordescription = pres[index1].description;
-    clickeddoctorcategory = pres[index1].doctorName;
+
+  Future<void> getOverview() async {
+    overview =
+        GetOverResult(status: GetOverResultStates.loading, data: GetOverView());
+    notifyListeners();
+    final response = await medicalRecordRepo.getOverview();
+    overview = response;
+    notifyListeners();
   }
 }

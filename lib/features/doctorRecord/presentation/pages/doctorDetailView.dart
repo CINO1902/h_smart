@@ -119,8 +119,9 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: theme.colorScheme.background,
       body: Stack(
         children: [
           // Scrollable Content
@@ -137,18 +138,20 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
                     children: [
                       Text(
                         'Dr. ${widget.doctor.fullName}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onBackground,
                         ),
                         textAlign: TextAlign.center,
                       ),
                       const Gap(8),
                       Text(
                         widget.doctor.specialization ?? 'General Practitioner',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
-                          color: Colors.grey,
+                          color:
+                              theme.colorScheme.onBackground.withOpacity(0.6),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -173,9 +176,10 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
                             ),
                           ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                _showCalendar ? Colors.red : Colors.blue,
-                            foregroundColor: Colors.white,
+                            backgroundColor: _showCalendar
+                                ? theme.colorScheme.error
+                                : theme.colorScheme.primary,
+                            foregroundColor: theme.colorScheme.onPrimary,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -196,11 +200,11 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
                         key: const ValueKey('calendar'),
                         margin: const EdgeInsets.symmetric(horizontal: 20),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: theme.colorScheme.surface,
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.grey.withOpacity(0.1),
+                              color: theme.colorScheme.shadow.withOpacity(0.1),
                               spreadRadius: 1,
                               blurRadius: 10,
                               offset: const Offset(0, 1),
@@ -213,12 +217,13 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
                               padding: const EdgeInsets.all(20),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
+                                children: [
                                   Text(
                                     'Select Available Time',
                                     style: TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
+                                      color: theme.colorScheme.onSurface,
                                     ),
                                   ),
                                 ],
@@ -233,18 +238,13 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
                                 crossAxisCount: 2,
                                 crossAxisSpacing: 16,
                                 mainAxisSpacing: 16,
-                                // either shrink your aspect ratio...
-                                // childAspectRatio: 1.5,
-
-                                // …or just force a fixed height:
-                                mainAxisExtent:
-                                    90, // each tile will be 140px tall
+                                mainAxisExtent: 90,
                               ),
                               itemCount: 8,
                               itemBuilder: (context, index) {
                                 final time =
                                     DateTime.now().add(Duration(days: index));
-                                return _buildTimeSlot(time);
+                                return _buildTimeSlot(time, theme);
                               },
                             ),
                           ],
@@ -258,11 +258,12 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
                             margin: const EdgeInsets.symmetric(horizontal: 20),
                             padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: theme.colorScheme.surface,
                               borderRadius: BorderRadius.circular(16),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.grey.withOpacity(0.1),
+                                  color:
+                                      theme.colorScheme.shadow.withOpacity(0.1),
                                   spreadRadius: 1,
                                   blurRadius: 10,
                                   offset: const Offset(0, 1),
@@ -272,37 +273,40 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
+                                Text(
                                   'About',
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
+                                    color: theme.colorScheme.onSurface,
                                   ),
                                 ),
                                 const Gap(12),
                                 Text(
                                   widget.doctor.qualification ??
                                       'No biography available.',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 14,
-                                    color: Colors.grey,
+                                    color: theme.colorScheme.onSurface
+                                        .withOpacity(0.7),
                                     height: 1.5,
                                   ),
                                 ),
                                 const Gap(20),
-                                const Text(
+                                Text(
                                   'Contact Information',
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
+                                    color: theme.colorScheme.onSurface,
                                   ),
                                 ),
                                 const Gap(12),
-                                _buildInfoRow(
-                                    Icons.email, widget.doctor.email ?? 'N/A'),
+                                _buildInfoRow(Icons.email,
+                                    widget.doctor.email ?? 'N/A', theme),
                                 const Gap(8),
-                                _buildInfoRow(
-                                    Icons.phone, widget.doctor.phone ?? 'N/A'),
+                                _buildInfoRow(Icons.phone,
+                                    widget.doctor.phone ?? 'N/A', theme),
                               ],
                             ),
                           ),
@@ -312,11 +316,12 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
                             margin: const EdgeInsets.symmetric(horizontal: 20),
                             padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: theme.colorScheme.surface,
                               borderRadius: BorderRadius.circular(16),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.grey.withOpacity(0.1),
+                                  color:
+                                      theme.colorScheme.shadow.withOpacity(0.1),
                                   spreadRadius: 1,
                                   blurRadius: 10,
                                   offset: const Offset(0, 1),
@@ -326,22 +331,25 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
+                                Text(
                                   'Qualifications',
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
+                                    color: theme.colorScheme.onSurface,
                                   ),
                                 ),
                                 const Gap(12),
                                 _buildQualificationItem(
                                   'Medical Degree',
                                   widget.doctor.qualification ?? 'N/A',
+                                  theme,
                                 ),
                                 const Gap(8),
                                 _buildQualificationItem(
                                   'Experience',
                                   '${widget.doctor.experienceYears ?? 0} years',
+                                  theme,
                                 ),
                               ],
                             ),
@@ -381,7 +389,7 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.transparent,
-                      Colors.black.withOpacity(0.7),
+                      theme.colorScheme.shadow.withOpacity(0.7),
                     ],
                   ),
                 ),
@@ -401,7 +409,8 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
                   height: _logoSize,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 3),
+                    border:
+                        Border.all(color: theme.colorScheme.surface, width: 3),
                     image: DecorationImage(
                       image: NetworkImage(widget.doctor.profileUrl ?? ''),
                       fit: BoxFit.cover,
@@ -418,11 +427,12 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
               padding: const EdgeInsets.only(left: 16.0, top: 6.0),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: theme.colorScheme.surface.withOpacity(0.8),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back),
+                  icon: Icon(Icons.arrow_back,
+                      color: theme.colorScheme.onSurface),
                   onPressed: () => context.pop(),
                 ),
               ),
@@ -433,17 +443,17 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String text) {
+  Widget _buildInfoRow(IconData icon, String text, ThemeData theme) {
     return Row(
       children: [
-        Icon(icon, size: 20, color: Colors.blue),
+        Icon(icon, size: 20, color: theme.colorScheme.primary),
         const Gap(12),
         Expanded(
           child: Text(
             text,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
-              color: Colors.grey,
+              color: theme.colorScheme.onSurface.withOpacity(0.7),
             ),
           ),
         ),
@@ -451,11 +461,11 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
     );
   }
 
-  Widget _buildQualificationItem(String title, String value) {
+  Widget _buildQualificationItem(String title, String value, ThemeData theme) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: theme.colorScheme.surfaceVariant,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -466,17 +476,18 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
                 const Gap(4),
                 Text(
                   value,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -487,17 +498,21 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
     );
   }
 
-  Widget _buildTimeSlot(DateTime date) {
+  Widget _buildTimeSlot(DateTime date, ThemeData theme) {
     final isToday = date.day == DateTime.now().day;
     final isWeekend =
         date.weekday == DateTime.saturday || date.weekday == DateTime.sunday;
 
     return Container(
       decoration: BoxDecoration(
-        color: isToday ? Colors.blue.withOpacity(0.1) : Colors.white,
+        color: isToday
+            ? theme.colorScheme.primary.withOpacity(0.1)
+            : theme.colorScheme.surfaceVariant,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isToday ? Colors.blue : Colors.grey.withOpacity(0.2),
+          color: isToday
+              ? theme.colorScheme.primary
+              : theme.colorScheme.outline.withOpacity(0.2),
           width: isToday ? 2 : 1,
         ),
       ),
@@ -522,7 +537,9 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
                       _getDayName(date.weekday),
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: isToday ? Colors.blue : Colors.black87,
+                        color: isToday
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurfaceVariant,
                         fontSize: 14,
                       ),
                     ),
@@ -532,13 +549,13 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: Colors.blue,
+                          color: theme.colorScheme.primary,
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Today',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: theme.colorScheme.onPrimary,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                           ),
@@ -550,7 +567,9 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
                 Text(
                   '${date.day} ${_getMonthName(date.month)}',
                   style: TextStyle(
-                    color: isWeekend ? Colors.grey : Colors.black54,
+                    color: isWeekend
+                        ? theme.colorScheme.onSurfaceVariant.withOpacity(0.5)
+                        : theme.colorScheme.onSurfaceVariant,
                     fontSize: 12,
                   ),
                 ),
@@ -560,14 +579,16 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: isWeekend
-                        ? Colors.grey.withOpacity(0.1)
-                        : Colors.green.withOpacity(0.1),
+                        ? theme.colorScheme.surface
+                        : theme.colorScheme.primaryContainer,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     isWeekend ? 'Not Available' : 'Available',
                     style: TextStyle(
-                      color: isWeekend ? Colors.grey : Colors.green,
+                      color: isWeekend
+                          ? theme.colorScheme.onSurface
+                          : theme.colorScheme.onPrimaryContainer,
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
                     ),
@@ -672,35 +693,16 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
                     textAlign: TextAlign.center,
                   ),
                   const Gap(20),
-                  Flexible(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              childAspectRatio: 2.5,
-                              crossAxisSpacing: 10,
-                              mainAxisSpacing: 10,
-                            ),
-                            itemCount: 9,
-                            itemBuilder: (context, index) {
-                              final hour = 9 + index;
-                              final time =
-                                  '${hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}';
-                              return _buildTimeButton(time);
-                            },
-                          ),
-                          const Gap(20),
-                          // Add some bottom padding for better scrolling
-                          const SizedBox(height: 20),
-                        ],
-                      ),
-                    ),
+                  _DigitalClockSelector(
+                    onTimeSelected: (time) {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Appointment booked for $time'),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -710,38 +712,187 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
       ),
     );
   }
+}
 
-  Widget _buildTimeButton(String time) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.blue.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.blue.withOpacity(0.3)),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            Navigator.pop(context);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Appointment booked for $time'),
-                duration: const Duration(seconds: 2),
-              ),
-            );
-          },
-          borderRadius: BorderRadius.circular(8),
-          child: Center(
-            child: Text(
-              time,
-              style: const TextStyle(
-                color: Colors.blue,
-                fontWeight: FontWeight.w500,
-              ),
+class _DigitalClockSelector extends StatefulWidget {
+  final Function(String) onTimeSelected;
+
+  const _DigitalClockSelector({required this.onTimeSelected});
+
+  @override
+  State<_DigitalClockSelector> createState() => _DigitalClockSelectorState();
+}
+
+class _DigitalClockSelectorState extends State<_DigitalClockSelector> {
+  int _selectedHour = 9;
+  int _selectedMinute = 0;
+  String _period = 'AM';
+  bool _isHourSelected = true;
+
+  void _updateTime() {
+    setState(() {
+      if (_isHourSelected) {
+        _selectedHour = (_selectedHour % 12) + 1;
+      } else {
+        _selectedMinute = (_selectedMinute + 15) % 60;
+      }
+    });
+  }
+
+  void _togglePeriod() {
+    setState(() {
+      _period = _period == 'AM' ? 'PM' : 'AM';
+    });
+  }
+
+  void _toggleSelection() {
+    setState(() {
+      _isHourSelected = !_isHourSelected;
+    });
+  }
+
+  String _getFormattedTime() {
+    final hour = _selectedHour > 12 ? _selectedHour - 12 : _selectedHour;
+    final minute = _selectedMinute.toString().padLeft(2, '0');
+    return '$hour:$minute $_period';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        GestureDetector(
+          onTap: _toggleSelection,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildTimePart(
+                  _selectedHour.toString(),
+                  _isHourSelected,
+                  'HOUR',
+                ),
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 20),
+                  child: Text(
+                    ':',
+                    style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
+                    ),
+                  ),
+                ),
+                _buildTimePart(
+                  _selectedMinute.toString().padLeft(2, '0'),
+                  !_isHourSelected,
+                  'MIN',
+                ),
+                const SizedBox(width: 10),
+                GestureDetector(
+                  onTap: _togglePeriod,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      _period,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
-      ),
+        const Gap(20),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: _updateTime,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 30,
+                  vertical: 15,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                _isHourSelected ? 'Change Hour' : 'Change Minute',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const Gap(20),
+            ElevatedButton(
+              onPressed: () => widget.onTimeSelected(_getFormattedTime()),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 30,
+                  vertical: 15,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                'Confirm',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTimePart(String value, bool isSelected, String label) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 40,
+            fontWeight: FontWeight.bold,
+            color: isSelected ? Colors.blue : Colors.grey,
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: isSelected ? Colors.blue : Colors.grey,
+          ),
+        ),
+      ],
     );
   }
 }

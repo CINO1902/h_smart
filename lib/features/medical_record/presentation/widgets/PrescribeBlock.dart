@@ -136,13 +136,7 @@ class _prescription1State extends ConsumerState<prescription1> {
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
                                     InkWell(
-                                      onTap: () {
-                                        ref
-                                            .read(medicalRecordProvider)
-                                            .getclickeddoctor(widget.index);
-                                        Navigator.pushNamed(
-                                            context, '/aboutDoctor');
-                                      },
+                                      onTap: () {},
                                       child: SizedBox(
                                         height: 56,
                                         width: 56,

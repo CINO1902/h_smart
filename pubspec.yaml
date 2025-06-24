@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.1.0 <4.0.0'
+  sdk: '>=3.2.3 <4.0.0'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -59,12 +59,12 @@ dependencies:
   firebase_core: ^3.13.1  
   flutter_multi_formatter: ^2.12.2
   awesome_dialog: ^3.1.0
-  cached_network_image: ^3.4.1
+  cached_network_image: ^3.3.0
   shimmer: ^3.0.0
   image_picker: ^1.0.5
   sticky_headers: ^0.3.0+2
   cloud_firestore: ^5.6.7
-  flutter_riverpod: ^2.5.1
+  flutter_riverpod: ^2.4.9
   intl_phone_field: ^3.2.0
   marquee: ^2.3.0
   socket_io_client: ^3.1.1
@@ -74,6 +74,12 @@ dependencies:
   phone_number: ^2.1.0
   phone_numbers_parser: ^9.0.3
   flutter_sticky_header: ^0.8.0
+  timeago: ^3.6.0
+  video_player: ^2.8.1
+  local_auth: ^2.1.8
+  qr_flutter: ^4.1.0
+  qr_code_scanner:
+    path: ./packages/qr_code_scanner
 
 dev_dependencies:
   flutter_test:

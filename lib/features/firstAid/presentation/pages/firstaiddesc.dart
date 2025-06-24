@@ -15,6 +15,8 @@ class FirstAidDesc extends StatefulWidget {
 class _FirstAidDescState extends State<FirstAidDesc> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
           centerTitle: true,
@@ -39,161 +41,118 @@ class _FirstAidDescState extends State<FirstAidDesc> {
               height: 44,
               width: 180,
               decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  color: const Color(0xffF3F7FF)),
+                borderRadius: BorderRadius.circular(16),
+                color: theme.colorScheme.primary.withOpacity(0.1),
+              ),
               child: Center(
-                child:
-                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  SizedBox(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
                       height: 20,
                       width: 20,
-                      child: Image.asset('images/firstaid_opacity.png')),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  const Text(
-                    'Quick First Aid Tips',
-                    style: TextStyle(
-                        color: Color(0xffFF5C5D),
+                      child: Image.asset(
+                        'images/firstaid_opacity.png',
+                        color: theme.colorScheme.error,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      'Quick First Aid Tips',
+                      style: TextStyle(
+                        color: theme.colorScheme.error,
                         fontWeight: FontWeight.w600,
-                        fontSize: 13),
-                  )
-                ]),
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Container(
-              margin: const EdgeInsets.only(top: 44),
-              child: ListView(
-                children: [
-                  Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          '1. Clean It:',
-                          style: TextStyle(fontSize: 13),
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Gap(80),
+                Text(
+                  widget.title,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onBackground,
+                  ),
+                ),
+                const Gap(20),
+                Text(
+                  'Symptoms',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onBackground,
+                  ),
+                ),
+                const Gap(10),
+                Text(
+                  'Lorem ipsum dolor sit amet consectetur. Nunc pharetra massa velit consectetur lectus erat. Tincidunt dis egestas aliquet adipiscing donec. Sed cras vulputate amet scelerisque. Varius etiam frementum at.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: theme.colorScheme.onBackground.withOpacity(0.7),
+                  ),
+                ),
+                const Gap(20),
+                Text(
+                  'First Aid Steps',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onBackground,
+                  ),
+                ),
+                const Gap(10),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: 5,
+                    itemBuilder: (context, index) {
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 10),
+                        padding: const EdgeInsets.all(10),
+                        height: 125,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: theme.colorScheme.primary.withOpacity(0.3),
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          color: theme.colorScheme.primary.withOpacity(0.1),
                         ),
-                        const Gap(10),
-                        ListView(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SvgPicture.asset('images/dot.svg'),
-                                SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.82,
-                                  child: const Text(
-                                    'Fever is a temporary increase in body temperature, often in response to an infection or illness. It\'s a natural defense mechanism as it helps the body fight off infections.',
-                                    style: TextStyle(fontSize: 13),
-                                  ),
-                                )
-                              ],
+                            Text(
+                              'Step ${index + 1}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: theme.colorScheme.primary,
+                              ),
                             ),
                             const Gap(10),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SvgPicture.asset('images/dot.svg'),
-                                SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.82,
-                                  child: const Text(
-                                    'Use clean, running water to gently rinse the scrape. This helps remove any dirt and debris.',
-                                    style: TextStyle(fontSize: 13),
-                                  ),
-                                )
-                              ],
+                            Text(
+                              'Lorem ipsum dolor sit amet consectetur. Nunc pharetra massa velit consectetur lectus erat.',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: theme.colorScheme.onBackground
+                                    .withOpacity(0.7),
+                              ),
                             ),
                           ],
-                        )
-                      ]),
-                  const Gap(20),
-                  const MySeparator(),
-                  const Gap(20),
-                  Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Common Causes::',
-                          style: TextStyle(fontSize: 13),
                         ),
-                        const Gap(10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SvgPicture.asset('images/dot.svg'),
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.82,
-                              child: const Text(
-                                'Fever can be caused by various factors, including viral or bacterial infections, the flu, common cold, urinary tract infections, or other health conditions.',
-                                style: TextStyle(fontSize: 13),
-                              ),
-                            )
-                          ],
-                        )
-                      ]),
-                  const Gap(20),
-                  const MySeparator(),
-                  const Gap(20),
-                  Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Self-Help Tips:',
-                          style: TextStyle(fontSize: 13),
-                        ),
-                        const Gap(10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SvgPicture.asset('images/dot.svg'),
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.82,
-                              child: const Text(
-                                'If you have a mild fever, it\'s essential to rest, stay hydrated, and keep cool by taking a lukewarm bath. Over-the-counter fever reducers like acetaminophen or ibuprofen can help lower the fever. However, if your fever is severe, persistent, or accompanied by other concerning symptoms, it\'s important to seek medical advice.',
-                                style: TextStyle(fontSize: 13),
-                              ),
-                            )
-                          ],
-                        )
-                      ]),
-                  const Gap(20),
-                  const MySeparator(),
-                  const Gap(20),
-                  Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'When to Seek Medical Attention:',
-                          style: TextStyle(fontSize: 13),
-                        ),
-                        const Gap(10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SvgPicture.asset('images/dot.svg'),
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.82,
-                              child: const Text(
-                                'Contact a healthcare provider if your fever persists for more than a few days, is very high (above 39°C), is accompanied by severe headache, difficulty breathing, chest pain, rash, or confusion, or if you have underlying health conditions.',
-                                style: TextStyle(fontSize: 13),
-                              ),
-                            )
-                          ],
-                        )
-                      ]),
-                ],
-              ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
         ],

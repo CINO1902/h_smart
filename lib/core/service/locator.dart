@@ -25,6 +25,10 @@ import '../../features/myAppointment/data/datasources/remotedatasource.dart';
 import '../../features/myAppointment/data/repositories/user_repo.dart';
 import '../../features/myAppointment/domain/repositories/user_repo.dart';
 import '../../features/myAppointment/presentation/controller/myAppointmentController.dart';
+import '../../features/posts/data/datasource/datasource.dart';
+import '../../features/posts/data/repository/post_repo.dart';
+import '../../features/posts/domain/repository/postRepo.dart';
+import '../../features/posts/presentation/controllers/postController.dart';
 import 'dio_service.dart';
 import 'http_service.dart';
 
@@ -71,6 +75,12 @@ void setup() {
     ..registerLazySingleton<ChatDataSource>(() => ChatDatasourceImp(locator()))
     ..registerLazySingleton<ChatRepository>(() => ChatRepositoryImp(locator()))
     ..registerLazySingleton(() => ChatController(locator()))
+    //Post
+    ..registerLazySingleton<PostDatasourceImp>(
+        () => PostDatasourceImp(locator()))
+    ..registerLazySingleton<PostDataSource>(() => PostDatasourceImp(locator()))
+    ..registerLazySingleton<PostRepository>(() => PostRepositoryImp(locator()))
+    ..registerLazySingleton(() => PostController(locator()))
     //packages
     ..registerLazySingleton<HttpService>(() => DioService(locator()))
     ..registerLazySingleton(() => Dio());

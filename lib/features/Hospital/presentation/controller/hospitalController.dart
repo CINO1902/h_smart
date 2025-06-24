@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:h_smart/features/Hospital/domain/entities/Doctor.dart';
 import 'package:h_smart/features/Hospital/domain/entities/GetHospital.dart';
 import 'package:h_smart/features/Hospital/domain/repositories/hospitalrepo.dart';
+import 'package:http/http.dart' as http;
 
 import '../../domain/entities/DoctorsResponse.dart';
 import '../../domain/states/hospitalStates.dart';
@@ -56,6 +58,8 @@ class GetHospitalProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+
 
   ///Search for hospital
   Future<void> searchHospital(String search) async {

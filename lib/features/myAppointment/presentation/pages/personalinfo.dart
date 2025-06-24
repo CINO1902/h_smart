@@ -16,6 +16,8 @@ import 'package:h_smart/constant/customesnackbar.dart';
 import 'package:h_smart/features/myAppointment/presentation/provider/mydashprovider.dart';
 import 'package:h_smart/features/auth/presentation/provider/auth_provider.dart';
 
+import '../../../../core/theme/theme_mode_provider.dart';
+
 class PersonalInfo extends ConsumerStatefulWidget {
   const PersonalInfo({Key? key}) : super(key: key);
 
@@ -141,7 +143,7 @@ class _PersonalInfoState extends ConsumerState<PersonalInfo> {
     final authState = ref.watch(authProvider);
     final userData = authState.userData;
     final uploadProv = ref.watch(appointmentProvider);
-
+    final theme = Theme.of(context);
     final profileUrl = userData?.patientMetadata?.profileUrl;
 
     return Scaffold(
@@ -149,8 +151,8 @@ class _PersonalInfoState extends ConsumerState<PersonalInfo> {
         centerTitle: true,
         elevation: 0,
         foregroundColor: Colors.black,
-        titleTextStyle: const TextStyle(
-          color: Colors.black,
+        titleTextStyle: TextStyle(
+          color: theme.colorScheme.onBackground,
           fontWeight: FontWeight.w600,
           fontFamily: 'Poppins',
         ),
@@ -239,7 +241,9 @@ class _PersonalInfoState extends ConsumerState<PersonalInfo> {
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFFF3F7FF),
+                color: ref.read(themeModeCheckerProvider)(context)
+                    ? theme.colorScheme.surface
+                    : const Color(0xFFF3F7FF),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Form(
@@ -248,7 +252,10 @@ class _PersonalInfoState extends ConsumerState<PersonalInfo> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // First Name
-                    const Text('First Name'),
+                    Text('First Name',
+                        style: TextStyle(
+                          color: theme.colorScheme.onBackground,
+                        )),
                     const Gap(5),
                     TextFormField(
                       controller: _firstNameController,
@@ -256,12 +263,13 @@ class _PersonalInfoState extends ConsumerState<PersonalInfo> {
                       cursorHeight: 20,
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor:
-                            _isEditing ? Colors.white : const Color(0xFFEAECF0),
-                        contentPadding: const EdgeInsets.only(
-                          top: 5,
-                          left: 10,
-                        ),
+                        fillColor: ref.read(themeModeCheckerProvider)(context)
+                            ? _isEditing
+                                ? Colors.black
+                                : const Color.fromARGB(255, 48, 48, 48)
+                            : _isEditing
+                                ? Colors.white
+                                : const Color(0xFFEAECF0),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
                           borderSide: BorderSide.none,
@@ -286,8 +294,13 @@ class _PersonalInfoState extends ConsumerState<PersonalInfo> {
                       cursorHeight: 20,
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor:
-                            _isEditing ? Colors.white : const Color(0xFFEAECF0),
+                        fillColor: ref.read(themeModeCheckerProvider)(context)
+                            ? _isEditing
+                                ? Colors.black
+                                : const Color.fromARGB(255, 48, 48, 48)
+                            : _isEditing
+                                ? Colors.white
+                                : const Color(0xFFEAECF0),
                         contentPadding: const EdgeInsets.only(
                           top: 5,
                           left: 10,
@@ -316,12 +329,13 @@ class _PersonalInfoState extends ConsumerState<PersonalInfo> {
                       readOnly: !_isEditing,
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor:
-                            _isEditing ? Colors.white : const Color(0xFFEAECF0),
-                        contentPadding: const EdgeInsets.only(
-                          top: 5,
-                          left: 10,
-                        ),
+                        fillColor: ref.read(themeModeCheckerProvider)(context)
+                            ? _isEditing
+                                ? Colors.black
+                                : const Color.fromARGB(255, 48, 48, 48)
+                            : _isEditing
+                                ? Colors.white
+                                : const Color(0xFFEAECF0),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
                           borderSide: BorderSide.none,
@@ -349,12 +363,13 @@ class _PersonalInfoState extends ConsumerState<PersonalInfo> {
                       cursorHeight: 20,
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor:
-                            _isEditing ? Colors.white : const Color(0xFFEAECF0),
-                        contentPadding: const EdgeInsets.only(
-                          top: 5,
-                          left: 10,
-                        ),
+                        fillColor: ref.read(themeModeCheckerProvider)(context)
+                            ? _isEditing
+                                ? Colors.black
+                                : const Color.fromARGB(255, 48, 48, 48)
+                            : _isEditing
+                                ? Colors.white
+                                : const Color(0xFFEAECF0),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
                           borderSide: BorderSide.none,
@@ -379,11 +394,13 @@ class _PersonalInfoState extends ConsumerState<PersonalInfo> {
                       cursorHeight: 20,
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: const Color(0xFFEAECF0),
-                        contentPadding: const EdgeInsets.only(
-                          top: 5,
-                          left: 10,
-                        ),
+                        fillColor: ref.read(themeModeCheckerProvider)(context)
+                            ? _isEditing
+                                ? Colors.black
+                                : const Color.fromARGB(255, 48, 48, 48)
+                            : _isEditing
+                                ? Colors.white
+                                : const Color(0xFFEAECF0),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
                           borderSide: BorderSide.none,

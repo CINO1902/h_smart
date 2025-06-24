@@ -8,14 +8,15 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 
 import '../../../../constant/Inkbutton.dart';
 import '../../../../constant/snackbar.dart';
+import '../../../../core/theme/theme_mode_provider.dart';
 import '../../../../core/utils/appColor.dart' show AppColors;
 import '../../../../features/auth/domain/usecases/authStates.dart';
 import '../../../../features/auth/presentation/provider/auth_provider.dart';
 import 'package:gap/gap.dart';
 
 class VerifyEmailPage extends ConsumerStatefulWidget {
-  String email;
-  VerifyEmailPage({Key? key, required this.email}) : super(key: key);
+  final String email;
+  const VerifyEmailPage({Key? key, required this.email}) : super(key: key);
 
   @override
   ConsumerState<VerifyEmailPage> createState() => _VerifyEmailPageState();
@@ -73,20 +74,23 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
             .response['message'] as String? ??
         'Unknown error';
     if (verifyState == EmailVerificationResultState.isError) {
-      SnackBarService.showSnackBar(
-        context,
-        title: 'Error',
-        body: responseMsg,
-        status: SnackbarStatus.fail,
-      );
+      if (mounted) {
+        SnackBarService.showSnackBar(
+          context,
+          title: 'Error',
+          body: responseMsg,
+          status: SnackbarStatus.fail,
+        );
+      }
     } else {
-      SnackBarService.showSnackBar(
-        context,
-        title: 'Success',
-        body: responseMsg,
-        status: SnackbarStatus.success,
-      );
-
+      if (mounted) {
+        SnackBarService.showSnackBar(
+          context,
+          title: 'Success',
+          body: responseMsg,
+          status: SnackbarStatus.success,
+        );
+      }
       // Navigate to profile completion and remove this page from history
     }
   }
@@ -99,12 +103,10 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
       );
       return;
     }
-
     final verifyState = ref.read(authProvider).verifyEmailResult.state;
     if (verifyState == VerifyEmailResultStates.isLoading) {
       return;
     }
-
     SmartDialog.showLoading();
     await ref.read(authProvider).verifyOtp(_currentOtp);
     SmartDialog.dismiss();
@@ -117,29 +119,36 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
         'Unknown error';
 
     if (resultState == VerifyEmailResultStates.isError) {
-      SnackBarService.showSnackBar(
-        context,
-        title: 'Error',
-        body: responseMsg,
-        status: SnackbarStatus.fail,
-      );
+      if (mounted) {
+        SnackBarService.showSnackBar(
+          context,
+          title: 'Error',
+          body: responseMsg,
+          status: SnackbarStatus.fail,
+        );
+      }
     } else {
-      SnackBarService.showSnackBar(
-        context,
-        title: 'Success',
-        body: responseMsg,
-        status: SnackbarStatus.success,
-      );
-
-      // Navigate to profile completion and remove this page from history
-      context.go('/login');
+      if (mounted) {
+        SnackBarService.showSnackBar(
+          context,
+          title: 'Success',
+          body: responseMsg,
+          status: SnackbarStatus.success,
+        );
+      }
+      if (mounted) {
+        // Navigate to profile completion and remove this page from history
+        context.go('/login');
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = ref.read(themeModeCheckerProvider)(context);
     return Scaffold(
       appBar: AppBar(
+        title: Image.asset('images/logo1.png', width: 150),
         leading: InkWell(
           onTap: () => context.pop(),
           child: const Padding(
@@ -151,8 +160,8 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
           ),
         ),
         elevation: 0,
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.black87,
+        // backgroundColor: Colors.transparent,
+        // foregroundColor: Colors.black87,
       ),
       body: SafeArea(
         child: Padding(
@@ -193,12 +202,18 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
                     borderRadius: BorderRadius.circular(10),
                     fieldHeight: 54,
                     fieldWidth: 75,
-                    activeColor: const Color(0xffEBF1FF),
-                    inactiveColor: const Color(0xffEBF1FF),
-                    selectedColor: const Color(0xffEBF1FF),
-                    inactiveFillColor: const Color(0xffEBF1FF),
-                    selectedFillColor: const Color(0xffEBF1FF),
-                    activeFillColor: const Color(0xffEBF1FF),
+                    activeColor:
+                        isDarkMode ? Colors.grey[700] : const Color(0xffEBF1FF),
+                    inactiveColor:
+                        isDarkMode ? Colors.grey[700] : const Color(0xffEBF1FF),
+                    selectedColor:
+                        isDarkMode ? Colors.grey[700] : const Color(0xffEBF1FF),
+                    inactiveFillColor:
+                        isDarkMode ? Colors.grey[700] : const Color(0xffEBF1FF),
+                    selectedFillColor:
+                        isDarkMode ? Colors.grey[700] : const Color(0xffEBF1FF),
+                    activeFillColor:
+                        isDarkMode ? Colors.grey[700] : const Color(0xffEBF1FF),
                   ),
                   cursorColor: Colors.black,
                   onChanged: (value) {
@@ -268,7 +283,7 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
               Center(
                 child: InkWell(
                   onTap: _verifyAndContinue,
-                  child: InkButton(
+                  child: const InkButton(
                     title: 'Verify and continue',
                   ),
                 ),

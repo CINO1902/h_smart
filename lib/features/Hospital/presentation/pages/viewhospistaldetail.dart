@@ -18,6 +18,8 @@ class viewhospitaldetail extends ConsumerStatefulWidget {
 class _viewhospitaldetailState extends ConsumerState<viewhospitaldetail> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       body: Stack(
         children: [
@@ -67,8 +69,8 @@ class _viewhospitaldetailState extends ConsumerState<viewhospitaldetail> {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: <Color>[
-                          Colors.white.withOpacity(.1),
-                          Colors.white.withOpacity(.8)
+                          theme.colorScheme.background.withOpacity(0.1),
+                          theme.colorScheme.background.withOpacity(0.8)
                         ],
                       ),
                     ),
@@ -94,7 +96,7 @@ class _viewhospitaldetailState extends ConsumerState<viewhospitaldetail> {
                                   width: 12,
                                   child: Image.asset(
                                     'images/MapPin.png',
-                                    color: const Color(0xff3772FF),
+                                    color: theme.colorScheme.primary,
                                   ),
                                 ),
                                 const Gap(5),
@@ -110,7 +112,7 @@ class _viewhospitaldetailState extends ConsumerState<viewhospitaldetail> {
                                   width: 12,
                                   child: Image.asset(
                                     'images/Clock.png',
-                                    color: const Color(0xff3772FF),
+                                    color: theme.colorScheme.primary,
                                   ),
                                 ),
                                 const Gap(5),
@@ -267,21 +269,32 @@ class _viewhospitaldetailState extends ConsumerState<viewhospitaldetail> {
             ],
           ),
           SafeArea(
-            child: InkWell(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: Container(
-                margin: const EdgeInsets.only(left: 20),
-                padding: const EdgeInsets.all(5),
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(5),
-                    color: const Color.fromARGB(255, 237, 237, 237)),
-                child: Image.asset(
-                  'images/chevron-left.png',
-                ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CircleAvatar(
+                    backgroundColor: theme.colorScheme.surface.withOpacity(0.8),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.arrow_back,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ),
+                  CircleAvatar(
+                    backgroundColor: theme.colorScheme.surface.withOpacity(0.8),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.favorite_border,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                      onPressed: () {},
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

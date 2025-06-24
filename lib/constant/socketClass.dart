@@ -63,9 +63,7 @@ class SocketService {
           insertedId = int.tryParse(messageIdReceiver.split('_')[0]);
         }
         pref.setString('convoId', data['message']['conversation']);
-        String mwww = '893';
-        mwww =
-            data['message']['conversation'];
+
         DatabaseHelper().upsertMessage(
             id: insertedId,
             message: {

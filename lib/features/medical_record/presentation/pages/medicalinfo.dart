@@ -11,207 +11,211 @@ class MedicalInfo extends StatefulWidget {
 class _MedicalInfoState extends State<MedicalInfo> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
-          centerTitle: true,
-          elevation: 0,
-          titleSpacing: 0.1,
-          foregroundColor: Colors.black,
-          titleTextStyle: const TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.w600,
-              fontFamily: 'Poppins'),
-          title: const Text(
-            'Medical Info',
-            style: TextStyle(fontSize: 19),
-          )),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Column(
-              children: [
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Mary Jane',
-                      style:
-                          TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-                    ),
-                    Text(''),
-                  ],
-                ),
-                const Gap(10),
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Blood Group: O+',
-                      style:
-                          TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
-                    ),
-                    Text('Genotype: AA'),
-                  ],
-                ),
-                const Gap(10),
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Gender: Female',
-                      style:
-                          TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
-                    ),
-                    Text('DOB: 02/04/1998'),
-                  ],
-                ),
-                const Gap(25),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Medical Condition',
-                      style:
-                          TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-                    ),
-                    Container(
-                        height: 25,
-                        width: 25,
-                        decoration: BoxDecoration(
-                            border: Border.all(color: Colors.blue),
-                            color: const Color(0xffF3F7FF),
-                            borderRadius: BorderRadius.circular(15)),
-                        child: const Icon(
-                          Icons.add,
-                          size: 18,
-                        )),
-                  ],
-                ),
-                const Gap(20),
-                Container(
-                  //  margin: EdgeInsets.all(20),
-                  padding: const EdgeInsets.all(10),
-                  height: 125,
-                  decoration: BoxDecoration(
-                      border: Border.all(color: const Color(0xffC1D3FF)),
-                      borderRadius: BorderRadius.circular(16),
-                      color: const Color(0xffF3F7FF)),
-                  child: Column(
-                    children: [
-                      Container(
-                        height: 44,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0xffC1D3FF)),
-                        ),
-                        child: const Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'Hypertension (High Blood Pressure)',
-                            style: TextStyle(fontSize: 11),
-                          ),
-                        ),
-                      ),
-                      const Gap(10),
-                      Container(
-                        height: 44,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0xffC1D3FF)),
-                        ),
-                        child: const Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'Asthma',
-                            style: TextStyle(fontSize: 11),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Gap(25),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Allergies',
-                      style:
-                          TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-                    ),
-                    Container(
-                        height: 25,
-                        width: 25,
-                        decoration: BoxDecoration(
-                            border: Border.all(color: Colors.blue),
-                            color: const Color(0xffF3F7FF),
-                            borderRadius: BorderRadius.circular(15)),
-                        child: const Icon(
-                          Icons.add,
-                          size: 18,
-                        )),
-                  ],
-                ),
-                const Gap(20),
-                Container(
-                  //  margin: EdgeInsets.all(20),
-                  padding: const EdgeInsets.all(10),
-                  height: 125,
-                  decoration: BoxDecoration(
-                      border: Border.all(color: const Color(0xffC1D3FF)),
-                      borderRadius: BorderRadius.circular(16),
-                      color: const Color(0xffF3F7FF)),
-                  child: Column(
-                    children: [
-                      Container(
-                        height: 44,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0xffC1D3FF)),
-                        ),
-                        child: const Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'Food (Peanuts)',
-                            style: TextStyle(fontSize: 11),
-                          ),
-                        ),
-                      ),
-                      const Gap(10),
-                      Container(
-                        height: 44,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0xffC1D3FF)),
-                        ),
-                        child: const Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'Insect Sting Alergy',
-                            style: TextStyle(fontSize: 11),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              ],
+        centerTitle: true,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        titleSpacing: 0.1,
+        title: Text(
+          'Medical Info',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Allergies',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onBackground,
+              ),
             ),
-          )
-        ],
+            const Gap(10),
+            Container(
+              padding: const EdgeInsets.all(10),
+              height: 125,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: theme.colorScheme.primary.withOpacity(0.3),
+                ),
+                borderRadius: BorderRadius.circular(16),
+                color: theme.colorScheme.primary.withOpacity(0.1),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    height: 44,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: theme.colorScheme.primary.withOpacity(0.3),
+                      ),
+                    ),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Food (Peanuts)',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: theme.colorScheme.onBackground,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Gap(10),
+                  Container(
+                    height: 44,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: theme.colorScheme.primary.withOpacity(0.3),
+                      ),
+                    ),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Drug (Penicillin)',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: theme.colorScheme.onBackground,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Gap(20),
+            Text(
+              'Medical Conditions',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onBackground,
+              ),
+            ),
+            const Gap(10),
+            Container(
+              padding: const EdgeInsets.all(10),
+              height: 125,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: theme.colorScheme.primary.withOpacity(0.3),
+                ),
+                borderRadius: BorderRadius.circular(16),
+                color: theme.colorScheme.primary.withOpacity(0.1),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    height: 44,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: theme.colorScheme.primary.withOpacity(0.3),
+                      ),
+                    ),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Asthma',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: theme.colorScheme.onBackground,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Gap(10),
+                  Container(
+                    height: 44,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: theme.colorScheme.primary.withOpacity(0.3),
+                      ),
+                    ),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Diabetes Type 2',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: theme.colorScheme.onBackground,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Gap(20),
+            Text(
+              'Blood Type',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onBackground,
+              ),
+            ),
+            const Gap(10),
+            Container(
+              padding: const EdgeInsets.all(10),
+              height: 70,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: theme.colorScheme.primary.withOpacity(0.3),
+                ),
+                borderRadius: BorderRadius.circular(16),
+                color: theme.colorScheme.primary.withOpacity(0.1),
+              ),
+              child: Container(
+                height: 44,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: theme.colorScheme.primary.withOpacity(0.3),
+                  ),
+                ),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'O+',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: theme.colorScheme.onBackground,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

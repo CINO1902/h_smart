@@ -119,12 +119,13 @@ class _HospitalDetailViewState extends ConsumerState<HospitalDetailView> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     DoctorsResponse doctorsResponse =
         ref.watch(hospitalprovider).doctorResult.response;
     DoctorResultStates doctorResultStates =
         ref.watch(hospitalprovider).doctorResult.state;
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: theme.colorScheme.background,
       body: Stack(
         children: [
           // Scrollable Content
@@ -141,9 +142,10 @@ class _HospitalDetailViewState extends ConsumerState<HospitalDetailView> {
                     children: [
                       Text(
                         widget.hospital.hospitalName ?? '',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onBackground,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -151,14 +153,15 @@ class _HospitalDetailViewState extends ConsumerState<HospitalDetailView> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.location_on,
-                              color: Colors.blue, size: 20),
+                          Icon(Icons.location_on,
+                              color: theme.colorScheme.primary, size: 20),
                           const Gap(4),
                           Text(
                             '${widget.hospital.city}, ${widget.hospital.state}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
-                              color: Colors.grey,
+                              color: theme.colorScheme.onBackground
+                                  .withOpacity(0.7),
                             ),
                           ),
                         ],
@@ -188,8 +191,8 @@ class _HospitalDetailViewState extends ConsumerState<HospitalDetailView> {
                             ),
                           ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.kprimaryColor500,
-                            foregroundColor: Colors.white,
+                            backgroundColor: theme.colorScheme.primary,
+                            foregroundColor: theme.colorScheme.onPrimary,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -234,11 +237,12 @@ class _HospitalDetailViewState extends ConsumerState<HospitalDetailView> {
               padding: const EdgeInsets.only(left: 16.0, top: 6.0),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: theme.colorScheme.surface.withOpacity(0.8),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back),
+                  icon: Icon(Icons.arrow_back,
+                      color: theme.colorScheme.onSurface),
                   onPressed: () => context.pop(context),
                 ),
               ),

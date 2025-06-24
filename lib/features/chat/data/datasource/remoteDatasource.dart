@@ -52,9 +52,9 @@ class ChatDatasourceImp implements ChatDataSource {
         GetConversationResult(GetConversatonResultState.isLoading, {});
 
     final response = await httpService.request(
-        url: '/getConversation',
-        methodrequest: RequestMethod.getWithToken,
-        authtoken: userId);
+      url: '/getConversation',
+      methodrequest: RequestMethod.getWithToken,
+    );
 
     if (response.statusCode == 200) {
       getConversationResult = GetConversationResult(

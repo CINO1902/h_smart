@@ -10,6 +10,7 @@ import 'package:gap/gap.dart';
 
 import '../../../../../constant/Inkbutton.dart';
 import '../../../../../constant/snackbar.dart';
+import '../../../../../core/theme/theme_mode_provider.dart';
 import '../../../../../core/utils/appColor.dart';
 import '../../../domain/usecases/authStates.dart';
 import '../../provider/auth_provider.dart';
@@ -141,6 +142,7 @@ class _VerifyPasswordOtpState extends ConsumerState<VerifyPasswordOtp> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = ref.read(themeModeCheckerProvider)(context);
     return Scaffold(
       appBar: AppBar(
         surfaceTintColor: Colors.transparent,
@@ -157,8 +159,6 @@ class _VerifyPasswordOtpState extends ConsumerState<VerifyPasswordOtp> {
           ),
         ),
         elevation: 0,
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.black87,
       ),
       body: SafeArea(
         child: Padding(
@@ -199,12 +199,18 @@ class _VerifyPasswordOtpState extends ConsumerState<VerifyPasswordOtp> {
                     borderRadius: BorderRadius.circular(10),
                     fieldHeight: 54,
                     fieldWidth: 75,
-                    activeColor: const Color(0xffEBF1FF),
-                    inactiveColor: const Color(0xffEBF1FF),
-                    selectedColor: const Color(0xffEBF1FF),
-                    inactiveFillColor: const Color(0xffEBF1FF),
-                    selectedFillColor: const Color(0xffEBF1FF),
-                    activeFillColor: const Color(0xffEBF1FF),
+                    activeColor:
+                        isDarkMode ? Colors.grey[700] : const Color(0xffEBF1FF),
+                    inactiveColor:
+                        isDarkMode ? Colors.grey[700] : const Color(0xffEBF1FF),
+                    selectedColor:
+                        isDarkMode ? Colors.grey[700] : const Color(0xffEBF1FF),
+                    inactiveFillColor:
+                        isDarkMode ? Colors.grey[700] : const Color(0xffEBF1FF),
+                    selectedFillColor:
+                        isDarkMode ? Colors.grey[700] : const Color(0xffEBF1FF),
+                    activeFillColor:
+                        isDarkMode ? Colors.grey[700] : const Color(0xffEBF1FF),
                   ),
                   cursorColor: Colors.black,
                   onChanged: (value) {

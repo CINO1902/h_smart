@@ -1,3 +1,5 @@
+// ext.kotlin_version = '1.7.10'
+
 plugins {
     id "com.android.application"
     id "kotlin-android"
@@ -24,18 +26,24 @@ if (flutterVersionName == null) {
 
 android {
     namespace "com.caleboruta.hsmart"
-    compileSdkVersion flutter.compileSdkVersion
+    compileSdkVersion 35
+    
     ndkVersion "25.1.8937393"
+    buildToolsVersion "34.0.0"
     
 
     compileOptions {
         coreLibraryDesugaringEnabled true
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+
+        coreLibraryDesugaringEnabled true
+        
     }
 
     kotlinOptions {
-        jvmTarget = '1.8'
+        // jvmTarget = '1.8'
+        jvmTarget = '17'
     }
 
     sourceSets {
@@ -68,7 +76,11 @@ flutter {
 }
 
 dependencies {
-   implementation platform('com.google.firebase:firebase-bom:31.1.1')
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.0.3"
+    implementation platform('com.google.firebase:firebase-bom:31.1.1')
+
+    implementation "androidx.core:core-ktx:1.9.0"
+    implementation "androidx.appcompat:appcompat:1.5.1"
+    // coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
+    // implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }

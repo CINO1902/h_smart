@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
@@ -16,8 +15,9 @@ class ProfileItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Material(
-      color: Colors.white,
+      color: theme.colorScheme.surface,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
@@ -26,7 +26,9 @@ class ProfileItem extends StatelessWidget {
           height: 50,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            border: Border.all(color: const Color(0xFFC1D3FF)),
+            border: Border.all(
+              color: theme.colorScheme.outline.withOpacity(0.2),
+            ),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Row(
@@ -35,14 +37,15 @@ class ProfileItem extends StatelessWidget {
                 'images/$iconName.png',
                 width: 24,
                 height: 24,
+                color: theme.colorScheme.primary,
               ),
               const Gap(10),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
-                  color: Colors.black87,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
             ],

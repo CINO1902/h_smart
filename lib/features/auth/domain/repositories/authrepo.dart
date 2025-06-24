@@ -84,8 +84,13 @@ class AuthRepositoryImp implements AuthRepository {
       if (e.runtimeType == NetworkException) {
         NetworkException exp = e as NetworkException;
         final message = exp.errorMessage ?? e.message;
-        continueRegisterResult = ContinueRegisterResult(
-            ContinueRegisterResultStates.isError, {"message": message});
+        if (exp.type == NetworkExceptionType.unauthorizedRequest) {
+          continueRegisterResult = ContinueRegisterResult(
+              ContinueRegisterResultStates.islogout, {"message": message});
+        } else {
+          continueRegisterResult = ContinueRegisterResult(
+              ContinueRegisterResultStates.isError, {"message": message});
+        }
       } else {
         continueRegisterResult = ContinueRegisterResult(
             ContinueRegisterResultStates.isError,
@@ -147,6 +152,7 @@ class AuthRepositoryImp implements AuthRepository {
     try {
       registerResult = await authDatasource.getuserdetails();
     } catch (e) {
+      print(e);
       log(e.toString());
       if (e.runtimeType == NetworkException) {
         NetworkException exp = e as NetworkException;

@@ -80,18 +80,26 @@ class ContinueRegistrationModel {
         profileUrl: json["profile_url"],
       );
 
-  Map<String, dynamic> toJson() => {
-        "date_of_birth":
-            "${dateOfBirth.year.toString().padLeft(4, '0')}-${dateOfBirth.month.toString().padLeft(2, '0')}-${dateOfBirth.day.toString().padLeft(2, '0')}",
-        "gender": gender,
-        "blood_type": bloodType,
-        "emergency_contact_name": emergencyContactName,
-        "emergency_contact_phone": emergencyContactPhone,
-        "address": address,
-        "insurance_provider": insuranceProvider,
-        "insurance_number": insuranceNumber,
-        "allergies": allergies,
-        "medical_conditions": medicalConditions,
-        "profile_url": profileUrl,
-      };
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {
+      "date_of_birth": "${dateOfBirth.year.toString().padLeft(4, '0')}-"
+          "${dateOfBirth.month.toString().padLeft(2, '0')}-"
+          "${dateOfBirth.day.toString().padLeft(2, '0')}",
+      "gender": gender,
+      "blood_type": bloodType,
+      "emergency_contact_name": emergencyContactName,
+      "emergency_contact_phone": emergencyContactPhone,
+      "address": address,
+      "insurance_provider": insuranceProvider,
+      "insurance_number": insuranceNumber,
+      "allergies": allergies,
+      "medical_conditions": medicalConditions,
+      "profile_url": profileUrl,
+    };
+
+    // Remove any key whose value is null
+    data.removeWhere((key, value) => value == null);
+
+    return data;
+  }
 }

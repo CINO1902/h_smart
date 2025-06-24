@@ -70,16 +70,14 @@ class SnackBarService {
                 color: status == SnackbarStatus.success
                     ? AppColors.ksuccessColor300
                     : status == SnackbarStatus.info
-                        ? AppColors
-                            .kprimaryColor300 //I think this should be a shade of blue but na designer job
-                        : AppColors.kErrorColor200),
+                        ? AppColors.kwarningColor300
+                        : AppColors.kErrorColor300),
             borderRadius: BorderRadius.circular(8),
             color: status == SnackbarStatus.success
-                ? AppColors.ksuccessColor100
+                ? AppColors.kSuccessColor50
                 : status == SnackbarStatus.info
-                    ? AppColors
-                        .kprimaryColor100 //still think this should be blue
-                    : AppColors.kErrorColor200),
+                    ? AppColors.kwarningColor50
+                    : AppColors.kErrorColor50),
         child: Row(
           children: [
             Expanded(
@@ -92,18 +90,21 @@ class SnackBarService {
                         color: status == SnackbarStatus.success
                             ? AppColors.ksuccessColor500
                             : status == SnackbarStatus.info
-                                ? AppColors
-                                    .kprimaryColor500 //still think this should be blue sha
-                                : AppColors.kWhite,
+                                ? AppColors.kwarningColor500
+                                : AppColors.kErrorColor500,
                         fontWeight: FontWeight.w600),
                   ),
                   Text(
                     body,
                     textAlign: TextAlign.center,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall!
-                        .copyWith(color: AppColors.kWhite),
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          color: status == SnackbarStatus.success
+                              ? AppColors.ksuccessColor500
+                              : status == SnackbarStatus.info
+                                  ? AppColors.kwarningColor500
+                                  : AppColors.kErrorColor500,
+                          fontWeight: FontWeight.w400,
+                        ),
                   ),
                 ],
               ),
@@ -111,15 +112,18 @@ class SnackBarService {
             const SizedBox(
               width: 10,
             ),
-            // IconButton(
-            //     onPressed: () {
-            //     },
-            //     icon:
-            const Icon(
-              Icons.cancel_outlined,
-              color: AppColors.kWhite,
-            )
-            // )
+            Icon(
+              status == SnackbarStatus.success
+                  ? Icons.check_circle
+                  : status == SnackbarStatus.info
+                      ? Icons.info
+                      : Icons.error,
+              color: status == SnackbarStatus.success
+                  ? AppColors.ksuccessColor500
+                  : status == SnackbarStatus.info
+                      ? AppColors.kwarningColor500
+                      : AppColors.kErrorColor500,
+            ),
           ],
         ),
       ),
@@ -130,4 +134,70 @@ class SnackBarService {
   }
 }
 
-enum SnackbarStatus { success, fail, warning, info }
+enum SnackbarStatus { success, fail, info }
+
+void showCustomSnackBar(
+  BuildContext context,
+  String message,
+  SnackbarStatus status,
+) {
+  final theme = Theme.of(context);
+
+  showTopSnackBar(
+    Overlay.of(context),
+    Container(
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 30),
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 4,
+            color: theme.colorScheme.shadow.withOpacity(0.2),
+            spreadRadius: 2,
+            offset: const Offset(0, 1),
+          ),
+        ],
+        border: Border.all(
+          color: status == SnackbarStatus.success
+              ? theme.colorScheme.tertiary
+              : status == SnackbarStatus.info
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.error,
+        ),
+        borderRadius: BorderRadius.circular(8),
+        color: status == SnackbarStatus.success
+            ? theme.colorScheme.tertiary.withOpacity(0.2)
+            : status == SnackbarStatus.info
+                ? theme.colorScheme.primary.withOpacity(0.2)
+                : theme.colorScheme.error.withOpacity(0.2),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            status == SnackbarStatus.success
+                ? Icons.check_circle
+                : status == SnackbarStatus.info
+                    ? Icons.info
+                    : Icons.error,
+            color: status == SnackbarStatus.success
+                ? theme.colorScheme.tertiary
+                : status == SnackbarStatus.info
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.error,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(
+                color: theme.colorScheme.onBackground,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+    displayDuration: const Duration(seconds: 3),
+  );
+}

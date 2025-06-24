@@ -4,6 +4,7 @@ import 'package:h_smart/features/chat/presentation/pages/chat.dart';
 import 'package:h_smart/features/medical_record/presentation/pages/HomePage.dart';
 import 'package:h_smart/features/myAppointment/presentation/pages/myAppointment.dart';
 import 'package:h_smart/features/myAppointment/presentation/pages/profile.dart';
+import 'package:h_smart/features/posts/presentation/pages/posts_screen.dart';
 import 'package:line_icons/line_icons.dart';
 
 import '../../../../core/utils/appColor.dart';
@@ -24,6 +25,7 @@ class _indexpageState extends State<indexpage> {
     List<Widget> widgetOptions = <Widget>[
       const HomePage(),
       const MyAppointment(),
+      const PostsScreen(),
       const Chat(),
       const ProfileScreen(),
     ];
@@ -35,29 +37,27 @@ class _indexpageState extends State<indexpage> {
         ),
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
             boxShadow: [
               BoxShadow(
                 blurRadius: 20,
-                color: Colors.black.withOpacity(.1),
+                color: Theme.of(context).colorScheme.onInverseSurface,
               )
             ],
           ),
           child: SafeArea(
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8),
               child: GNav(
                 rippleColor: Theme.of(context).colorScheme.inverseSurface,
                 hoverColor: Theme.of(context).colorScheme.inverseSurface,
-                gap: 8,
+                gap: 4,
                 activeColor: AppColors.kprimaryColor500,
-                iconSize: 24,
+                iconSize: 20,
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 duration: const Duration(milliseconds: 400),
                 tabBackgroundColor: Colors.grey[100]!,
-                color: Colors.black,
+                // color: Colors.black,
                 tabs: const [
                   GButton(
                     icon: LineIcons.home,
@@ -67,9 +67,13 @@ class _indexpageState extends State<indexpage> {
                     icon: LineIcons.alternateCalendar,
                     text: 'Appointment',
                     textStyle: TextStyle(
-                        fontSize: 12,
+                        fontSize: 11,
                         color: AppColors.kprimaryColor500,
                         fontWeight: FontWeight.bold),
+                  ),
+                  GButton(
+                    icon: LineIcons.newspaper,
+                    text: 'Posts',
                   ),
                   GButton(
                     icon: LineIcons.rocketChat,

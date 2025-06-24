@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class ProfileCompleteScreen extends StatelessWidget {
+import '../../../../core/theme/theme_mode_provider.dart';
+
+class ProfileCompleteScreen extends ConsumerWidget {
   const ProfileCompleteScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isDarkMode = ref.read(themeModeCheckerProvider)(context);
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -30,12 +33,12 @@ class ProfileCompleteScreen extends StatelessWidget {
               const SizedBox(height: 30),
 
               // Title
-              const Text(
+              Text(
                 'Profile Setup Complete',
                 style: TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF111827),
+                  color: isDarkMode ? Colors.white : const Color(0xFF111827),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -43,11 +46,11 @@ class ProfileCompleteScreen extends StatelessWidget {
               const SizedBox(height: 12),
 
               // Subtitle
-              const Text(
+              Text(
                 'Your profile is now ready to use. You can continue to explore the app.',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Color(0xFF6B7280),
+                  color: isDarkMode ? Colors.white : const Color(0xFF6B7280),
                 ),
                 textAlign: TextAlign.center,
               ),

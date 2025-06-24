@@ -58,7 +58,7 @@ class AuthDatasourceImp implements AuthDatasource {
     // print(continueModel.toJson());
     ContinueRegisterResult continueRegisterResult =
         ContinueRegisterResult(ContinueRegisterResultStates.isLoading, {});
-
+    print(continueModel.toJson());
     final response = await httpService.request(
         url: '/auth/create_patient_profile_metadata',
         methodrequest: RequestMethod.postWithToken,

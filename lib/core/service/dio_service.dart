@@ -14,45 +14,35 @@ class DioService implements HttpService {
   final Dio dio;
 
   DioService(this.dio) {
-    dio.options.baseUrl = baseUrl;
-
-    dio.options.connectTimeout = const Duration(seconds: 15);
-    dio.options.receiveTimeout = const Duration(seconds: 15);
-
-    dio.options.headers.addAll({'Content-Type': 'application/json'});
+    dio.options
+      ..baseUrl = baseUrl
+      ..connectTimeout = const Duration(seconds: 15)
+      ..receiveTimeout = const Duration(seconds: 15)
+      ..headers.addAll({
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
+            'AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.4 Safari/605.1.15',
+      });
 
     if (kDebugMode) {
       dio.interceptors.add(
         InterceptorsWrapper(
-          onRequest: (requestOptions, handler) {
+          onRequest: (options, handler) {
             log(
-              'REQUEST[${requestOptions.method}] => PATH: ${requestOptions.path}'
-              '=> REQUEST VALUES: ${requestOptions.queryParameters} => HEADERS: ${requestOptions.headers}',
+              'REQUEST[${options.method}] => PATH: ${options.path}'
+              ' => QUERY: ${options.queryParameters}'
+              ' => HEADERS: ${options.headers}',
             );
-            return handler.next(requestOptions);
+            handler.next(options);
           },
           onResponse: (response, handler) {
-            log(
-              'RESPONSE[${response.statusCode}] => DATA: ${response.data}',
-            );
-            return handler.next(response);
+            log('RESPONSE[${response.statusCode}] => DATA: ${response.data}');
+            handler.next(response);
           },
-          onError: (err, handler) async {
-            //   final SharedPreferences prefs =
-            //       await SharedPreferences.getInstance();
-            //   log('request failed: ${err.response?.statusCode}');
-            //   // log('contains refresh token in storgae: ${prefs.containsKey('refreshToken')}');
-            //   if ((err.response?.statusCode == 401 &&
-            //       err.response?.data['msg'] == "Unauthorized")) {
-            //     if (prefs.containsKey('refreshToken')) {
-            //       // will throw error below
-            //       await refreshToken();
-            //       // return handler.resolve(await _retry(err.requestOptions));
-            //     }
-            //   }
-            log('Error[${err.response?.statusCode}]');
-            // log('Error[${err.response?.data}]');
-            return handler.next(err);
+          onError: (err, handler) {
+            log('ERROR[${err.response?.statusCode}] => ${err.message}');
+            handler.next(err);
           },
         ),
       );
@@ -65,66 +55,97 @@ class DioService implements HttpService {
     required RequestMethod methodrequest,
     Map<String, dynamic>? params,
     CancelToken? cancelToken,
-    String? authtoken,
     dynamic data,
   }) async {
-    final pref = await SharedPreferences.getInstance();
-    final accesstoken = pref.getString('jwt_token');
-    Response response;
-    try {
-      if (methodrequest == RequestMethod.post) {
-        response = await dio.post(url, data: data, cancelToken: cancelToken);
-      } else if (methodrequest == RequestMethod.delete) {
-        response = await dio.delete(url);
-      } else if (methodrequest == RequestMethod.patch) {
-        response = await dio.patch(url, data: data);
-      } else if (methodrequest == RequestMethod.put) {
-        response = await dio.put(url, data: params);
-      } else if (methodrequest == RequestMethod.postWithToken) {
-        response = await dio.post(
-          url,
-          data: data,
-          cancelToken: cancelToken,
-          options: Options(
-            headers: {
-              'Authorization': 'Bearer $accesstoken',
-            },
-          ),
-        );
-      } else if (methodrequest == RequestMethod.getWithToken) {
-        response = await dio.get(
-          url,
-          data: data,
-          cancelToken: cancelToken,
-          options: Options(
-            headers: {
-              'Authorization': 'Bearer $accesstoken',
-            },
-          ),
-        );
-      } else {
-        response = await dio.get(url,
-            queryParameters: params, cancelToken: cancelToken);
-      }
-      return response;
-    } catch (e) {
-      if (e is DioException) {
-        log(e.response.toString());
-        if (e.response == null) {
-          CustomException('Something Went wrong');
-        }
-        CustomException(e.error.toString());
-        throw parseNetworkException(e);
-      }
+    // Base headers for all requests
+    final baseHeaders = <String, String>{
+      'Accept': 'application/json',
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
+          'AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.4 Safari/605.1.15',
+    };
 
-      throw Exception(e);
+    // Retrieve stored token if needed
+    String? token;
+    if (methodrequest == RequestMethod.getWithToken ||
+        methodrequest == RequestMethod.postWithToken) {
+      final prefs = await SharedPreferences.getInstance();
+      token = prefs.getString('jwt_token');
+    }
+
+    // Build options based on method
+    Options options;
+    if (token != null && token.isNotEmpty) {
+      options = Options(headers: {
+        ...baseHeaders,
+        'Authorization': 'Bearer $token',
+      });
+    } else {
+      options = Options(headers: baseHeaders);
+    }
+
+    try {
+      switch (methodrequest) {
+        case RequestMethod.get:
+          return await dio.get(
+            url,
+            queryParameters: params,
+            cancelToken: cancelToken,
+            options: options,
+          );
+        case RequestMethod.post:
+          return await dio.post(
+            url,
+            data: data,
+            cancelToken: cancelToken,
+            options: options,
+          );
+        case RequestMethod.put:
+          return await dio.put(
+            url,
+            data: data,
+            queryParameters: params,
+            cancelToken: cancelToken,
+            options: options,
+          );
+        case RequestMethod.patch:
+          return await dio.patch(
+            url,
+            data: data,
+            cancelToken: cancelToken,
+            options: options,
+          );
+        case RequestMethod.delete:
+          return await dio.delete(
+            url,
+            cancelToken: cancelToken,
+            options: options,
+          );
+        case RequestMethod.getWithToken:
+          return await dio.get(
+            url,
+            queryParameters: params,
+            cancelToken: cancelToken,
+            options: options,
+          );
+        case RequestMethod.postWithToken:
+          return await dio.post(
+            url,
+            data: data,
+            cancelToken: cancelToken,
+            options: options,
+          );
+      }
+    } on DioException catch (e) {
+      log(e.response.toString());
+      if (e.response == null) {
+        throw CustomException('Something went wrong');
+      }
+      throw parseNetworkException(e);
     }
   }
 
   @override
-  set header(
-    Map<String, dynamic> header,
-  ) {
+  set header(Map<String, dynamic> header) {
     dio.options.headers = header;
   }
 
@@ -134,21 +155,6 @@ class DioService implements HttpService {
     required String path,
     String? name,
   }) async {
-    final formdata = <String, dynamic>{
-      key: await MultipartFile.fromFile(path, filename: name),
-    };
-    return formdata;
+    return {key: await MultipartFile.fromFile(path, filename: name)};
   }
-
-  // Future<Response<dynamic>> _retry(RequestOptions requestOptions) async {
-  //   log('retrying request');
-  //   final options = Options(
-  //     method: requestOptions.method,
-  //     headers: requestOptions.headers,
-  //   );
-  //   return dio.request<dynamic>(requestOptions.path,
-  //       data: requestOptions.data,
-  //       queryParameters: requestOptions.queryParameters,
-  //       options: options);
-  // }
 }

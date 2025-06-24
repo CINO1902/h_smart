@@ -5,11 +5,11 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:h_smart/constant/snackbar.dart';
 import 'package:h_smart/features/auth/domain/usecases/authStates.dart';
-import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:intl_phone_field/phone_number.dart';
 
 import '../../../../core/utils/appColor.dart' show AppColors;
 import '../../presentation/provider/auth_provider.dart';
+import '../widget/index.dart';
 
 class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({Key? key}) : super(key: key);
@@ -27,7 +27,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  bool _showPassword = false;
   bool _agreedToTerms = false;
   late PhoneNumber _phoneNumber;
 
@@ -75,9 +74,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           isError: true);
     } else if (result.state == RegisterResultStates.isData) {
       _showSnackbar(result.response['message'] ?? 'Registered successfully');
-      context.push('/verify-email', extra: {
-        "email": _emailController.text,
-      });
+      if (mounted) {
+        context.push('/verify-email', extra: {
+          "email": _emailController.text,
+        });
+      }
     }
   }
 
@@ -119,20 +120,92 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               key: _formKey,
               child: Column(
                 children: [
-                  _buildTextField(
-                      controller: _firstNameController, label: 'First Name'),
-                  _buildTextField(
-                      controller: _lastNameController, label: 'Last Name'),
-                  _buildTextField(
+                  AuthTextField(
+                    controller: _firstNameController,
+                    label: 'First Name',
+                    hint: 'Enter your first name',
+                    prefixIcon: const Icon(
+                      Icons.person_outline,
+                      color: AppColors.kprimaryColor500,
+                      size: 20,
+                    ),
+                    validator: (value) {
+                      final text = value?.trim() ?? '';
+                      if (text.isEmpty) return 'First Name can\'t be empty';
+                      return null;
+                    },
+                  ),
+                  AuthTextField(
+                    controller: _lastNameController,
+                    label: 'Last Name',
+                    hint: 'Enter your last name',
+                    prefixIcon: const Icon(
+                      Icons.person_outline,
+                      color: AppColors.kprimaryColor500,
+                      size: 20,
+                    ),
+                    validator: (value) {
+                      final text = value?.trim() ?? '';
+                      if (text.isEmpty) return 'Last Name can\'t be empty';
+                      return null;
+                    },
+                  ),
+                  AuthTextField(
                     controller: _emailController,
                     label: 'Email',
+                    hint: 'Enter your email address',
                     keyboardType: TextInputType.emailAddress,
+                    prefixIcon: const Icon(
+                      Icons.email_outlined,
+                      color: AppColors.kprimaryColor500,
+                      size: 20,
+                    ),
+                    validator: (value) {
+                      final text = value?.trim() ?? '';
+                      if (text.isEmpty) {
+                        return 'Email can\'t be empty';
+                      }
+                      final emailRegEx =
+                          RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                      if (!emailRegEx.hasMatch(text)) {
+                        return 'Enter a valid email address';
+                      }
+                      return null;
+                    },
                   ),
-                  _buildPhoneField(),
-                  _buildPasswordField(),
-                  _buildTermsCheckbox(),
+                  AuthPhoneField(
+                    controller: _phoneController,
+                    label: 'Phone Number',
+                    hint: 'Enter your phone number',
+                    onChanged: (phone) => _phoneNumber = phone,
+                    validator: (value) =>
+                        value == null || !value.isValidNumber()
+                            ? 'Enter a valid phone number'
+                            : null,
+                  ),
+                  AuthPasswordField(
+                    controller: _passwordController,
+                    label: 'Password',
+                    hint: 'Enter your password',
+                    textInputAction: TextInputAction.done,
+                    validator: (value) => value == null || value.isEmpty
+                        ? 'Password can\'t be empty'
+                        : null,
+                  ),
+                  AuthCheckbox(
+                    value: _agreedToTerms,
+                    onChanged: (val) =>
+                        setState(() => _agreedToTerms = val ?? false),
+                    label:
+                        'I agree to the Terms and Conditions and Privacy Policy',
+                  ),
                   const Gap(16),
-                  _buildRegisterButton(),
+                  AuthButton(
+                    text: 'Sign Up',
+                    onPressed: _onRegister,
+                    isLoading: ref.watch(authProvider).registerResult.state ==
+                        RegisterResultStates.isLoading,
+                  ),
                   const Gap(16),
                   _buildLoginLink(),
                 ],
@@ -140,111 +213,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    TextInputType keyboardType = TextInputType.text,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: TextFormField(
-        autovalidateMode: AutovalidateMode.onUnfocus,
-        controller: controller,
-        keyboardType: keyboardType,
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-        validator: (value) {
-          final text = value?.trim() ?? '';
-          if (text.isEmpty) {
-            return '$label can\'t be empty';
-          }
-          if (label.toLowerCase() == 'email') {
-            final emailRegEx = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-            if (!emailRegEx.hasMatch(text)) {
-              return 'Enter a valid email address';
-            }
-          }
-          return null;
-        },
-      ),
-    );
-  }
-
-  Widget _buildPhoneField() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: IntlPhoneField(
-        
-        initialCountryCode: 'NG',
-        controller: _phoneController,
-        decoration: InputDecoration(
-          labelText: 'Phone Number',
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-        onChanged: (phone) => _phoneNumber = phone,
-        validator: (value) => value == null || !value.isValidNumber()
-            ? 'Enter a valid phone number'
-            : null,
-      ),
-    );
-  }
-
-  Widget _buildPasswordField() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: TextFormField(
-        controller: _passwordController,
-        obscureText: !_showPassword,
-        decoration: InputDecoration(
-          labelText: 'Password',
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          suffixIcon: IconButton(
-            icon: Icon(_showPassword ? Icons.visibility_off : Icons.visibility),
-            onPressed: () => setState(() => _showPassword = !_showPassword),
-          ),
-        ),
-        validator: (value) =>
-            value == null || value.isEmpty ? 'Password can\'t be empty' : null,
-      ),
-    );
-  }
-
-  Widget _buildTermsCheckbox() {
-    return CheckboxListTile(
-      value: _agreedToTerms,
-      activeColor: AppColors.kprimaryColor500,
-      contentPadding: EdgeInsets.zero,
-      title: const Text(
-        'I agree to the Terms and Conditions and Privacy Policy',
-        style: TextStyle(fontSize: 14),
-      ),
-      controlAffinity: ListTileControlAffinity.leading,
-      onChanged: (val) => setState(() => _agreedToTerms = val ?? false),
-    );
-  }
-
-  Widget _buildRegisterButton() {
-    return GestureDetector(
-      onTap: _onRegister,
-      child: Container(
-        width: double.infinity,
-        height: 48,
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            color: AppColors.kprimaryColor500),
-        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        child: const Center(
-            child: Text(
-          "Sign Up",
-          style: TextStyle(
-              color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
-        )),
       ),
     );
   }

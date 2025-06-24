@@ -22,13 +22,14 @@ class HospitalWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     const double cardHeight = 208;
     const double imageHeight = cardHeight * 0.55;
     return Container(
       height: cardHeight,
       width: double.infinity,
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.blue),
+        border: Border.all(color: theme.colorScheme.primary),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -45,9 +46,9 @@ class HospitalWidget extends StatelessWidget {
                 child: enableHero
                     ? Hero(
                         tag: hospital.id ?? '',
-                        child: _buildCoverImage(imageHeight),
+                        child: _buildCoverImage(imageHeight, theme),
                       )
-                    : _buildCoverImage(imageHeight),
+                    : _buildCoverImage(imageHeight, theme),
               ),
               // Logo avatar at bottom center
               Positioned(
@@ -60,8 +61,9 @@ class HospitalWidget extends StatelessWidget {
                     height: 40,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
-                      color: Colors.white,
+                      border: Border.all(
+                          color: theme.colorScheme.surface, width: 2),
+                      color: theme.colorScheme.surface,
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(20),
@@ -70,21 +72,22 @@ class HospitalWidget extends StatelessWidget {
                               imageUrl: hospital.logo!,
                               fit: BoxFit.cover,
                               placeholder: (context, url) => Container(
-                                color: Colors.grey[200],
-                                child: const Center(
+                                color: theme.colorScheme.surfaceVariant,
+                                child: Center(
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
+                                    color: theme.colorScheme.primary,
                                   ),
                                 ),
                               ),
-                              errorWidget: (context, url, error) => const Icon(
+                              errorWidget: (context, url, error) => Icon(
                                 Icons.business,
-                                color: Colors.grey,
+                                color: theme.colorScheme.onSurfaceVariant,
                               ),
                             )
-                          : const Icon(
+                          : Icon(
                               Icons.business,
-                              color: Colors.grey,
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
                     ),
                   ),
@@ -98,9 +101,9 @@ class HospitalWidget extends StatelessWidget {
             child: Container(
               width: double.infinity,
               margin: const EdgeInsets.only(top: 5),
-              decoration: const BoxDecoration(
-                color: Colors.transparent,
-                borderRadius: BorderRadius.only(
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(16),
                   bottomRight: Radius.circular(16),
                 ),
@@ -116,8 +119,8 @@ class HospitalWidget extends StatelessWidget {
                     AutoScrollText(
                       text: hospital.hospitalName ?? '',
                       maxWidth: MediaQuery.of(context).size.width * 0.4 - 10,
-                      style: const TextStyle(
-                        color: Colors.black,
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurface,
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                       ),
@@ -127,13 +130,17 @@ class HospitalWidget extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Image.asset('images/MapPin.png',
-                            height: 15, width: 15, color: Colors.blue),
+                        Image.asset(
+                          'images/MapPin.png',
+                          height: 15,
+                          width: 15,
+                          color: theme.colorScheme.primary,
+                        ),
                         const Gap(4),
                         Text(
                           hospital.city ?? '',
-                          style: const TextStyle(
-                            color: Colors.black,
+                          style: TextStyle(
+                            color: theme.colorScheme.onSurface,
                             fontSize: 9,
                             fontWeight: FontWeight.w500,
                           ),
@@ -147,15 +154,15 @@ class HospitalWidget extends StatelessWidget {
                       children: [
                         SvgPicture.asset(
                           'images/dot.svg',
-                          color: AppColors.kprimaryColor500,
+                          color: theme.colorScheme.primary,
                           height: 10,
                           width: 10,
                         ),
                         const Gap(6),
-                        const Text(
+                        Text(
                           '10am - 3pm',
                           style: TextStyle(
-                            color: Colors.black,
+                            color: theme.colorScheme.onSurface,
                             fontSize: 9,
                             fontWeight: FontWeight.w500,
                           ),
@@ -172,7 +179,7 @@ class HospitalWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildCoverImage(double imageHeight) {
+  Widget _buildCoverImage(double imageHeight, ThemeData theme) {
     return Container(
       height: imageHeight,
       width: double.infinity,
@@ -187,7 +194,7 @@ class HospitalWidget extends StatelessWidget {
       ),
       child: hospital.hospitalsCoverImage == null ||
               hospital.hospitalsCoverImage!.isEmpty
-          ? const Center(child: Icon(Icons.error, color: Colors.red))
+          ? Center(child: Icon(Icons.error, color: theme.colorScheme.error))
           : null,
     );
   }

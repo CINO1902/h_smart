@@ -7,6 +7,9 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:h_smart/core/approuter.dart';
+import 'package:h_smart/core/theme/theme_provider.dart';
+import 'package:h_smart/core/theme/text_scale_provider.dart';
+
 
 import 'firebase_options.dart';
 import 'core/service/locator.dart';
@@ -38,7 +41,7 @@ void main() async {
   FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
 
   runApp(
-    const ProviderScope(
+    ProviderScope(
       child: MyApp(),
     ),
   );
@@ -47,9 +50,7 @@ void main() async {
 }
 
 class MyApp extends ConsumerStatefulWidget {
-  const MyApp({
-    Key? key,
-  }) : super(key: key);
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   ConsumerState<MyApp> createState() => _MyAppState();
@@ -59,17 +60,24 @@ class _MyAppState extends ConsumerState<MyApp> {
   @override
   void initState() {
     super.initState();
-    // Now that we’ve decided which screen to show, we can remove the splash:
+    // Now that we've decided which screen to show, we can remove the splash:
     FlutterNativeSplash.remove();
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      debugShowCheckedModeBanner: false,
-      title: 'H Smart',
-      routerConfig: appRouter,
-      builder: FlutterSmartDialog.init(),
+    final themeMode = ref.watch(themeProvider);
+
+    return TextScaleWrapper(
+      child: MaterialApp.router(
+        debugShowCheckedModeBanner: false,
+        title: 'H Smart',
+        themeMode: themeMode,
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        routerConfig: AppRouter.router,
+        builder: FlutterSmartDialog.init(),
+      ),
     );
   }
 }

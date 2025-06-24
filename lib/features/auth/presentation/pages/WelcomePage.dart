@@ -48,6 +48,7 @@ class WelcomePage extends StatelessWidget {
               InkWell(
                 onTap: () {
                   context.push('/login');
+
                   // Button action
                 },
                 child: Container(

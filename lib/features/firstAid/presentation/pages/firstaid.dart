@@ -38,21 +38,22 @@ class _FirstAidState extends State<FirstAid> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
-          centerTitle: true,
-          elevation: 0,
-          surfaceTintColor: Colors.transparent,
-          titleSpacing: 0.1,
-          foregroundColor: Colors.black,
-          titleTextStyle: const TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.w600,
-              fontFamily: 'Poppins'),
-          title: const Text(
-            'First Aid',
-            style: TextStyle(fontSize: 16),
-          )),
+        centerTitle: true,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        titleSpacing: 0.1,
+        title: Text(
+          'First Aid',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -61,19 +62,26 @@ class _FirstAidState extends State<FirstAid> {
             SizedBox(
               height: 44,
               child: TextField(
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.only(top: 10),
-                  prefixIcon: Icon(Icons.search),
-                  prefixIconColor: Colors.grey,
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.only(top: 10),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  ),
                   hintText: 'Search',
                   focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(16)),
-                      borderSide: BorderSide(
-                          color: Color.fromARGB(255, 192, 192, 192), width: 2)),
+                    borderRadius: const BorderRadius.all(Radius.circular(16)),
+                    borderSide: BorderSide(
+                      color: theme.colorScheme.primary,
+                      width: 2,
+                    ),
+                  ),
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(16)),
-                      borderSide: BorderSide(
-                          color: Color.fromARGB(255, 226, 226, 226))),
+                    borderRadius: const BorderRadius.all(Radius.circular(16)),
+                    borderSide: BorderSide(
+                      color: theme.colorScheme.outline,
+                    ),
+                  ),
                 ),
                 onChanged: (value) {
                   searchbook(value);
@@ -88,18 +96,22 @@ class _FirstAidState extends State<FirstAid> {
                   return InkWell(
                     onTap: () {
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                FirstAidDesc(title: suggestAfirstaid[index]),
-                          ));
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              FirstAidDesc(title: suggestAfirstaid[index]),
+                        ),
+                      );
                     },
                     child: Container(
                       margin: const EdgeInsets.only(bottom: 10),
                       decoration: BoxDecoration(
-                          border: Border(
-                              bottom: BorderSide(
-                                  color: Colors.grey.withOpacity(.3)))),
+                        border: Border(
+                          bottom: BorderSide(
+                            color: theme.colorScheme.outline.withOpacity(0.3),
+                          ),
+                        ),
+                      ),
                       height: 44,
                       width: double.infinity,
                       child: Row(
@@ -107,19 +119,26 @@ class _FirstAidState extends State<FirstAid> {
                         children: [
                           Text(
                             suggestAfirstaid[index],
-                            style: const TextStyle(fontSize: 13),
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: theme.colorScheme.onBackground,
+                            ),
                           ),
                           SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: Image.asset('images/iconright.png'))
+                            height: 20,
+                            width: 20,
+                            child: Image.asset(
+                              'images/iconright.png',
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
                         ],
                       ),
                     ),
                   );
                 },
               ),
-            )
+            ),
           ],
         ),
       ),

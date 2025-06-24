@@ -10,7 +10,6 @@ import 'package:go_router/go_router.dart';
 import 'package:h_smart/constant/snackbar.dart';
 import 'package:h_smart/features/myAppointment/presentation/Widget/profileItem.dart';
 
-import '../../../../core/utils/appColor.dart' show AppColors;
 import '../../../auth/domain/usecases/authStates.dart';
 import '../../../auth/presentation/controller/auth_controller.dart';
 import '../../../auth/presentation/provider/auth_provider.dart';
@@ -25,12 +24,13 @@ class ProfileScreen extends ConsumerStatefulWidget {
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final authState = ref.watch(authProvider);
     final userData = authState.userData;
     final profileUrl = userData?.patientMetadata?.profileUrl;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Column(
         children: [
           Stack(
@@ -39,8 +39,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               // Blurred background/banner
               Container(
                 height: 195,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF3F7FF),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withOpacity(0.1),
                 ),
                 child: ClipRRect(
                   borderRadius: const BorderRadius.only(
@@ -50,14 +50,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   child: ImageFiltered(
                     imageFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                     child: profileUrl == null
-                        ? const Center(
+                        ? Center(
                             child: CircleAvatar(
                               radius: 40,
-                              backgroundColor: AppColors.kprimaryColor500,
+                              backgroundColor: theme.colorScheme.primary,
                               child: Icon(
                                 Icons.camera_alt,
                                 size: 32,
-                                color: Colors.white,
+                                color: theme.colorScheme.onPrimary,
                               ),
                             ),
                           )
@@ -65,16 +65,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             imageUrl: profileUrl,
                             fit: BoxFit.cover,
                             width: double.infinity,
-                            placeholder: (context, url) => const Center(
+                            placeholder: (context, url) => Center(
                               child: SizedBox(
                                 height: 24,
                                 width: 24,
-                                child:
-                                    CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: theme.colorScheme.primary,
+                                ),
                               ),
                             ),
-                            errorWidget: (context, url, error) => const Center(
-                              child: Icon(Icons.error, color: Colors.red),
+                            errorWidget: (context, url, error) => Icon(
+                              Icons.error,
+                              color: theme.colorScheme.error,
                             ),
                           ),
                   ),
@@ -94,14 +97,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           foreground: Paint()
                             ..style = PaintingStyle.stroke
                             ..strokeWidth = 4
-                            ..color = Colors.white,
+                            ..color = theme.colorScheme.surface,
                         ),
                       ),
-                      const Text(
+                      Text(
                         'Profile',
                         style: TextStyle(
                           fontSize: 18,
-                          color: Colors.black,
+                          color: theme.colorScheme.onBackground,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -119,34 +122,36 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     width: 100,
                     height: 100,
                     padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFEDEDED),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
                       shape: BoxShape.circle,
                     ),
                     child: ClipOval(
                       child: profileUrl == null
                           ? Container(
-                              color: AppColors.kprimaryColor500,
-                              child: const Icon(
+                              color: theme.colorScheme.primary,
+                              child: Icon(
                                 Icons.camera_alt,
                                 size: 32,
-                                color: Colors.white,
+                                color: theme.colorScheme.onPrimary,
                               ),
                             )
                           : CachedNetworkImage(
                               imageUrl: profileUrl,
                               fit: BoxFit.cover,
-                              placeholder: (context, url) => const Center(
+                              placeholder: (context, url) => Center(
                                 child: SizedBox(
                                   height: 24,
                                   width: 24,
-                                  child:
-                                      CircularProgressIndicator(strokeWidth: 2),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: theme.colorScheme.primary,
+                                  ),
                                 ),
                               ),
-                              errorWidget: (context, url, error) => const Icon(
+                              errorWidget: (context, url, error) => Icon(
                                 Icons.error,
-                                color: Colors.red,
+                                color: theme.colorScheme.error,
                                 size: 32,
                               ),
                             ),
@@ -161,10 +166,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           if (userData != null)
             Text(
               '${userData.firstName} ${userData.lastName}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Colors.black87,
+                color: theme.colorScheme.onBackground,
               ),
             ),
           const Gap(16),
@@ -177,8 +182,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   margin: const EdgeInsets.symmetric(horizontal: 20),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF3F7FF),
-                    border: Border.all(color: const Color(0xFFC1D3FF)),
+                    color: theme.colorScheme.primary.withOpacity(0.1),
+                    border: Border.all(
+                        color: theme.colorScheme.primary.withOpacity(0.3)),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Column(
@@ -192,6 +198,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               GetUserResultStates.isLoading) {
                             SnackBarService.notifyAction(
                               context,
+                              status: SnackbarStatus.fail,
                               message: 'System is busy',
                             );
                             return;
@@ -202,7 +209,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             SnackBarService.notifyAction(
                               context,
                               message:
-                                  'An error occurred while trying to gather your information. Let\'s try again.',
+                                  'An error occurred while trying to gather your information c  ',
                               status: SnackbarStatus.fail,
                             );
                             await ref.read(authProvider).fetchUserInfo();
@@ -255,7 +262,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ProfileItem(
                         title: 'Settings',
                         iconName: 'Sliders',
-                        onTap: () => context.push('/Settings'),
+                        onTap: () => context.push('/settings'),
                       ),
                       const Gap(12),
                       ProfileItem(
@@ -281,26 +288,28 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     child: Container(
                       height: 50,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFEFEF),
-                        border: Border.all(color: const Color(0xFFFFBCBD)),
+                        color: theme.colorScheme.error.withOpacity(0.1),
+                        border: Border.all(
+                            color: theme.colorScheme.error.withOpacity(0.3)),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
+                          Text(
                             'Log out',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
-                              color: Colors.red,
+                              color: theme.colorScheme.error,
                             ),
                           ),
                           Image.asset(
                             'images/SignOut.png',
                             width: 24,
                             height: 24,
+                            color: theme.colorScheme.error,
                           ),
                         ],
                       ),

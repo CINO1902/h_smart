@@ -15,8 +15,11 @@ class CustomeSnackbar extends StatelessWidget {
   String msg;
   final Color color1;
   final Color color2;
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -27,39 +30,45 @@ class CustomeSnackbar extends StatelessWidget {
             color: color1,
             borderRadius: const BorderRadius.all(Radius.circular(20)),
           ),
-          child: Row(children: [
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.12,
-            ),
-            Expanded(
+          child: Row(
+            children: [
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.12,
+              ),
+              Expanded(
                 child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: MediaQuery.of(context).size.width * 0.05,
-                  child: FittedBox(
-                    child: Text(
-                      topic,
-                      style: const TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold),
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: MediaQuery.of(context).size.width * 0.05,
+                      child: FittedBox(
+                        child: Text(
+                          topic,
+                          style: TextStyle(
+                            color: theme.colorScheme.onPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                    const Spacer(),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.width * 0.1,
+                      child: Text(
+                        msg,
+                        style: TextStyle(
+                          color: theme.colorScheme.onPrimary,
+                          fontWeight: FontWeight.w400,
+                          fontSize: 18,
+                        ),
+                        softWrap: true,
+                      ),
+                    ),
+                  ],
                 ),
-                const Spacer(),
-                SizedBox(
-                  height: MediaQuery.of(context).size.width * 0.1,
-                  child: Text(
-                    msg,
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w400,
-                        fontSize: 18),
-                    softWrap: true,
-                  ),
-                )
-              ],
-            ))
-          ]),
+              ),
+            ],
+          ),
         ),
         Positioned(
           bottom: 0,
@@ -67,33 +76,34 @@ class CustomeSnackbar extends StatelessWidget {
             borderRadius: const BorderRadius.only(
               bottomLeft: Radius.circular(20),
             ),
-            child: Stack(children: [
-              SvgPicture.asset(
-                'images/bubbles.svg',
-                height: MediaQuery.of(context).size.height * 0.063,
-                color: color2,
-              )
-            ]),
+            child: SvgPicture.asset(
+              'images/bubbles.svg',
+              height: 48,
+              width: 40,
+              color: color2,
+            ),
           ),
         ),
         Positioned(
-            top: MediaQuery.of(context).size.height * -0.023,
-            left: 0,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                SvgPicture.asset(
-                  'images/fail.svg',
-                  height: MediaQuery.of(context).size.height * 0.045,
-                  color: color2,
-                ),
-                Positioned(
-                    child: SvgPicture.asset(
+          top: -20,
+          left: 0,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              SvgPicture.asset(
+                'images/fail.svg',
+                height: 40,
+              ),
+              Positioned(
+                top: 10,
+                child: SvgPicture.asset(
                   'images/close.svg',
-                  height: MediaQuery.of(context).size.height * 0.023,
-                ))
-              ],
-            ))
+                  height: 16,
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }

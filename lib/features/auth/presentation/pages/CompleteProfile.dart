@@ -2,16 +2,14 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_multi_formatter/formatters/phone_input_formatter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:h_smart/core/utils/appColor.dart';
 import 'package:h_smart/features/auth/presentation/controller/auth_controller.dart';
-import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:h_smart/features/auth/presentation/widget/index.dart';
 import 'package:intl_phone_field/phone_number.dart';
-import 'package:multi_select_flutter/multi_select_flutter.dart';
 
 import 'package:h_smart/constant/utils.dart';
 import 'package:h_smart/constant/snackbar.dart'
@@ -19,6 +17,11 @@ import 'package:h_smart/constant/snackbar.dart'
 import 'package:h_smart/features/auth/domain/usecases/authStates.dart';
 import 'package:h_smart/features/auth/presentation/provider/auth_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../../core/theme/theme_mode_provider.dart';
+import 'CompleteProfileWidget/EnhanceMultiSelect.dart';
+import 'CompleteProfileWidget/EnhancedDropDown.dart';
 
 class CompleteProfilePage extends ConsumerStatefulWidget {
   const CompleteProfilePage({Key? key}) : super(key: key);
@@ -35,12 +38,6 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
   final _dobController = TextEditingController();
   final _addressController = TextEditingController();
   final _emergencyNameController = TextEditingController();
-
-  // FocusNodes
-  late FocusNode _dobFocusNode;
-  late FocusNode _addressFocusNode;
-  late FocusNode _emergencyNameFocusNode;
-  late FocusNode _phoneFocusNode;
 
   DateTime _selectedDate = DateTime.now();
   bool _dateChosen = false;
@@ -70,10 +67,6 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
   @override
   void initState() {
     super.initState();
-    _dobFocusNode = FocusNode();
-    _addressFocusNode = FocusNode();
-    _emergencyNameFocusNode = FocusNode();
-    _phoneFocusNode = FocusNode();
   }
 
   @override
@@ -82,11 +75,6 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
     _addressController.dispose();
     _emergencyNameController.dispose();
 
-    // Dispose focus nodes
-    _dobFocusNode.dispose();
-    _addressFocusNode.dispose();
-    _emergencyNameFocusNode.dispose();
-    _phoneFocusNode.dispose();
     super.dispose();
   }
 
@@ -142,6 +130,22 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
       );
       return;
     }
+    if (_selectedGender == null) {
+      SnackBarService.notifyAction(
+        context,
+        message: 'Gender is required',
+        status: SnackbarStatus.fail,
+      );
+      return;
+    }
+    if (_selectedBloodType == null) {
+      SnackBarService.notifyAction(
+        context,
+        message: 'Blood type is required',
+        status: SnackbarStatus.fail,
+      );
+      return;
+    }
     if (auth.profileImage == null) {
       SnackBarService.notifyAction(
         context,
@@ -150,291 +154,485 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
       );
       return;
     }
+    try {
+      SmartDialog.showLoading();
 
-    SmartDialog.showLoading();
-    await auth.uploadProfile(
-      gender: _selectedGender!,
-      dob: DateTime.parse(_dobController.text),
-      address: _addressController.text.trim(),
-      bloodType: _selectedBloodType,
-      emergencyContactName: _emergencyNameController.text.trim(),
-      emergencyContactPhone: _phoneNumber.completeNumber,
-      allergies: _selectedAllergies,
-      medicalConditions: _selectedConditions,
-    );
-    SmartDialog.dismiss();
+      await auth.uploadProfile(
+        gender: _selectedGender!,
+        dob: DateTime.parse(_dobController.text),
+        address: _addressController.text.trim(),
+        bloodType: _selectedBloodType,
+        emergencyContactName: _emergencyNameController.text.trim(),
+        emergencyContactPhone: _phoneNumber.completeNumber,
+        allergies: _selectedAllergies,
+        medicalConditions: _selectedConditions,
+      );
+      SmartDialog.dismiss();
 
-    final result = ref.watch(authProvider).continueRegisterResult;
-    final message = result.response['message'] ?? '';
-    if (result.state == ContinueRegisterResultStates.isError) {
-      SnackBarService.showSnackBar(
+      final result = ref.watch(authProvider).continueRegisterResult;
+      final message = result.response['message'] ?? '';
+      if (result.state == ContinueRegisterResultStates.isError) {
+        SnackBarService.showSnackBar(
+          context,
+          title: 'Error',
+          body: message,
+          status: SnackbarStatus.fail,
+        );
+      } else if (result.state == ContinueRegisterResultStates.isData) {
+        final prefs = await SharedPreferences.getInstance();
+        prefs.setBool('profile_completed', true);
+        SnackBarService.showSnackBar(
+          context,
+          title: 'Success',
+          body: message,
+          status: SnackbarStatus.success,
+        );
+        context.go('/profile-complete');
+      } else if (result.state == ContinueRegisterResultStates.islogout) {
+        ref.read(authProvider).logout();
+        context.go('/login');
+        SnackBarService.showSnackBar(
+          context,
+          title: 'Error',
+          body: message,
+          status: SnackbarStatus.fail,
+        );
+      }
+    } catch (e) {
+      SnackBarService.notifyAction(
         context,
-        title: 'Error',
-        body: message,
+        message: 'Error uploading profile $e',
         status: SnackbarStatus.fail,
       );
-    } else if (result.state == ContinueRegisterResultStates.isData) {
-      SnackBarService.showSnackBar(
-        context,
-        title: 'Success',
-        body: message,
-        status: SnackbarStatus.success,
-      );
-      context.go('/profile-complete');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
+
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
-          'Complete Your Profile',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
-        backgroundColor: Colors.white,
-        iconTheme: const IconThemeData(color: AppColors.kprimaryColor500),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Column(
-          children: [
-            const Gap(8),
-            Expanded(
-              child: ListView(
-                children: [
-                  const Text(
-                    'Make sure your name and date of birth matches your medical information',
-                  ),
-                  const Gap(16),
-                  _buildAvatarPicker(context, auth, ref),
-                  const Gap(24),
-                  Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        // ─── Date of Birth Field ─────────────────────────────────
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: TextFormField(
-                            controller: _dobController,
-                            focusNode: _dobFocusNode,
-                            readOnly: true,
-                            textInputAction: TextInputAction.next,
-                            autovalidateMode:
-                                AutovalidateMode.onUserInteraction,
-                            decoration: InputDecoration(
-                              labelText: 'Date of Birth',
-                              hintText: 'YYYY-MM-DD',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              suffixIcon: const Icon(Icons.calendar_today),
-                            ),
-                            onTap: _pickDate,
-                            // When user taps “Next” on keyboard, jump to address field
-                            onFieldSubmitted: (_) {
-                              FocusScope.of(context)
-                                  .requestFocus(_addressFocusNode);
-                            },
-                            validator: (value) =>
-                                (value == null || value.isEmpty)
-                                    ? 'Date of birth is required'
-                                    : null,
-                          ),
-                        ),
-
-                        // ─── Address Field ───────────────────────────────────────
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: TextFormField(
-                            controller: _addressController,
-                            focusNode: _addressFocusNode,
-                            textInputAction: TextInputAction.next,
-                            keyboardType: TextInputType.text,
-                            autovalidateMode:
-                                AutovalidateMode.onUserInteraction,
-                            decoration: InputDecoration(
-                              labelText: 'Address',
-                              hintText: 'Enter your address',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            onFieldSubmitted: (_) {
-                              FocusScope.of(context)
-                                  .requestFocus(_emergencyNameFocusNode);
-                            },
-                            validator: (value) =>
-                                (value == null || value.trim().isEmpty)
-                                    ? 'Address can\'t be empty'
-                                    : null,
-                          ),
-                        ),
-
-                        // ─── Emergency Contact Name Field ───────────────────────
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: TextFormField(
-                            controller: _emergencyNameController,
-                            focusNode: _emergencyNameFocusNode,
-                            textInputAction: TextInputAction.next,
-                            keyboardType: TextInputType.text,
-                            autovalidateMode:
-                                AutovalidateMode.onUserInteraction,
-                            decoration: InputDecoration(
-                              labelText: 'Emergency Contact Name',
-                              hintText: 'Enter your emergency contact\'s name',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            onFieldSubmitted: (_) {
-                              FocusScope.of(context)
-                                  .requestFocus(_phoneFocusNode);
-                            },
-                            validator: (value) =>
-                                (value == null || value.trim().isEmpty)
-                                    ? 'Emergency Contact Name can\'t be empty'
-                                    : null,
-                          ),
-                        ),
-
-                        // ─── Phone Number Field ─────────────────────────────────
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: IntlPhoneField(
-                            controller: _phoneController,
-                            focusNode: _phoneFocusNode,
-                            initialCountryCode: 'NG',
-                            decoration: InputDecoration(
-                              labelText: 'Phone Number',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            textInputAction: TextInputAction.done,
-                            onChanged: (phone) => _phoneNumber = phone,
-                            // When the user hits “done” on keyboard, you might want to close the keyboard:
-                            onSubmitted: (_) =>
-                                FocusScope.of(context).unfocus(),
-                            validator: (value) =>
-                                value == null || !value.isValidNumber()
-                                    ? 'Enter a valid phone number'
-                                    : null,
-                          ),
-                        ),
-
-                        // ─── Gender / Blood Type / Multi-selects ─────────────────
-                        _buildDropdown(
-                          label: 'Gender',
-                          value: _selectedGender,
-                          items: _genders,
-                          onChanged: (val) =>
-                              setState(() => _selectedGender = val),
-                        ),
-                        _buildDropdown(
-                          label: 'Blood Type',
-                          value: _selectedBloodType,
-                          items: _bloodTypes,
-                          onChanged: (val) =>
-                              setState(() => _selectedBloodType = val),
-                        ),
-                        _buildMultiSelect(
-                          label: 'Allergies',
-                          options: _allergyOptions,
-                          selected: _selectedAllergies,
-                          onConfirm: (vals) => setState(
-                              () => _selectedAllergies = vals.cast<String>()),
-                        ),
-                        _buildMultiSelect(
-                          label: 'Medical Conditions',
-                          options: _conditionOptions,
-                          selected: _selectedConditions,
-                          onConfirm: (vals) => setState(
-                              () => _selectedConditions = vals.cast<String>()),
-                        ),
-
-                        const Gap(80),
-                      ],
-                    ),
-                  ),
-                ],
+        title: Text(
+          'Complete Your Profile',
+          style: Theme.of(context).appBarTheme.titleTextStyle?.copyWith(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
               ),
+        ),
+        centerTitle: true,
+      ),
+      body: FocusScope(
+        autofocus: true,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Theme.of(context).scaffoldBackgroundColor,
+                Theme.of(context).scaffoldBackgroundColor.withOpacity(0.95),
+              ],
             ),
+          ),
+          child: SafeArea(
+            child: Column(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      // Dismiss keyboard when tapping anywhere on the screen
+                      FocusScope.of(context).unfocus();
+                    },
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Gap(16),
 
-            // Continue button…
-            SafeArea(
-              child: GestureDetector(
-                onTap: _onContinue,
-                child: Container(
-                  width: double.infinity,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    color: AppColors.kprimaryColor500,
-                  ),
-                  child: const Center(
-                    child: Text(
-                      "Continue",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500),
+                          // Header Section
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color:
+                                  AppColors.kprimaryColor500.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color:
+                                    AppColors.kprimaryColor500.withOpacity(0.2),
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.kprimaryColor500,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Icon(
+                                    Icons.person_add_outlined,
+                                    color: Colors.white,
+                                    size: 24,
+                                  ),
+                                ),
+                                const Gap(16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Complete Your Profile',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColors.kprimaryColor500,
+                                            ),
+                                      ),
+                                      const Gap(4),
+                                      Text(
+                                        'Make sure your information matches your medical records',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                              color: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyMedium
+                                                  ?.color
+                                                  ?.withOpacity(0.7),
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const Gap(32),
+
+                          // Avatar Section
+                          _buildAvatarPicker(context, auth, ref),
+
+                          const Gap(32),
+
+                          // Form Section
+                          Form(
+                            key: _formKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Personal Information',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                                const Gap(16),
+
+                                // Date of Birth Field
+                                _buildEnhancedDateField(),
+                                const Gap(16),
+
+                                // Address Field
+                                AuthTextField(
+                                  controller: _addressController,
+                                  label: 'Address',
+                                  hint: 'Enter your full address',
+                                  prefixIcon: const Icon(
+                                    Icons.location_on_outlined,
+                                    color: AppColors.kprimaryColor500,
+                                  ),
+                                  validator: (value) =>
+                                      (value == null || value.isEmpty)
+                                          ? 'Address is required'
+                                          : null,
+                                ),
+
+                                const Gap(24),
+
+                                Text(
+                                  'Emergency Contact',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                                const Gap(16),
+
+                                // Emergency Contact Name Field
+                                AuthTextField(
+                                  controller: _emergencyNameController,
+                                  label: 'Emergency Contact Name',
+                                  hint: 'Enter emergency contact\'s full name',
+                                  prefixIcon: const Icon(
+                                    Icons.person_outline,
+                                    color: AppColors.kprimaryColor500,
+                                  ),
+                                  validator: (value) =>
+                                      (value == null || value.isEmpty)
+                                          ? 'Emergency contact name is required'
+                                          : null,
+                                ),
+                                const Gap(16),
+
+                                // Phone Number Field
+                                AuthPhoneField(
+                                  controller: _phoneController,
+                                  label: 'Phone Number',
+                                  onChanged: (number) => _phoneNumber = number,
+                                  hint: 'Enter your phone number',
+                                  textInputAction: TextInputAction.next,
+                                  validator: (value) => (value == null ||
+                                          value.completeNumber.isEmpty)
+                                      ? 'Phone number is required'
+                                      : null,
+                                ),
+
+                                const Gap(24),
+
+                                Text(
+                                  'Medical Information',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                                const Gap(16),
+
+                                // Gender and Blood Type in a row
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          EnhancedDropdown(
+                                            label: 'Gender *',
+                                            value: _selectedGender,
+                                            items: _genders,
+                                            onChanged: (val) => setState(
+                                                () => _selectedGender = val),
+                                          ),
+                                          if (_selectedGender == null)
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 16, top: 4),
+                                              child: Text(
+                                                'Gender is required',
+                                                style: TextStyle(
+                                                  color: Colors.red[600],
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                    const Gap(16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          EnhancedDropdown(
+                                            label: 'Blood Type *',
+                                            value: _selectedBloodType,
+                                            items: _bloodTypes,
+                                            onChanged: (val) => setState(
+                                                () => _selectedBloodType = val),
+                                          ),
+                                          if (_selectedBloodType == null)
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 16, top: 4),
+                                              child: Text(
+                                                'Blood type is required',
+                                                style: TextStyle(
+                                                  color: Colors.red[600],
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const Gap(16),
+
+                                // Multi-select fields
+                                EnhancedMultiSelect(
+                                  label: 'Allergies',
+                                  options: _allergyOptions,
+                                  selected: _selectedAllergies,
+                                  onConfirm: (vals) => setState(() =>
+                                      _selectedAllergies = vals.cast<String>()),
+                                ),
+                                const Gap(16),
+
+                                EnhancedMultiSelect(
+                                  label: 'Medical Conditions',
+                                  options: _conditionOptions,
+                                  selected: _selectedConditions,
+                                  onConfirm: (vals) => setState(() =>
+                                      _selectedConditions =
+                                          vals.cast<String>()),
+                                ),
+
+                                const Gap(40),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
-            const Gap(16),
-          ],
-        ),
-      ),
-    );
-  }
 
-  Widget _buildPhoneField() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: IntlPhoneField(
-        initialCountryCode: 'NG',
-        controller: _phoneController,
-        decoration: InputDecoration(
-          labelText: 'Phone Number',
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                // Continue Button
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, -2),
+                      ),
+                    ],
+                  ),
+                  child: SafeArea(
+                    child: GestureDetector(
+                      onTap: _onContinue,
+                      child: Container(
+                        width: double.infinity,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          gradient: LinearGradient(
+                            colors: [
+                              AppColors.kprimaryColor500,
+                              AppColors.kprimaryColor500.withOpacity(0.8),
+                            ],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color:
+                                  AppColors.kprimaryColor500.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                "Complete Profile",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const Gap(8),
+                              Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(
+                                  Icons.arrow_forward,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-        onChanged: (phone) => _phoneNumber = phone,
-        validator: (value) => value == null || !value.isValidNumber()
-            ? 'Enter a valid phone number'
-            : null,
       ),
     );
   }
 
   Widget _buildAvatarPicker(
       BuildContext context, AuthProvider auth, WidgetRef ref) {
+    final isDarkMode = ref.read(themeModeCheckerProvider)(context);
     return Center(
       child: GestureDetector(
         onTap: () => ref.read(authProvider).pickImage(),
         child: Stack(
           alignment: Alignment.bottomRight,
           children: [
-            CircleAvatar(
-              radius: 50,
-              backgroundColor: Colors.grey[200],
-              backgroundImage: auth.profileImage != null
-                  ? FileImage(auth.profileImage!)
-                  : const AssetImage('images/User.png') as ImageProvider,
-              child: auth.isImageLoading
-                  ? const CircularProgressIndicator()
-                  : null,
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.kprimaryColor500.withOpacity(0.2),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: CircleAvatar(
+                radius: 60,
+                backgroundColor:
+                    isDarkMode ? Colors.grey[700] : Colors.grey[200],
+                backgroundImage: auth.profileImage != null
+                    ? FileImage(auth.profileImage!)
+                    : const AssetImage('images/User.png') as ImageProvider,
+                child: auth.isImageLoading
+                    ? const CircularProgressIndicator()
+                    : null,
+              ),
             ),
-            const CircleAvatar(
-              radius: 14,
-              backgroundColor: AppColors.kprimaryColor500,
-              child: Icon(Icons.camera_alt, size: 16, color: Colors.white),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.kprimaryColor500,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.kprimaryColor500.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.camera_alt,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
           ],
         ),
@@ -442,170 +640,50 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
     );
   }
 
-  Widget _buildDateField() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+  Widget _buildEnhancedDateField() {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: TextFormField(
         controller: _dobController,
         readOnly: true,
+        textInputAction: TextInputAction.next,
         autovalidateMode: AutovalidateMode.onUserInteraction,
         decoration: InputDecoration(
           labelText: 'Date of Birth',
-          hintText: 'YYYY-MM-DD',
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          suffixIcon: const Icon(Icons.calendar_today),
+          hintText: 'Select your date of birth',
+          prefixIcon: Container(
+            margin: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.kprimaryColor500.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.calendar_today,
+              color: AppColors.kprimaryColor500,
+              size: 20,
+            ),
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
+          ),
+          filled: true,
+          fillColor: Theme.of(context).cardColor,
         ),
         onTap: _pickDate,
         validator: (value) => (value == null || value.isEmpty)
             ? 'Date of birth is required'
             : null,
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    TextInputType keyboardType = TextInputType.text,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: keyboardType,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
-        decoration: InputDecoration(
-          labelText: label,
-          hintText: 'Enter your $label'.toLowerCase(),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-        validator: (value) => (value == null || value.trim().isEmpty)
-            ? '$label can\'t be empty'
-            : null,
-      ),
-    );
-  }
-
-  Widget _buildDropdown({
-    required String label,
-    String? value,
-    required List<String> items,
-    required ValueChanged<String?> onChanged,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: GestureDetector(
-        onTap: () async {
-          final selectedValue = await showModalBottomSheet<String>(
-            context: context,
-            isScrollControlled: true,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-            ),
-            builder: (ctx) {
-              final screenHeight = MediaQuery.of(ctx).size.height;
-
-              // Estimate height based on number of items (roughly 56 px per ListTile)
-              final estimatedHeight = 120 + (items.length * 56);
-              final minHeight = screenHeight * 0.2;
-              final maxHeight = screenHeight * 0.5;
-              final modalHeight =
-                  estimatedHeight.clamp(minHeight, maxHeight).toDouble();
-
-              return SizedBox(
-                height: modalHeight,
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text('Select $label',
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
-                    ),
-                    const Divider(height: 1),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: items.length,
-                        itemBuilder: (context, index) {
-                          final item = items[index];
-                          return ListTile(
-                            title: Text(item),
-                            onTap: () => Navigator.pop(ctx, item),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                ),
-              );
-            },
-          );
-
-          if (selectedValue != null) {
-            onChanged(selectedValue);
-          }
-        },
-        child: InputDecorator(
-          decoration: InputDecoration(
-            labelText: label,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          child: Text(
-            value ?? 'Select $label',
-            style: TextStyle(
-              color: value == null ? Colors.grey : Colors.black,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMultiSelect({
-    required String label,
-    required List<String> options,
-    required List<String> selected,
-    required Function(List<String?>) onConfirm,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: MultiSelectBottomSheetField<String?>(
-        selectedColor: AppColors.kprimaryColor500,
-        initialChildSize: 0.3,
-        minChildSize: 0.3,
-        maxChildSize: 0.5,
-        listType: MultiSelectListType.LIST,
-        items: options.map((e) => MultiSelectItem(e, e)).toList(),
-        title: Text(label),
-        buttonText: Text(label),
-        initialValue: selected,
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade400),
-          borderRadius: BorderRadius.circular(12),
-        ),
-
-        // Wrap the callback to accept List<String?> and filter out nulls:
-        onConfirm: (List<String?> values) {
-          final nonNull = values.whereType<String>().toList();
-          onConfirm(nonNull);
-        },
-
-        chipDisplay: MultiSelectChipDisplay(
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade400),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          chipColor: Colors.grey.shade200,
-          textStyle: const TextStyle(color: Colors.black),
-          onTap: (val) {
-            setState(() {
-              selected.remove(val);
-            });
-          },
-        ),
       ),
     );
   }

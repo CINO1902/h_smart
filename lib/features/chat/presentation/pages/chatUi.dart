@@ -10,7 +10,6 @@ import 'package:h_smart/features/chat/presentation/widgets/ChatBubble.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../constant/socketClass.dart';
-import '../../../../core/utils/appColor.dart';
 import '../../domains/utils/DatabaseHelper.dart';
 
 class ChatUI extends ConsumerStatefulWidget {
@@ -191,7 +190,9 @@ class _ChatUIState extends ConsumerState<ChatUI> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
+      backgroundColor: theme.colorScheme.background,
       body: SafeArea(
         child: Stack(children: [
           Align(
@@ -204,11 +205,15 @@ class _ChatUIState extends ConsumerState<ChatUI> {
                 ),
                 Container(
                   height: 47,
-                  margin: const EdgeInsets.only(left: 20, right: 20, bottom: 10),
+                  margin:
+                      const EdgeInsets.only(left: 20, right: 20, bottom: 10),
                   decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xffEDEDED))),
+                    color: theme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: theme.colorScheme.outline.withOpacity(0.2),
+                    ),
+                  ),
                   padding: const EdgeInsets.all(10),
                   child: Row(
                     children: [
@@ -216,20 +221,33 @@ class _ChatUIState extends ConsumerState<ChatUI> {
                         'images/attachment.png',
                         height: 20,
                         width: 20,
+                        color: theme.colorScheme.onSurface.withOpacity(0.7),
                       ),
                       const Gap(5),
                       Expanded(
-                          child: TextField(
-                        controller: messagecontroller,
-                        minLines: 1,
-                        maxLines: 3,
-                        style: const TextStyle(fontSize: 14),
-                        decoration: const InputDecoration(
-                            constraints: BoxConstraints(minHeight: 20),
-                            contentPadding: EdgeInsets.symmetric(
-                                horizontal: 5, vertical: 0),
-                            border: InputBorder.none),
-                      )),
+                        child: TextField(
+                          controller: messagecontroller,
+                          minLines: 1,
+                          maxLines: 3,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                          decoration: InputDecoration(
+                            constraints: const BoxConstraints(minHeight: 20),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 5,
+                              vertical: 0,
+                            ),
+                            border: InputBorder.none,
+                            hintText: 'Type a message...',
+                            hintStyle: TextStyle(
+                              color:
+                                  theme.colorScheme.onSurface.withOpacity(0.5),
+                            ),
+                          ),
+                        ),
+                      ),
                       const Gap(5),
                       InkWell(
                         onTap: _sendMessage,
@@ -237,6 +255,7 @@ class _ChatUIState extends ConsumerState<ChatUI> {
                           'images/send.png',
                           height: 20,
                           width: 20,
+                          color: theme.colorScheme.primary,
                         ),
                       ),
                     ],
@@ -246,106 +265,65 @@ class _ChatUIState extends ConsumerState<ChatUI> {
             ),
           ),
           Container(
-            color: Colors.white,
+            color: theme.colorScheme.surface,
             height: 70,
-            padding: const EdgeInsets.all(15),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    InkWell(
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                      child: SizedBox(
-                          height: 30,
-                          width: 30,
-                          child: Image.asset(
-                            'images/chevron-left.png',
-                            color: AppColors.kprimaryColor500,
-                          )),
-                    ),
-                    const Gap(15),
-                    SizedBox(
-                      height: 40,
+                InkWell(
+                  onTap: () => Navigator.pop(context),
+                  child: Icon(
+                    Icons.arrow_back,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                const Gap(15),
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: CachedNetworkImage(
+                      imageUrl: widget.profile_pic,
+                      fit: BoxFit.cover,
                       width: 40,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(50),
-                        child: CachedNetworkImage(
-                          progressIndicatorBuilder: (context, url, progress) {
-                            return Center(
-                              child: SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  color: AppColors.kprimaryColor500,
-                                  value: progress.progress,
-                                  strokeWidth: 2,
-                                ),
-                              ),
-                            );
-                          },
-                          imageUrl: widget.profile_pic,
-                          fit: BoxFit.cover,
-                          errorWidget: (context, url, error) => const Icon(
-                            Icons.error,
-                            color: Colors.red,
+                      height: 40,
+                      placeholder: (context, url) => Container(
+                        color: theme.colorScheme.surfaceVariant,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: theme.colorScheme.primary,
                           ),
                         ),
                       ),
+                      errorWidget: (context, url, error) => Icon(
+                        Icons.person,
+                        color: theme.colorScheme.primary,
+                      ),
                     ),
-                    const Gap(15),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          width: 180,
-                          child: Text(
-                            '${widget.firstname} ${widget.lastname}',
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 14),
-                          ),
-                        ),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              height: 5,
-                              width: 5,
-                              child: SvgPicture.asset('images/dot.svg',
-                                  color: Colors.green),
-                            ),
-                            const Gap(5),
-                            const Text(
-                              'Online',
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.green),
-                            ),
-                          ],
-                        )
-                      ],
+                  ),
+                ),
+                const Gap(10),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${widget.firstname} ${widget.lastname}',
+                      style: theme.textTheme.titleMedium!.copyWith(
+                        color: theme.colorScheme.onSurface,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      'Online',
+                      style: theme.textTheme.bodySmall!.copyWith(
+                        color: theme.colorScheme.primary,
+                      ),
                     ),
                   ],
                 ),
-                Row(
-                  children: [
-                    Image.asset(
-                      'images/voice_call.png',
-                      height: 30,
-                      width: 30,
-                    ),
-                    const Gap(10),
-                    Image.asset(
-                      'images/video_call.png',
-                      height: 30,
-                      width: 30,
-                    )
-                  ],
-                )
               ],
             ),
           ),
@@ -355,183 +333,56 @@ class _ChatUIState extends ConsumerState<ChatUI> {
   }
 
   Widget _buildmessageList() {
-    return StreamBuilder(
-      stream: _dbHelper.messageStream,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Text('Error${snapshot.error}');
-        }
+    final theme = Theme.of(context);
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: _dbHelper.getMessagesForConversation(widget.conversationID),
+      builder: (context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(),
+          return Center(
+            child: CircularProgressIndicator(
+              color: theme.colorScheme.primary,
+            ),
           );
         }
-        // Get all messages for this conversation.
-        final messages = snapshot.data!
-            .where((msg) => msg['conversationId'] == widget.conversationID)
-            .toList();
 
-        if (messages.isEmpty) {
-          return const Center(child: Text("No messages yet"));
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(
+            child: Text(
+              'No messages yet',
+              style: TextStyle(
+                color: theme.colorScheme.onSurface.withOpacity(0.7),
+              ),
+            ),
+          );
         }
 
-        // Compute new messages based solely on the timestamp.
-        final newMessages = messages.where((msg) {
-          final DateTime msgTime =
-              DateTime.parse(msg['timestamp']).toUtc().toLocal();
-          return (msgTime.isAfter(newMessageThreshold) ||
-                  msgTime.isAtSameMomentAs(newMessageThreshold)) &&
-              msg['sender'] != '222022'; // Exclude messages sent by you
-        }).toList();
-
-        // Update our state with the new message count if it has changed.
-        if (newMessages.length != newMessageCount) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              setState(() {
-                newMessageCount = newMessages.length;
-              });
-            }
-          });
-        }
-
-        // Find the first message that is considered new.
-        int dividerIndex = messages.indexWhere((msg) {
-          final DateTime msgTime =
-              DateTime.parse(msg['timestamp']).toUtc().toLocal();
-          return (msgTime.isAfter(newMessageThreshold) ||
-                  msgTime.isAtSameMomentAs(newMessageThreshold)) &&
-              msg['sender'] != '829922';
-        });
-        if (dividerIndex == -1 || newMessageCount == 0) {
-          dividerIndex = -1;
-        }
-
-        // Adjust total items if we need to insert a divider.
-        final int totalItems = messages.length + (dividerIndex != -1 ? 1 : 0);
-
+        final messages = snapshot.data!;
         return ListView.builder(
-          shrinkWrap: true,
           controller: _controller,
-          itemCount: totalItems,
+          reverse: true,
+          itemCount: messages.length,
           itemBuilder: (context, index) {
-            // checknewmessage(
-            //   snapshot.data!.docs.length,
-            // );
-            // bookindex = snapshot.data!.docs.length;
-            _scrollDown();
-            return _buildmessageItem(newMessages, index, totalItems);
+            final message = messages[index];
+            final isFromMe = message['sender'] == '67d2eddda33c0f86f2e9938d';
+
+            return Align(
+              alignment:
+                  isFromMe ? Alignment.centerRight : Alignment.centerLeft,
+              child: Container(
+                margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+                child: ChatBubble(
+                  message: message['content'] as String,
+                  backgroundColor: isFromMe
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.surfaceVariant,
+                  isFromMe: isFromMe,
+                ),
+              ),
+            );
           },
-          // children: snapshot.data!.docs
-          //     .map((document) => _buildmessageItem(document))
-          //     .toList(),
         );
       },
     );
-  }
-
-  Widget _buildmessageItem(document, index, length) {
-    var alignment = (document[index]['senderId'] == email)
-        ? Alignment.centerRight
-        : Alignment.centerLeft;
-
-    return Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        alignment: alignment,
-        child: (document[index]['senderId'] == email)
-            ? ChatBubble(
-                message: document[index]['message'],
-                color: const Color(0xffF3F7FF),
-              )
-            : length != index + 1
-                ? document[index]['recieverID'] !=
-                        document[index + 1]['recieverID']
-                    ? Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          SizedBox(
-                            height: 30,
-                            width: 30,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(50),
-                              child: CachedNetworkImage(
-                                progressIndicatorBuilder:
-                                    (context, url, progress) {
-                                  return Center(
-                                    child: SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        color: AppColors.kprimaryColor500,
-                                        value: progress.progress,
-                                        strokeWidth: 2,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                imageUrl: widget.profile_pic,
-                                fit: BoxFit.cover,
-                                errorWidget: (context, url, error) => const Icon(
-                                  Icons.error,
-                                  color: Colors.red,
-                                ),
-                              ),
-                            ),
-                          ),
-                          ChatBubble(
-                            message: document[index]['message'],
-                            color: const Color(0xffEDEDED),
-                          )
-                        ],
-                      )
-                    : Row(
-                        children: [
-                          const SizedBox(
-                            width: 30,
-                          ),
-                          ChatBubble(
-                            message: document[index]['message'],
-                            color: const Color(0xffEDEDED),
-                          ),
-                        ],
-                      )
-                : Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      SizedBox(
-                        height: 30,
-                        width: 30,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(50),
-                          child: CachedNetworkImage(
-                            progressIndicatorBuilder: (context, url, progress) {
-                              return Center(
-                                child: SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    color: AppColors.kprimaryColor500,
-                                    value: progress.progress,
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                              );
-                            },
-                            imageUrl: widget.profile_pic,
-                            fit: BoxFit.cover,
-                            errorWidget: (context, url, error) => const Icon(
-                              Icons.error,
-                              color: Colors.red,
-                            ),
-                          ),
-                        ),
-                      ),
-                      ChatBubble(
-                        message: document[index]['message'],
-                        color: const Color(0xffEDEDED),
-                      )
-                    ],
-                  ));
   }
 }
 
