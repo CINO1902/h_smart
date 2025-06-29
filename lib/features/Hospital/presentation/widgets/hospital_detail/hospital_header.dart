@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:h_smart/features/Hospital/domain/entities/GetHospital.dart';
-import 'package:h_smart/features/medical_record/presentation/widgets/AutoScrollText.dart';
+import 'package:h_smart/constant/AutoScrollText.dart';
 
 class HospitalHeader extends StatelessWidget {
   final Hospital hospital;

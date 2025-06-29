@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
-import 'package:h_smart/features/medical_record/presentation/widgets/AutoScrollText.dart';
+import 'package:h_smart/constant/AutoScrollText.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:h_smart/features/posts/domain/entities/post.dart';
 import 'package:h_smart/core/utils/appColor.dart';
-import 'package:h_smart/features/posts/presentation/widgets/fullview.dart';
 import 'package:go_router/go_router.dart';
 import 'package:h_smart/constant/SchimmerWidget.dart';
+
+import '../index.dart';
 
 class PostCard extends StatefulWidget {
   final Post post;
@@ -30,7 +31,6 @@ class _PostCardState extends State<PostCard> {
   bool _expanded = false;
   bool _showSeeMore = false;
   final int _maxLines = 8;
-  bool _isAvatarLoading = true;
 
   @override
   void initState() {

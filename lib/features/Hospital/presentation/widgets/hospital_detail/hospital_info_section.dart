@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:h_smart/features/Hospital/domain/entities/GetHospital.dart';
 import 'package:h_smart/core/utils/appColor.dart';
-import 'package:h_smart/features/medical_record/presentation/widgets/AutoScrollText.dart';
+import 'package:h_smart/constant/AutoScrollText.dart';
 
 class HospitalInfoSection extends StatelessWidget {
   final Hospital hospital;

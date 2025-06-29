@@ -1,366 +1,200 @@
 // To parse this JSON data, do
 //
-//     final prescription = prescriptionFromJson(jsonString);
+//     final pescriptionResponse = pescriptionResponseFromJson(jsonString);
 
 import 'dart:convert';
 
-Prescription prescriptionFromJson(String str) =>
-    Prescription.fromJson(json.decode(str));
+PescriptionResponse pescriptionResponseFromJson(String str) =>
+    PescriptionResponse.fromJson(json.decode(str));
 
-String prescriptionToJson(Prescription data) => json.encode(data.toJson());
+String pescriptionResponseToJson(PescriptionResponse data) =>
+    json.encode(data.toJson());
 
-class Prescription {
-  String status;
-  List<Datum> data;
+class PescriptionResponse {
+  bool? error;
+  String? message;
+  List<Pescription>? payload;
 
-  Prescription({
-    required this.status,
-    required this.data,
+  PescriptionResponse({
+    this.error,
+    this.message,
+    this.payload,
   });
 
-  factory Prescription.fromJson(Map<String, dynamic> json) => Prescription(
+  PescriptionResponse copyWith({
+    bool? error,
+    String? message,
+    List<Pescription>? payload,
+  }) =>
+      PescriptionResponse(
+        error: error ?? this.error,
+        message: message ?? this.message,
+        payload: payload ?? this.payload,
+      );
+
+  factory PescriptionResponse.fromJson(Map<String, dynamic> json) =>
+      PescriptionResponse(
+        error: json["error"],
+        message: json["message"],
+        payload: json["payload"] == null
+            ? []
+            : List<Pescription>.from(
+                json["payload"]!.map((x) => Pescription.fromJson(x))),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "error": error,
+        "message": message,
+        "payload": payload == null
+            ? []
+            : List<dynamic>.from(payload!.map((x) => x.toJson())),
+      };
+}
+
+class Pescription {
+  DateTime? createdAt;
+  String? doctorId;
+  String? doctorName;
+  String? doctorProfileUrl;
+  DateTime? endDate;
+  String? id;
+  List<Medication>? medications;
+  String? patientId;
+  String? patientName;
+  String? phoneNumber;
+  DateTime? startDate;
+  String? status;
+  DateTime? updatedAt;
+
+  Pescription({
+    this.createdAt,
+    this.doctorId,
+    this.doctorName,
+    this.doctorProfileUrl,
+    this.endDate,
+    this.id,
+    this.medications,
+    this.patientId,
+    this.patientName,
+    this.phoneNumber,
+    this.startDate,
+    this.status,
+    this.updatedAt,
+  });
+
+  Pescription copyWith({
+    DateTime? createdAt,
+    String? doctorId,
+    String? doctorName,
+    String? doctorProfileUrl,
+    DateTime? endDate,
+    String? id,
+    List<Medication>? medications,
+    String? patientId,
+    String? patientName,
+    String? phoneNumber,
+    DateTime? startDate,
+    String? status,
+    DateTime? updatedAt,
+  }) =>
+      Pescription(
+        createdAt: createdAt ?? this.createdAt,
+        doctorId: doctorId ?? this.doctorId,
+        doctorName: doctorName ?? this.doctorName,
+        doctorProfileUrl: doctorProfileUrl ?? this.doctorProfileUrl,
+        endDate: endDate ?? this.endDate,
+        id: id ?? this.id,
+        medications: medications ?? this.medications,
+        patientId: patientId ?? this.patientId,
+        patientName: patientName ?? this.patientName,
+        phoneNumber: phoneNumber ?? this.phoneNumber,
+        startDate: startDate ?? this.startDate,
+        status: status ?? this.status,
+        updatedAt: updatedAt ?? this.updatedAt,
+      );
+
+  factory Pescription.fromJson(Map<String, dynamic> json) => Pescription(
+        createdAt: json["created_at"] == null
+            ? null
+            : DateTime.parse(json["created_at"]),
+        doctorId: json["doctor_id"],
+        doctorName: json["doctor_name"],
+        doctorProfileUrl: json["doctor_profile_url"],
+        endDate:
+            json["end_date"] == null ? null : DateTime.parse(json["end_date"]),
+        id: json["id"],
+        medications: json["medications"] == null
+            ? []
+            : List<Medication>.from(
+                json["medications"]!.map((x) => Medication.fromJson(x))),
+        patientId: json["patient_id"],
+        patientName: json["patient_name"],
+        phoneNumber: json["phone_number"],
+        startDate: json["start_date"] == null
+            ? null
+            : DateTime.parse(json["start_date"]),
         status: json["status"],
-        data: List<Datum>.from(json["data"].map((x) => Datum.fromJson(x))),
+        updatedAt: json["updated_at"] == null
+            ? null
+            : DateTime.parse(json["updated_at"]),
       );
 
   Map<String, dynamic> toJson() => {
+        "created_at": createdAt?.toIso8601String(),
+        "doctor_id": doctorId,
+        "doctor_name": doctorName,
+        "doctor_profile_url": doctorProfileUrl,
+        "end_date": endDate?.toIso8601String(),
+        "id": id,
+        "medications": medications == null
+            ? []
+            : List<dynamic>.from(medications!.map((x) => x.toJson())),
+        "patient_id": patientId,
+        "patient_name": patientName,
+        "phone_number": phoneNumber,
+        "start_date": startDate?.toIso8601String(),
         "status": status,
-        "data": List<dynamic>.from(data.map((x) => x.toJson())),
+        "updated_at": updatedAt?.toIso8601String(),
       };
 }
 
-class Datum {
-  String id;
-  DoctorName doctorName;
-  PatientName patientName;
-  List<Specializations> drugs;
-  DateTime prescriptionDate;
-  String description;
-  String dosage;
-  bool isCurrent;
-  DateTime createdAt;
-  DateTime updatedAt;
+class Medication {
+  String? dosage;
+  String? frequency;
+  String? instructions;
+  String? name;
 
-  Datum({
-    required this.id,
-    required this.doctorName,
-    required this.patientName,
-    required this.drugs,
-    required this.prescriptionDate,
-    required this.description,
-    required this.dosage,
-    required this.isCurrent,
-    required this.createdAt,
-    required this.updatedAt,
+  Medication({
+    this.dosage,
+    this.frequency,
+    this.instructions,
+    this.name,
   });
 
-  factory Datum.fromJson(Map<String, dynamic> json) => Datum(
-        id: json["id"],
-        doctorName: DoctorName.fromJson(json["doctor_name"]),
-        patientName: PatientName.fromJson(json["patient_name"]),
-        drugs: List<Specializations>.from(
-            json["drugs"].map((x) => Specializations.fromJson(x))),
-        prescriptionDate: DateTime.parse(json["prescription_date"]),
-        description: json["description"],
+  Medication copyWith({
+    String? dosage,
+    String? frequency,
+    String? instructions,
+    String? name,
+  }) =>
+      Medication(
+        dosage: dosage ?? this.dosage,
+        frequency: frequency ?? this.frequency,
+        instructions: instructions ?? this.instructions,
+        name: name ?? this.name,
+      );
+
+  factory Medication.fromJson(Map<String, dynamic> json) => Medication(
         dosage: json["dosage"],
-        isCurrent: json["is_current"],
-        createdAt: DateTime.parse(json["created_at"]),
-        updatedAt: DateTime.parse(json["updated_at"]),
+        frequency: json["frequency"],
+        instructions: json["instructions"],
+        name: json["name"],
       );
 
   Map<String, dynamic> toJson() => {
-        "id": id,
-        "doctor_name": doctorName.toJson(),
-        "patient_name": patientName.toJson(),
-        "drugs": List<dynamic>.from(drugs.map((x) => x.toJson())),
-        "prescription_date":
-            "${prescriptionDate.year.toString().padLeft(4, '0')}-${prescriptionDate.month.toString().padLeft(2, '0')}-${prescriptionDate.day.toString().padLeft(2, '0')}",
-        "description": description,
         "dosage": dosage,
-        "is_current": isCurrent,
-        "created_at": createdAt.toIso8601String(),
-        "updated_at": updatedAt.toIso8601String(),
-      };
-}
-
-class DoctorName {
-  String id;
-  User user;
-  Specializations specialization;
-  Hospital hospital;
-  dynamic docProfilePicture;
-  String firstName;
-  String lastName;
-  String phoneNumber;
-  String bio;
-  String couldinaryFileField;
-  DateTime createdAt;
-  DateTime updatedAt;
-
-  DoctorName({
-    required this.id,
-    required this.user,
-    required this.specialization,
-    required this.hospital,
-    this.docProfilePicture,
-    required this.firstName,
-    required this.lastName,
-    required this.phoneNumber,
-    required this.bio,
-    required this.couldinaryFileField,
-    required this.createdAt,
-    required this.updatedAt,
-  });
-
-  factory DoctorName.fromJson(Map<String, dynamic> json) => DoctorName(
-        id: json["id"],
-        user: User.fromJson(json["user"]),
-        specialization: Specializations.fromJson(json["specialization"]),
-        hospital: Hospital.fromJson(json["hospital"]),
-        docProfilePicture: json["doc_profile_picture"],
-        firstName: json["first_name"],
-        lastName: json["last_name"],
-        phoneNumber: json["phone_number"],
-        bio: json["bio"],
-        couldinaryFileField: json["couldinary_file_field"],
-        createdAt: DateTime.parse(json["created_at"]),
-        updatedAt: DateTime.parse(json["updated_at"]),
-      );
-
-  Map<String, dynamic> toJson() => {
-        "id": id,
-        "user": user.toJson(),
-        "specialization": specialization.toJson(),
-        "hospital": hospital.toJson(),
-        "doc_profile_picture": docProfilePicture,
-        "first_name": firstName,
-        "last_name": lastName,
-        "phone_number": phoneNumber,
-        "bio": bio,
-        "couldinary_file_field": couldinaryFileField,
-        "created_at": createdAt.toIso8601String(),
-        "updated_at": updatedAt.toIso8601String(),
-      };
-}
-
-class Hospital {
-  String id;
-  String name;
-  String address;
-  String city;
-  String state;
-  dynamic coverImage;
-  String type;
-  String country;
-  String phoneNumber;
-  String email;
-  String website;
-  DateTime createdAt;
-  DateTime updatedAt;
-
-  Hospital({
-    required this.id,
-    required this.name,
-    required this.address,
-    required this.city,
-    required this.state,
-    this.coverImage,
-    required this.type,
-    required this.country,
-    required this.phoneNumber,
-    required this.email,
-    required this.website,
-    required this.createdAt,
-    required this.updatedAt,
-  });
-
-  factory Hospital.fromJson(Map<String, dynamic> json) => Hospital(
-        id: json["id"],
-        name: json["name"],
-        address: json["address"],
-        city: json["city"],
-        state: json["state"],
-        coverImage: json["cover_image"],
-        type: json["type"],
-        country: json["country"],
-        phoneNumber: json["phone_number"],
-        email: json["email"],
-        website: json["website"],
-        createdAt: DateTime.parse(json["created_at"]),
-        updatedAt: DateTime.parse(json["updated_at"]),
-      );
-
-  Map<String, dynamic> toJson() => {
-        "id": id,
+        "frequency": frequency,
+        "instructions": instructions,
         "name": name,
-        "address": address,
-        "city": city,
-        "state": state,
-        "cover_image": coverImage,
-        "type": type,
-        "country": country,
-        "phone_number": phoneNumber,
-        "email": email,
-        "website": website,
-        "created_at": createdAt.toIso8601String(),
-        "updated_at": updatedAt.toIso8601String(),
-      };
-}
-
-class Specializations {
-  String id;
-  List<Doctor>? doctors;
-  String name;
-  String description;
-  DateTime createdAt;
-  DateTime updatedAt;
-
-  Specializations({
-    required this.id,
-    this.doctors,
-    required this.name,
-    required this.description,
-    required this.createdAt,
-    required this.updatedAt,
-  });
-
-  factory Specializations.fromJson(Map<String, dynamic> json) => Specializations(
-        id: json["id"],
-        doctors: json["doctors"] == null
-            ? []
-            : List<Doctor>.from(
-                json["doctors"]!.map((x) => Doctor.fromJson(x))),
-        name: json["name"],
-        description: json["description"],
-        createdAt: DateTime.parse(json["created_at"]),
-        updatedAt: DateTime.parse(json["updated_at"]),
-      );
-
-  Map<String, dynamic> toJson() => {
-        "id": id,
-        "doctors": doctors == null
-            ? []
-            : List<dynamic>.from(doctors!.map((x) => x.toJson())),
-        "name": name,
-        "description": description,
-        "created_at": createdAt.toIso8601String(),
-        "updated_at": updatedAt.toIso8601String(),
-      };
-}
-
-class Doctor {
-  User user;
-  String firstName;
-  String lastName;
-  String phoneNumber;
-  String bio;
-  dynamic docProfilePicture;
-
-  Doctor({
-    required this.user,
-    required this.firstName,
-    required this.lastName,
-    required this.phoneNumber,
-    required this.bio,
-    required this.docProfilePicture,
-  });
-
-  factory Doctor.fromJson(Map<String, dynamic> json) => Doctor(
-        user: User.fromJson(json["user"]),
-        firstName: json["first_name"],
-        lastName: json["last_name"],
-        phoneNumber: json["phone_number"],
-        bio: json["bio"],
-        docProfilePicture: json["doc_profile_picture"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "user": user.toJson(),
-        "first_name": firstName,
-        "last_name": lastName,
-        "phone_number": phoneNumber,
-        "bio": bio,
-        "doc_profile_picture": docProfilePicture,
-      };
-}
-
-class User {
-  String id;
-  String email;
-
-  User({
-    required this.id,
-    required this.email,
-  });
-
-  factory User.fromJson(Map<String, dynamic> json) => User(
-        id: json["id"],
-        email: json["email"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "id": id,
-        "email": email,
-      };
-}
-
-class PatientName {
-  String id;
-  String user;
-  dynamic profilePicture;
-  String firstName;
-  String lastName;
-  DateTime dateOfBirth;
-  String address;
-  String contactNumber;
-  String couldinaryFileField;
-  DateTime createdAt;
-  DateTime updatedAt;
-  dynamic hospital;
-
-  PatientName({
-    required this.id,
-    required this.user,
-    this.profilePicture,
-    required this.firstName,
-    required this.lastName,
-    required this.dateOfBirth,
-    required this.address,
-    required this.contactNumber,
-    required this.couldinaryFileField,
-    required this.createdAt,
-    required this.updatedAt,
-    required this.hospital,
-  });
-
-  factory PatientName.fromJson(Map<String, dynamic> json) => PatientName(
-        id: json["id"],
-        user: json["user"],
-        profilePicture: json["profile_picture"],
-        firstName: json["first_name"],
-        lastName: json["last_name"],
-        dateOfBirth: DateTime.parse(json["date_of_birth"]),
-        address: json["address"],
-        contactNumber: json["contact_number"],
-        couldinaryFileField: json["couldinary_file_field"],
-        createdAt: DateTime.parse(json["created_at"]),
-        updatedAt: DateTime.parse(json["updated_at"]),
-        hospital: json["hospital"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "id": id,
-        "user": user,
-        "profile_picture": profilePicture,
-        "first_name": firstName,
-        "last_name": lastName,
-        "date_of_birth":
-            "${dateOfBirth.year.toString().padLeft(4, '0')}-${dateOfBirth.month.toString().padLeft(2, '0')}-${dateOfBirth.day.toString().padLeft(2, '0')}",
-        "address": address,
-        "contact_number": contactNumber,
-        "couldinary_file_field": couldinaryFileField,
-        "created_at": createdAt.toIso8601String(),
-        "updated_at": updatedAt.toIso8601String(),
-        "hospital": hospital,
       };
 }

@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:video_player/video_player.dart';
-import 'dart:async';
-import 'package:h_smart/features/posts/domain/entities/post.dart';
-import 'package:h_smart/features/posts/presentation/providers/video_controller_provider.dart';
 
 class Fullview extends StatefulWidget {
   final String imageUrl;

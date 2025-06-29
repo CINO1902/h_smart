@@ -35,12 +35,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Future<void> _onLogin() async {
-    if (_rememberMe) {
-      ref.read(authProvider).saveEmailLogin(_emailController.text);
-    } else {
-      ref.read(authProvider).unSaveEmailLogin();
-    }
-
     if (!_formKey.currentState!.validate()) return;
 
     final auth = ref.read(authProvider);
@@ -65,6 +59,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         status: SnackbarStatus.fail,
       );
     } else if (result.state == LoginResultStates.isData) {
+      if (_rememberMe) {
+        print('should save this ${_emailController.text}');
+        ref.read(authProvider).saveEmailLogin(_emailController.text);
+      } else {
+        ref.read(authProvider).unSaveEmailLogin();
+      }
+
       SnackBarService.showSnackBar(
         context,
         title: 'Success',
@@ -74,12 +75,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
       // Save credentials for biometric login if user has biometric enabled
       final securityNotifier = ref.read(securityProvider.notifier);
-      if (securityNotifier.hasBiometricEnabled) {
-        await securityNotifier.saveLoginCredentials(
-          _emailController.text.trim(),
-          _passwordController.text,
-        );
-      }
+
+      await securityNotifier.saveLoginCredentials(
+        _emailController.text.trim(),
+        _passwordController.text,
+      );
 
       final isComplete = result.response.payload?.isProfileComplete ?? true;
       final emailVerified = result.response.payload?.status ?? '';
@@ -158,6 +158,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     });
   }
 
+  // @override
+  // void didChangeDependencies() {
+  //   super.didChangeDependencies();
+  //   WidgetsBinding.instance.addPostFrameCallback((_) async {
+  //     ref.read(authProvider);
+  //     await _loadRememberMe();
+  //     updateEmailField();
+  //   });
+  // }
+
   Future<void> _loadRememberMe() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -177,6 +187,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     await Future.delayed(const Duration(microseconds: 500));
     final savedEmail = ref.read(authProvider).emailLogin;
     if (savedEmail.isNotEmpty) {
+      print('object is $savedEmail');
       _emailController.text = savedEmail;
       // _rememberMe = true;
     }

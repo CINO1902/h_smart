@@ -9,67 +9,31 @@ class MedicalRecordprovider extends ChangeNotifier {
 
   MedicalRecordprovider(this.medicalRecordRepo);
 
-  bool loading = true;
-  bool error = false;
-  bool currentempty = false;
-  List<Datum> pres = [];
-  String clickdoctordescription = '';
+  bool isUpdating = false;
+  bool listloaded = false;
+
   GetOverResult overview =
-      GetOverResult(status: GetOverResultStates.idle, data: GetOverView());
-  DoctorName clickeddoctorcategory = DoctorName(
-      id: '',
-      user: User(email: '', id: ''),
-      docProfilePicture: '',
-      firstName: '',
-      lastName: '',
-      phoneNumber: '',
-      bio: '',
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-      hospital: Hospital(
-        address: '',
-        name: '',
-        id: '',
-        city: '',
-        state: '',
-        coverImage: null,
-        type: '',
-        country: '',
-        phoneNumber: '',
-        email: '',
-        website: '',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      ),
-      specialization: Specializations(
-          id: '',
-          name: '',
-          description: '',
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now()),
-      couldinaryFileField: '');
+      GetOverResult(status: GetOverResultStates.loading, data: GetOverView());
+  GetPrescriptionResult prescription = GetPrescriptionResult(
+      GetPrescriptionResultStates.loading, PescriptionResponse());
+
   Future<void> getprescription() async {
-    final response = await medicalRecordRepo.getprescription();
-
-    loading = false;
-    if (response[0].contains('1')) {
-      error = true;
+    if (listloaded) {
+      isUpdating = true;
+      notifyListeners();
     } else {
-      error = false;
-
-      if (response[1]['data'].isEmpty) {
-        currentempty = true;
-      } else {
-        print(response[1]);
-        // final decodedres =
-        //     Prescription.fromJson(response[1] as Map<String, dynamic>);
-
-        // pres = decodedres.data;
-      }
+      prescription = GetPrescriptionResult(
+          GetPrescriptionResultStates.loading, PescriptionResponse());
+      notifyListeners();
+    }
+    final response = await medicalRecordRepo.getprescription();
+    prescription = response;
+    isUpdating = false;
+    if (response.status == GetPrescriptionResultStates.success) {
+      listloaded = true;
     }
     notifyListeners();
   }
-
 
   Future<void> getOverview() async {
     overview =

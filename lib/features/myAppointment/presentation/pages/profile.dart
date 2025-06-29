@@ -128,12 +128,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     child: ClipOval(
                       child: profileUrl == null
-                          ? Container(
-                              color: theme.colorScheme.primary,
-                              child: Icon(
-                                Icons.camera_alt,
-                                size: 32,
-                                color: theme.colorScheme.onPrimary,
+                          ? CircleAvatar(
+                              radius: 22,
+                              backgroundColor:
+                                  theme.colorScheme.primary.withOpacity(0.1),
+                              child: Text(
+                                userData?.firstName?[0].toUpperCase() ?? '',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.colorScheme.primary,
+                                ),
                               ),
                             )
                           : CachedNetworkImage(

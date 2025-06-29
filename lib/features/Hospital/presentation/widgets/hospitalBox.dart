@@ -5,7 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:h_smart/core/utils/appColor.dart';
 import 'package:h_smart/features/Hospital/domain/entities/GetHospital.dart';
-import 'package:h_smart/features/medical_record/presentation/widgets/AutoScrollText.dart';
+import 'package:h_smart/constant/AutoScrollText.dart';
 
 class HospitalWidget extends StatelessWidget {
   const HospitalWidget({

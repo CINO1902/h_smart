@@ -6,9 +6,10 @@ import 'package:h_smart/features/medical_record/domain/usecases/userStates.dart'
 
 import '../../../../constant/enum.dart';
 import '../entities/GetOverView.dart';
+import '../entities/prescription.dart';
 
 abstract class MedicalRecordRepo {
-  Future<List<dynamic>> getprescription();
+  Future<GetPrescriptionResult> getprescription();
   Future<GetOverResult> getOverview();
 }
 
@@ -17,17 +18,23 @@ class MedicalRecordRepoImp implements MedicalRecordRepo {
 
   MedicalRecordRepoImp(this.medicalRecordDatasource);
   @override
-  Future<List> getprescription() async {
-    List<dynamic> returnresponse = [];
+  Future<GetPrescriptionResult> getprescription() async {
+    GetPrescriptionResult returnresponse = GetPrescriptionResult(
+        GetPrescriptionResultStates.fail, PescriptionResponse());
 
     try {
       returnresponse = await medicalRecordDatasource.getprescription();
     } catch (e) {
-      NetworkException exp = e as NetworkException;
-
-      returnresponse.add('1');
-      returnresponse.add(exp.message);
       log(e.toString());
+      if (e.runtimeType == NetworkException) {
+        NetworkException exp = e as NetworkException;
+        final message = exp.errorMessage ?? e.message;
+        returnresponse = GetPrescriptionResult(GetPrescriptionResultStates.fail,
+            PescriptionResponse(message: message));
+      } else {
+        returnresponse = GetPrescriptionResult(GetPrescriptionResultStates.fail,
+            PescriptionResponse(message: "Something went wrong"));
+      }
     }
     return returnresponse;
   }

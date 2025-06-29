@@ -18,22 +18,22 @@ class PostCardShimmer extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header with avatar and title
-          Padding(
-            padding: const EdgeInsets.all(16),
+          const Padding(
+            padding: EdgeInsets.all(16),
             child: Row(
               children: [
                 // Avatar shimmer
-                const ShimmerWidget.rectangle(
+                ShimmerWidget.rectangle(
                   height: 48,
                   width: 48,
                 ),
-                const Gap(12),
+                Gap(12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Name shimmer
-                      const ShimmerWidget.rectangle(
+                      ShimmerWidget.rectangle(
                         height: 14,
                         width: 120,
                       ),
@@ -41,11 +41,11 @@ class PostCardShimmer extends StatelessWidget {
                       // Category and time shimmer
                       Row(
                         children: [
-                          const ShimmerWidget.rectangle(
+                          ShimmerWidget.rectangle(
                             height: 12,
                             width: 60,
                           ),
-                          const Gap(12),
+                          Gap(12),
                           ShimmerWidget.rectangle(
                             height: 12,
                             width: 40,
@@ -83,16 +83,16 @@ class PostCardShimmer extends StatelessWidget {
           ),
           const Gap(16),
           // Tags shimmer
-          Padding(
+          const Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                const ShimmerWidget.rectangle(
+                ShimmerWidget.rectangle(
                   height: 24,
                   width: 80,
                 ),
-                const Gap(8),
-                const ShimmerWidget.rectangle(
+                Gap(8),
+                ShimmerWidget.rectangle(
                   height: 24,
                   width: 80,
                 ),
@@ -109,20 +109,20 @@ class PostCardShimmer extends StatelessWidget {
             ),
           ),
           // Action buttons shimmer
-          Padding(
-            padding: const EdgeInsets.all(16),
+          const Padding(
+            padding: EdgeInsets.all(16),
             child: Row(
               children: [
-                const ShimmerWidget.rectangle(
+                ShimmerWidget.rectangle(
                   height: 32,
                   width: 80,
                 ),
-                const Gap(16),
-                const ShimmerWidget.rectangle(
+                Gap(16),
+                ShimmerWidget.rectangle(
                   height: 32,
                   width: 80,
                 ),
-                const Spacer(),
+                Spacer(),
                 ShimmerWidget.rectangle(
                   height: 32,
                   width: 32,

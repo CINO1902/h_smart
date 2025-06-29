@@ -19,8 +19,8 @@ class TextScaleWrapper extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // final textScale = ref.watch(textScaleFactorProvider) / 1.3;
-    final textScale = 0.7;
+    final textScale = ref.watch(textScaleFactorProvider) / 1.5;
+    // final textScale = 0.7;
     print('textScale: $textScale');
 
     return MediaQuery(

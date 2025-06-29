@@ -7,7 +7,7 @@ import 'package:h_smart/constant/network_api.dart';
 import 'package:h_smart/features/auth/domain/entities/ContinueRegistrationModel.dart';
 import 'package:h_smart/features/auth/domain/entities/createaccount.dart';
 import 'package:h_smart/features/auth/domain/entities/loginResponse.dart'
-    hide Payload;
+    hide LoginPayload;
 import 'package:h_smart/features/auth/domain/entities/loginmodel.dart';
 import 'package:h_smart/features/auth/domain/repositories/authrepo.dart';
 import 'package:h_smart/features/auth/domain/usecases/authStates.dart';
@@ -22,12 +22,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AuthProvider extends ChangeNotifier {
   AuthProvider(this._authRepository) {
     // Call your “on-create” method here:
-    _init();
+    init();
   }
 
   final AuthRepository _authRepository;
 
-  Future<void> _init() async {
+  Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
     emailLogin = prefs.getString('emailLogin') ?? '';
     // print(emailLogin);
@@ -41,7 +41,7 @@ class AuthProvider extends ChangeNotifier {
   bool _isLoggedOut = false;
   final bool _infoLoading = true;
   bool _hasFetchedInfo = false;
-
+  bool isHomePageInitialized = false;
   String emailLogin = '';
 
   /// Controllers for image picking and other async tasks
@@ -119,6 +119,11 @@ class AuthProvider extends ChangeNotifier {
       await prefs.setBool('profile_completed', profileCompleted ?? false);
     }
     loginResult = response;
+    notifyListeners();
+  }
+
+  void markhometarget(value) {
+    isHomePageInitialized = value;
     notifyListeners();
   }
 
@@ -217,6 +222,7 @@ class AuthProvider extends ChangeNotifier {
   Future<Payload?> loadSavedPayload() async {
     final prefs = await SharedPreferences.getInstance();
     final storedString = prefs.getString('user_payload');
+    print(storedString);
     if (storedString == null) return null;
 
     try {
@@ -252,6 +258,8 @@ class AuthProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('user_payload');
     await prefs.remove('jwt_token');
+    markhometarget(false);
+    init(); uit
     _isLoggedOut = false;
     notifyListeners();
   }

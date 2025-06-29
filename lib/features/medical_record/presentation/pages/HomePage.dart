@@ -8,11 +8,12 @@ import 'package:h_smart/features/auth/presentation/controller/auth_controller.da
 import 'package:h_smart/features/auth/presentation/provider/auth_provider.dart';
 import 'package:h_smart/features/medical_record/presentation/provider/medicalRecord.dart';
 import 'package:h_smart/core/utils/appColor.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:h_smart/features/medical_record/presentation/widgets/homeViews/prescriptionChip.dart';
 
 import '../../domain/usecases/userStates.dart';
-import '../widgets/AutoScrollText.dart';
 import 'dart:async';
+import '../widgets/homeViews/QuickActionButton.dart';
+import '../widgets/homeViews/ScheduleCard.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({
@@ -35,9 +36,9 @@ class _HomePageState extends ConsumerState<HomePage>
   bool _exceededMaxAttempts = false;
   int _currentAppointmentIndex = 0;
   Timer? _appointmentTimer;
+  Timer? _prescriptionAutoScrollTimer;
 
   // Static variable to persist across widget rebuilds
-  static bool _isHomePageInitialized = false;
 
   @override
   void initState() {
@@ -45,16 +46,15 @@ class _HomePageState extends ConsumerState<HomePage>
     _verticalController = ScrollController();
     _prescriptionController = ScrollController();
     _appointmentController = PageController();
-    _startPrescriptionAutoScroll();
-    _startAppointmentAutoScroll();
 
-    // Only initialize once
-    if (!_isHomePageInitialized) {
+    final isInitialized = ref.read(authProvider).isHomePageInitialized;
+    if (!isInitialized) {
+      // Schedule your async calls after first frame
       WidgetsBinding.instance.addPostFrameCallback((_) async {
-        ref.read(authProvider).loadSavedPayload();
-        ref.read(authProvider).fetchUserInfo();
-        ref.read(medicalRecordProvider).getOverview();
-        _isHomePageInitialized = true;
+        ref.read(authProvider.notifier).loadSavedPayload();
+        ref.read(authProvider.notifier).fetchUserInfo();
+        ref.read(medicalRecordProvider.notifier).getOverview();
+        ref.read(authProvider.notifier).markhometarget(true);
       });
     }
   }
@@ -66,36 +66,22 @@ class _HomePageState extends ConsumerState<HomePage>
     _appointmentController.dispose();
     _countdownTimer?.cancel();
     _appointmentTimer?.cancel();
+    _prescriptionAutoScrollTimer?.cancel();
     super.dispose();
   }
 
   void _startPrescriptionAutoScroll() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_prescriptionController.hasClients) {
-        final minExt = _prescriptionController.position.minScrollExtent;
-        final maxExt = _prescriptionController.position.maxScrollExtent;
-        if (maxExt > minExt) {
-          _autoScrollLoop(maxExt, minExt, maxExt);
-        }
+    _prescriptionAutoScrollTimer?.cancel();
+    _prescriptionAutoScrollTimer =
+        Timer.periodic(const Duration(milliseconds: 50), (_) {
+      if (!_prescriptionController.hasClients) return;
+      final maxScroll = _prescriptionController.position.maxScrollExtent;
+      final current = _prescriptionController.offset;
+      double next = current + 1;
+      if (next >= maxScroll) {
+        next = 0;
       }
-    });
-  }
-
-  void _autoScrollLoop(double max, double min, double target) {
-    if (max == min) return;
-
-    // Calculate duration based on distance to maintain consistent speed
-    // Target speed: 50 pixels per second
-    const double pixelsPerSecond = 20.0;
-    final double distance = (target == max) ? (max - min) : (max - min);
-    final int durationMs = (distance / pixelsPerSecond * 1000).round();
-
-    _prescriptionController
-        .animateTo(target,
-            duration: Duration(milliseconds: durationMs), curve: Curves.linear)
-        .then((_) {
-      final next = (target == max) ? min : max;
-      _autoScrollLoop(max, min, next);
+      _prescriptionController.jumpTo(next);
     });
   }
 
@@ -172,7 +158,10 @@ class _HomePageState extends ConsumerState<HomePage>
         _countdown = 5;
         _reloadAttempts = 0;
         _exceededMaxAttempts = false;
-        _startPrescriptionAutoScroll();
+        // Only start auto scroll if controller has clients
+        if (_prescriptionController.hasClients) {
+          _startPrescriptionAutoScroll();
+        }
         _startAppointmentAutoScroll();
       }
       // If transitioning from fail to success, also reset
@@ -283,15 +272,30 @@ class _HomePageState extends ConsumerState<HomePage>
                                   ? const SizedBox()
                                   : Container(
                                       height: 36,
-                                      child: ListView.builder(
-                                        controller: _prescriptionController,
-                                        scrollDirection: Axis.horizontal,
-                                        itemCount: prescription?.length ?? 0,
-                                        itemBuilder: (context, index) =>
-                                            _buildEnhancedPrescriptionChip(
-                                          '${prescription?[index].dosage ?? ''} of ${prescription?[index].name ?? ''} to be taken ${prescription?[index].frequency ?? ''}',
-                                          context,
-                                        ),
+                                      child: Builder(
+                                        builder: (context) {
+                                          // Schedule the auto-scroll after the frame is built
+                                          WidgetsBinding.instance
+                                              .addPostFrameCallback((_) {
+                                            if (_prescriptionController
+                                                    .hasClients &&
+                                                _prescriptionAutoScrollTimer ==
+                                                    null) {
+                                              _startPrescriptionAutoScroll();
+                                            }
+                                          });
+                                          return ListView.builder(
+                                            controller: _prescriptionController,
+                                            scrollDirection: Axis.horizontal,
+                                            itemCount:
+                                                prescription?.length ?? 0,
+                                            itemBuilder: (context, index) =>
+                                                PrescriptionChip(
+                                              text:
+                                                  '${prescription?[index].dosage ?? ''} of ${prescription?[index].name ?? ''} to be taken ${prescription?[index].frequency ?? ''}',
+                                            ),
+                                          );
+                                        },
                                       ),
                                     )
                               : ref
@@ -376,7 +380,21 @@ class _HomePageState extends ConsumerState<HomePage>
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                    child: _buildEnhancedScheduleCard(context),
+                    child: ScheduleCard(
+                      appointments: ref
+                          .watch(medicalRecordProvider)
+                          .overview
+                          .data
+                          .payload
+                          ?.appointments,
+                      appointmentController: _appointmentController,
+                      currentAppointmentIndex: _currentAppointmentIndex,
+                      onPageChanged: (int value) {
+                        setState(() {
+                          _currentAppointmentIndex = value;
+                        });
+                      },
+                    ),
                   ),
                 ),
 
@@ -418,45 +436,46 @@ class _HomePageState extends ConsumerState<HomePage>
                   padding: const EdgeInsets.all(20),
                   sliver: SliverGrid(
                     delegate: SliverChildListDelegate([
-                      _buildEnhancedQuickAction(
-                        'images/bookappoint.png',
-                        'Book Appointment',
-                        const Color(0xffE6EEFF),
-                        () => context.push('/book-appointment'),
+                      QuickActionButton(
+                        image: 'images/bookappoint.png',
+                        title: 'Book Appointment',
+                        backgroundColor: const Color(0xffE6EEFF),
+                        onTap: () => context.push('/book-appointment'),
                       ),
-                      _buildEnhancedQuickAction(
-                        'images/Doctors.png',
-                        'Doctors',
-                        AppColors.kSuccessColor50,
-                        () => context.push('/doctors'),
+                      QuickActionButton(
+                        image: 'images/Doctors.png',
+                        title: 'Doctors',
+                        backgroundColor: AppColors.kSuccessColor50,
+                        onTap: () => context.push('/doctors'),
                       ),
-                      _buildEnhancedQuickAction(
-                        'images/medandpres.png',
-                        'Medicine & Prescription',
-                        const Color(0xffFDFCED),
-                        () => context.push('/medicine-prescription'),
+                      QuickActionButton(
+                        image: 'images/medandpres.png',
+                        title: 'Medicine & Prescription',
+                        backgroundColor: const Color(0xffFDFCED),
+                        onTap: () =>
+                            context.push('/medical-record/prescriptions'),
                       ),
-                      _buildEnhancedQuickAction(
-                        'images/symptoms.png',
-                        'Symptoms Checker',
-                        const Color(0xffFFF7EB),
-                        () => context.push('/symptoms-checker'),
+                      QuickActionButton(
+                        image: 'images/symptoms.png',
+                        title: 'Symptoms Checker',
+                        backgroundColor: const Color(0xffFFF7EB),
+                        onTap: () => context.push('/symptoms-checker'),
                       ),
-                      _buildEnhancedQuickAction(
-                        'images/firstaid.png',
-                        'First Aid',
-                        const Color(0xffFFEFEF),
-                        () => SnackBarService.notifyAction(
+                      QuickActionButton(
+                        image: 'images/firstaid.png',
+                        title: 'First Aid',
+                        backgroundColor: const Color(0xffFFEFEF),
+                        onTap: () => SnackBarService.notifyAction(
                           context,
                           message: 'Coming soon!',
                           status: SnackbarStatus.info,
                         ),
                       ),
-                      _buildEnhancedQuickAction(
-                        'images/hospital.png',
-                        'Hospital',
-                        const Color(0xffFDFCED),
-                        () => context.push('/hospital'),
+                      QuickActionButton(
+                        image: 'images/hospital.png',
+                        title: 'Hospital',
+                        backgroundColor: const Color(0xffFDFCED),
+                        onTap: () => context.push('/hospital'),
                       ),
                     ]),
                     gridDelegate:
@@ -476,439 +495,6 @@ class _HomePageState extends ConsumerState<HomePage>
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildEnhancedPrescriptionChip(String text, BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(right: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-      decoration: BoxDecoration(
-        color: AppColors.kprimaryColor500.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppColors.kprimaryColor500.withOpacity(0.25),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.kprimaryColor500.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: AppColors.kprimaryColor500.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(
-              Icons.medication_rounded,
-              size: 16,
-              color: AppColors.kprimaryColor500,
-            ),
-          ),
-          const Gap(8),
-          Flexible(
-            child: Text(
-              text,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.kprimaryColor500,
-                fontFamily: 'Poppins',
-                height: 1.2,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEnhancedScheduleCard(BuildContext context) {
-    final appointments =
-        ref.watch(medicalRecordProvider).overview.data.payload?.appointments;
-
-    if (appointments == null || appointments.isEmpty) {
-      // Show empty state
-      return SizedBox(
-        height: 180,
-        child: Stack(
-          children: [
-            // Background color and SVG patterns
-            Container(
-              // margin: const EdgeInsets.symmetric(horizontal: 5),
-              decoration: BoxDecoration(
-                color: AppColors.kprimaryColor100,
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-            // Up SVG at top right
-            Positioned(
-              top: 0,
-              right: 0,
-              child: SvgPicture.asset(
-                'images/up.svg',
-                width: 48,
-                height: 48,
-              ),
-            ),
-            // Down SVG at bottom right
-            Positioned(
-              bottom: 0,
-              right: 0,
-              child: SvgPicture.asset(
-                'images/down.svg',
-                width: 48,
-                height: 48,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.schedule,
-                          color: Colors.white,
-                          size: 16,
-                        ),
-                        Gap(6),
-                        Text(
-                          'Upcoming Schedule',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Gap(16),
-                  const Text(
-                    'No upcoming appointments',
-                    style: TextStyle(
-                      fontSize: 22,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    'Book your next appointment',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white.withOpacity(0.8),
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return SizedBox(
-      height: 180,
-      child: LayoutBuilder(builder: (context, constraints) {
-        final width = constraints.maxWidth;
-        final sideMargin = width * 0.03; // 3% of the width
-        final svgSize = width * 0.3; // 25% of the width
-
-        return Stack(
-          clipBehavior: Clip.none,
-          children: [
-            // Background fills, with relative horizontal padding
-            Positioned.fill(
-              // left: sideMargin,
-              // right: sideMargin,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.kprimaryColor500,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-            ),
-
-            // "Up" SVG aligned to the top right, sized proportionally
-            Positioned(
-              top: 0, // slight overlap
-              right: sideMargin - svgSize * 0.005,
-              child: SvgPicture.asset(
-                'images/up.svg',
-                width: svgSize,
-                height: svgSize,
-              ),
-            ),
-
-            // "Down" SVG at bottom right
-            Positioned(
-              bottom: 0,
-              right: sideMargin - svgSize * 0.005,
-              child: SvgPicture.asset(
-                'images/down.svg',
-                width: svgSize,
-                height: svgSize,
-              ),
-            ),
-            // Appointment carousel
-            PageView.builder(
-              controller: _appointmentController,
-              onPageChanged: (index) {
-                setState(() {
-                  _currentAppointmentIndex = index;
-                });
-              },
-              itemCount: appointments.length,
-              itemBuilder: (context, index) {
-                final appointment = appointments[index];
-                final appointmentDate = appointment.date;
-                final appointmentTime = appointment.time;
-
-                // Format date
-                String formattedDate = 'No date set';
-                String formattedTime = 'No time set';
-
-                if (appointmentDate != null) {
-                  formattedDate =
-                      '${appointmentDate.day}/${appointmentDate.month}/${appointmentDate.year}';
-                }
-
-                if (appointmentTime != null) {
-                  formattedTime = appointmentTime;
-                }
-
-                return Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.schedule,
-                                  color: Colors.white,
-                                  size: 16,
-                                ),
-                                const Gap(6),
-                                Text(
-                                  'Appointment ${index + 1} of ${appointments.length}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const Gap(16),
-                      Text(
-                        appointment.doctorName ?? 'Doctor Name',
-                        style: const TextStyle(
-                          fontSize: 22,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        appointment.doctorSpecialization ?? 'Specialization',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white.withOpacity(0.8),
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      const Gap(16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.calendar_today,
-                                  color: Colors.white,
-                                  size: 14,
-                                ),
-                                const Gap(6),
-                                Text(
-                                  '$formattedDate, $formattedTime',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const Gap(8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: _getStatusColor(appointment.status)
-                                  .withOpacity(0.8),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              appointment.status ?? 'Unknown',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-
-            // Page indicator dots
-            if (appointments.length > 1)
-              Positioned(
-                bottom: 22,
-                left: 0,
-                right: 0,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    appointments.length,
-                    (index) => Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      width: 5,
-                      height: 5,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: _currentAppointmentIndex == index
-                            ? Colors.white
-                            : Colors.white.withOpacity(0.4),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        );
-      }),
-    );
-  }
-
-  Color _getStatusColor(String? status) {
-    switch (status?.toLowerCase()) {
-      case 'confirmed':
-        return Colors.green;
-      case 'pending':
-        return Colors.orange;
-      case 'cancelled':
-        return Colors.red;
-      case 'completed':
-        return Colors.blue;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  Widget _buildEnhancedQuickAction(
-      String image, String title, Color backgroundColor, VoidCallback onTap) {
-    final theme = Theme.of(context);
-    final isDarkMode = theme.brightness == Brightness.dark;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: backgroundColor.withOpacity(0.3),
-            width: 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: backgroundColor.withOpacity(0.2),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Image.asset(
-                image,
-                width: 35,
-                height: 35,
-                fit: BoxFit.contain,
-              ),
-            ),
-            const Gap(12),
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.2,
-              height: 25,
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: isDarkMode
-                      ? Colors.black
-                      : theme.textTheme.bodyMedium?.color,
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

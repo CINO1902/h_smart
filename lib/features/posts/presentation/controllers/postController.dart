@@ -3,14 +3,21 @@ import 'package:h_smart/features/posts/domain/entities/post.dart';
 import 'package:h_smart/features/posts/domain/repository/postRepo.dart';
 import 'package:h_smart/features/posts/domain/utils/states/postStates.dart';
 
+import '../../domain/entities/getpostbyId.dart';
+
 class PostController extends ChangeNotifier {
   final PostRepository postRepository;
 
   PostController(this.postRepository) {
-    getpost();
+    if (postResult.state != PostResultState.isLoading ||
+        postResult.state != PostResultState.isData) {
+      getpost();
+    }
   }
 
   PostResult postResult = PostResult(PostResultState.isLoading, GetPost());
+  CommentResult commentResult = CommentResult(CommentResultState.isLoading, GetPostById());
+  CreateCommentResult createCommentResult = CreateCommentResult(CreateCommentResultState.isLoading, GetPostById());
   List<dynamic> _allPosts = [];
   int _currentPage = 1;
   int _limit = 10;
@@ -81,5 +88,23 @@ class PostController extends ChangeNotifier {
 
   void refreshPosts() {
     getpost();
+  }
+
+  Future<void> getComments(String postId) async {
+    commentResult = CommentResult(CommentResultState.isLoading, GetPostById());
+    notifyListeners();
+    final result = await postRepository.getComments(postId);
+    if (result.state == CommentResultState.isData) {
+      commentResult = result;
+    }
+    notifyListeners();
+  }
+
+  Future<void> createComment(String postId, String comment) async {
+    final result = await postRepository.createComment(postId, comment);
+    if (result.state == CreateCommentResultState.isData) {
+      createCommentResult = result;
+    }
+    notifyListeners();
   }
 }

@@ -1,6 +1,6 @@
 import '../../domain/usecases/userStates.dart';
 
 abstract class MedicalRecordDatasource {
-  Future<List<dynamic>> getprescription();
+  Future<GetPrescriptionResult> getprescription();
   Future<GetOverResult> getOverview();
 }

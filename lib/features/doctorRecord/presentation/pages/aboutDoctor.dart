@@ -46,57 +46,25 @@ class _AboutDoctorState extends ConsumerState<AboutDoctor> {
                     borderRadius: const BorderRadius.only(
                         bottomLeft: Radius.circular(20),
                         bottomRight: Radius.circular(20)),
-                    child: Hero(
-                      tag: ref.watch(doctorprovider).doctorclicked
-                          ? ref
-                              .watch(doctorprovider)
-                              .clickeddoctorcategory
-                              .firstName
-                          : ref.read(doctorprovider).mydoctorclicked
-                              ? ref
-                                  .read(doctorprovider)
-                                  .mydoctorlist[0]
-                                  .doctor
-                                  .firstName
-                              : ref
-                                  .watch(medicalRecordProvider)
-                                  .clickeddoctorcategory
-                                  .firstName,
-                      child: CachedNetworkImage(
-                        progressIndicatorBuilder: (context, url, progress) {
-                          print(progress.progress);
-                          return Center(
-                            child: SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                value: progress.progress,
-                                strokeWidth: 2,
-                              ),
+                    child: CachedNetworkImage(
+                      progressIndicatorBuilder: (context, url, progress) {
+                        print(progress.progress);
+                        return Center(
+                          child: SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              value: progress.progress,
+                              strokeWidth: 2,
                             ),
-                          );
-                        },
-                        imageUrl: ref.watch(doctorprovider).doctorclicked
-                            ? ref
-                                .watch(doctorprovider)
-                                .clickeddoctorcategory
-                                .docProfilePicture
-                            : ref.watch(doctorprovider).mydoctorclicked
-                                ? ref
-                                        .watch(doctorprovider)
-                                        .mydoctorlist[0]
-                                        .doctor
-                                        .docProfilePicture ??
-                                    'https://t4.ftcdn.net/jpg/02/60/04/09/360_F_260040900_oO6YW1sHTnKxby4GcjCvtypUCWjnQRg5.jpg'
-                                : ref
-                                    .watch(medicalRecordProvider)
-                                    .clickeddoctorcategory
-                                    .docProfilePicture,
-                        fit: BoxFit.cover,
-                        errorWidget: (context, url, error) => const Icon(
-                          Icons.error,
-                          color: Colors.red,
-                        ),
+                          ),
+                        );
+                      },
+                      imageUrl: '',
+                      fit: BoxFit.cover,
+                      errorWidget: (context, url, error) => const Icon(
+                        Icons.error,
+                        color: Colors.red,
                       ),
                     ),
                   ),
@@ -118,9 +86,7 @@ class _AboutDoctorState extends ConsumerState<AboutDoctor> {
                   child: Column(children: [
                     SizedBox(
                       child: Text(
-                        ref.read(doctorprovider).doctorclicked
-                            ? '${ref.watch(doctorprovider).clickeddoctorcategory.firstName} ${ref.watch(doctorprovider).clickeddoctorcategory.lastName}'
-                            : '${ref.watch(doctorprovider).clickeddoctorcategory.firstName} ${ref.watch(medicalRecordProvider).clickeddoctorcategory.lastName}',
+                        'Dr. John Doe',
                         style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w600),
                       ),
@@ -162,20 +128,7 @@ class _AboutDoctorState extends ConsumerState<AboutDoctor> {
                         ),
                         const Gap(5),
                         Text(
-                          ref.watch(doctorprovider).doctorclicked
-                              ? 'Lenox Hill Hospital'
-                              : ref.watch(doctorprovider).mydoctorclicked
-                                  ? ref
-                                      .watch(doctorprovider)
-                                      .mydoctorlist[0]
-                                      .doctor
-                                      .hospital
-                                      .city
-                                  : ref
-                                      .watch(medicalRecordProvider)
-                                      .clickeddoctorcategory
-                                      .hospital
-                                      .name,
+                          'Lenox Hill Hospital',
                           style: const TextStyle(
                               fontSize: 11, fontWeight: FontWeight.w500),
                         ),
@@ -196,14 +149,7 @@ class _AboutDoctorState extends ConsumerState<AboutDoctor> {
             Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
-                  ref.watch(doctorprovider).doctorclicked
-                      ? ref.watch(doctorprovider).clickeddoctorcategory.bio
-                      : ref.watch(doctorprovider).mydoctorclicked
-                          ? ref.watch(doctorprovider).mydoctorlist[0].doctor.bio
-                          : ref
-                              .watch(medicalRecordProvider)
-                              .clickeddoctorcategory
-                              .bio,
+                  '',
                   style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w400,
