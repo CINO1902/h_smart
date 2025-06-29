@@ -259,7 +259,7 @@ class AuthProvider extends ChangeNotifier {
     await prefs.remove('user_payload');
     await prefs.remove('jwt_token');
     markhometarget(false);
-    init(); uit
+    init(); 
     _isLoggedOut = false;
     notifyListeners();
   }
