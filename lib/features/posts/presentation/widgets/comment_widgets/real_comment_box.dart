@@ -4,20 +4,32 @@ import 'package:gap/gap.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:h_smart/core/theme/theme_mode_provider.dart';
 import 'package:h_smart/features/posts/domain/entities/getpostbyId.dart';
+import 'package:timeago/timeago.dart' as timeago;
+import 'reply_box.dart';
 
 class RealCommentBox extends ConsumerWidget {
   final Comment comment;
   final WidgetRef ref;
+  final void Function(String userName) onReplyPressed;
+  final List<Reply>? replies;
 
   const RealCommentBox({
     super.key,
     required this.comment,
     required this.ref,
+    required this.onReplyPressed,
+    this.replies,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final userImage = comment.userImage ?? '';
+    final userName = comment.userName ?? 'Anonymous';
+    final commentText = comment.comment ?? '';
+    final commentTime = comment.createdAt != null
+        ? timeago.format(comment.createdAt!)
+        : 'just now';
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -41,14 +53,12 @@ class RealCommentBox extends ConsumerWidget {
           CircleAvatar(
             radius: 18,
             backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
-            backgroundImage: comment.userImage != null &&
-                    comment.userImage.toString().isNotEmpty
-                ? CachedNetworkImageProvider(comment.userImage.toString())
+            backgroundImage: userImage.isNotEmpty
+                ? CachedNetworkImageProvider(userImage)
                 : null,
-            child: comment.userImage == null ||
-                    comment.userImage.toString().isEmpty
+            child: userImage.isEmpty
                 ? Text(
-                    (comment.userName ?? 'U')[0].toUpperCase(),
+                    userName.isNotEmpty ? userName[0] : '',
                     style: TextStyle(
                       color: theme.colorScheme.primary,
                       fontWeight: FontWeight.bold,
@@ -64,7 +74,7 @@ class RealCommentBox extends ConsumerWidget {
                 Row(
                   children: [
                     Text(
-                      comment.userName ?? 'Anonymous',
+                      userName,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
@@ -73,7 +83,7 @@ class RealCommentBox extends ConsumerWidget {
                     ),
                     const Gap(8),
                     Text(
-                      _formatTimeAgo(comment.createdAt),
+                      commentTime,
                       style: TextStyle(
                         color: theme.colorScheme.onSurface.withOpacity(0.6),
                         fontSize: 12,
@@ -83,56 +93,51 @@ class RealCommentBox extends ConsumerWidget {
                 ),
                 const Gap(4),
                 Text(
-                  comment.comment ?? '',
+                  commentText,
                   style: TextStyle(
                     fontSize: 15,
                     color: theme.colorScheme.onSurface,
                   ),
                 ),
                 const Gap(6),
-                Row(
-                  children: [
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        minimumSize: const Size(40, 24),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      onPressed: () {},
-                      child: Text(
-                        'Reply',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: theme.colorScheme.primary,
-                        ),
-                      ),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(40, 24),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  onPressed: () {
+                    onReplyPressed(userName);
+                  },
+                  child: Text(
+                    'Reply',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: theme.colorScheme.primary,
                     ),
-                  ],
+                  ),
                 ),
+                if ((replies ?? comment.replies)?.isNotEmpty ?? false) ...[
+                  const SizedBox(height: 8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: (replies ?? comment.replies)!
+                        .map((reply) => Padding(
+                              padding: const EdgeInsets.only(
+                                  left: 10.0, bottom: 6.0),
+                              child: ReplyBox(
+                                reply: reply,
+                                ref: ref,
+                              ),
+                            ))
+                        .toList(),
+                  ),
+                ],
               ],
             ),
           ),
         ],
       ),
     );
-  }
-
-  String _formatTimeAgo(DateTime? dateTime) {
-    if (dateTime == null) return 'Unknown';
-
-    final now = DateTime.now();
-    // force the incoming timestamp into local time
-    final localDate = dateTime.toUtc().toLocal();
-    print(localDate);
-    final difference = now.difference(localDate);
-    if (difference.inDays > 0) {
-      return '${difference.inDays}d ago';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}h ago';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m ago';
-    } else {
-      return 'Just now';
-    }
   }
 }

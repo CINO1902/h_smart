@@ -1,6 +1,7 @@
 import 'package:h_smart/core/service/http_service.dart';
 
 import '../../../../constant/enum.dart';
+import '../../domain/entities/createComment.dart';
 import '../../domain/entities/getpostbyId.dart';
 import '../../domain/entities/post.dart';
 import '../../domain/utils/states/postStates.dart';
@@ -44,15 +45,15 @@ class PostDatasourceImp implements PostDataSource {
   @override
   Future<CreateCommentResult> createComment(
       String postId, String comment) async {
-    CreateCommentResult createCommentResult =
-        CreateCommentResult(CreateCommentResultState.isLoading, GetPostById());
+    CreateCommentResult createCommentResult = CreateCommentResult(
+        CreateCommentResultState.isLoading, CreateComment());
     final response = await httpService.request(
-        url: '/posts/create_comment/$postId',
+        url: '/posts/create_comment',
         methodrequest: RequestMethod.postWithToken,
         data: {'post_id': postId, 'comment': comment});
 
-    if (response.statusCode == 200) {
-      final decodedData = GetPostById.fromJson(response.data);
+    if (response.statusCode == 201) {
+      final decodedData = CreateComment.fromJson(response.data);
       createCommentResult =
           CreateCommentResult(CreateCommentResultState.isData, decodedData);
     }

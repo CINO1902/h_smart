@@ -1,20 +1,20 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:h_smart/core/theme/theme_mode_provider.dart';
 import 'package:h_smart/features/auth/presentation/provider/auth_provider.dart';
 
 class CommentInput extends ConsumerStatefulWidget {
-  final TextEditingController controller;
   final VoidCallback? onSendPressed;
   final String hintText;
+  final Function(String)? onMarkupChanged;
+  final String? replyToUsername;
 
   const CommentInput({
     super.key,
-    required this.controller,
     this.onSendPressed,
     this.hintText = 'Add a comment...',
+    this.onMarkupChanged,
+    this.replyToUsername,
   });
 
   @override
@@ -22,11 +22,12 @@ class CommentInput extends ConsumerStatefulWidget {
 }
 
 class _CommentInputState extends ConsumerState<CommentInput> {
+  final TextEditingController _controller = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     final String userImage =
         ref.watch(authProvider).userData?.patientMetadata?.profileUrl ?? '';
-    final String userName = ref.watch(authProvider).userData?.firstName ?? '';
     final theme = Theme.of(context);
     final isDarkMode = ref.watch(themeModeCheckerProvider)(context);
 
@@ -79,47 +80,32 @@ class _CommentInputState extends ConsumerState<CommentInput> {
                           color: theme.colorScheme.primary.withOpacity(0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: CachedNetworkImage(
-                          imageUrl: userImage,
+                        child: Image.network(
+                          userImage,
                           fit: BoxFit.cover,
-                          placeholder: (context, url) => Center(
-                            child: SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: theme.colorScheme.primary,
-                              ),
-                            ),
-                          ),
-                          errorWidget: (context, url, error) => Icon(
-                            Icons.error,
-                            color: theme.colorScheme.error,
-                            size: 32,
-                          ),
                         ),
                       ),
               ),
-              const Gap(10),
+              const SizedBox(width: 10),
               Expanded(
                 child: TextField(
-                  controller: widget.controller,
-                  minLines: 1,
-                  maxLines: 4,
+                  controller: _controller,
                   style: TextStyle(
+                    fontSize: 16,
                     color: theme.colorScheme.onSurface,
                   ),
+                  cursorColor: theme.colorScheme.primary,
                   decoration: InputDecoration(
-                    hintText: widget.hintText,
+                    hintText: widget.replyToUsername != null
+                        ? 'Reply to ${widget.replyToUsername}'
+                        : widget.hintText,
                     hintStyle: TextStyle(
                       color: theme.colorScheme.onSurface.withOpacity(0.5),
                     ),
-                    border: InputBorder.none,
-                    isDense: true,
-                    contentPadding:
-                        const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                    filled: true,
-                    fillColor: theme.colorScheme.surfaceVariant,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: BorderSide.none,
+                    ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
                       borderSide: BorderSide.none,
@@ -128,24 +114,36 @@ class _CommentInputState extends ConsumerState<CommentInput> {
                       borderRadius: BorderRadius.circular(20),
                       borderSide: BorderSide(
                         color: theme.colorScheme.primary,
-                        width: 1,
+                        width: 1.5,
                       ),
                     ),
+                    isDense: true,
+                    contentPadding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                    filled: true,
+                    fillColor: theme.colorScheme.surfaceVariant,
                   ),
+                  onChanged: (val) {
+                    if (widget.onMarkupChanged != null) {
+                      widget.onMarkupChanged!(val);
+                    }
+                  },
+                  minLines: 1,
+                  maxLines: 4,
                 ),
               ),
-              const Gap(8),
+              const SizedBox(width: 8),
               Material(
                 color: theme.colorScheme.primary,
                 borderRadius: BorderRadius.circular(20),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(20),
                   onTap: widget.onSendPressed,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
+                  child: const Padding(
+                    padding: EdgeInsets.all(8.0),
                     child: Icon(
                       Icons.send,
-                      color: theme.colorScheme.onPrimary,
+                      color: Colors.white,
                       size: 22,
                     ),
                   ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mentions/flutter_mentions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:h_smart/constant/snackbar.dart';
@@ -6,6 +7,9 @@ import 'package:h_smart/features/posts/domain/entities/post.dart';
 import 'package:h_smart/features/posts/presentation/widgets/index.dart';
 import 'package:h_smart/features/posts/presentation/providers/posts_provider.dart';
 import 'package:h_smart/features/posts/domain/utils/states/postStates.dart';
+import 'package:h_smart/features/auth/presentation/provider/auth_provider.dart';
+import 'package:h_smart/features/posts/domain/entities/getpostbyId.dart';
+import 'package:h_smart/features/posts/presentation/widgets/comment_widgets/loading_comment_box.dart';
 
 class PostDetailPage extends ConsumerStatefulWidget {
   final Post post;
@@ -16,8 +20,12 @@ class PostDetailPage extends ConsumerStatefulWidget {
 }
 
 class _PostDetailPageState extends ConsumerState<PostDetailPage> {
-  final TextEditingController _commentController = TextEditingController();
+  final GlobalKey<FlutterMentionsState> _mentionsKey =
+      GlobalKey<FlutterMentionsState>();
   final ScrollController _scrollController = ScrollController();
+  String? _pendingComment;
+  String _commentText = '';
+  String? _replyToUsername;
 
   @override
   void initState() {
@@ -25,7 +33,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
     _scrollController.addListener(_onScroll);
     // Call getComments when the page opens
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(postsProvider.notifier).getComments(widget.post.id);
+      ref.read(postsProvider.notifier).getComments(widget.post.id ?? '');
     });
   }
 
@@ -34,21 +42,34 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
     FocusScope.of(context).unfocus();
   }
 
+  void _handleReply(String userName) {
+    setState(() {
+      _replyToUsername = userName;
+    });
+  }
+
   void _onSendComment() {
-    // TODO: Add comment logic
-    _commentController.clear();
-    if (_commentController.text.trim().isEmpty) {
-      SnackBarService.notifyAction(context, message: 'Comment is empty');
+    if (_commentText.trim().isEmpty) {
+      SnackBarService.notifyAction(context,
+          message: 'Comment is empty', status: SnackbarStatus.fail);
       return;
     }
+
+    setState(() {
+      _pendingComment = _commentText;
+      _replyToUsername = null;
+    });
+
     ref
-        .read(postsProvider)
-        .createComment(widget.post.id, _commentController.text);
+        .read(postsProvider.notifier)
+        .createComment(widget.post.id ?? '', _commentText);
+    setState(() {
+      _commentText = '';
+    });
   }
 
   @override
   void dispose() {
-    _commentController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -58,100 +79,186 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
     final theme = Theme.of(context);
     final postsController = ref.watch(postsProvider);
     final commentResult = postsController.commentResult;
+    final createCommentResult = postsController.createCommentResult;
 
-    return Scaffold(
-      backgroundColor: theme.colorScheme.background,
-      resizeToAvoidBottomInset: true,
-      body: Stack(
-        children: [
-          GestureDetector(
-            onTap: () {
-              // Dismiss keyboard when tapping anywhere
-              FocusScope.of(context).unfocus();
-            },
-            child: CustomScrollView(
-              controller: _scrollController,
-              slivers: [
-                SliverAppBar(
-                  backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
-                  elevation: 0,
-                  floating: true,
-                  snap: true,
-                  leading: IconButton(
-                    icon: Icon(Icons.arrow_back,
-                        color: theme.colorScheme.onSurface),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                  title: Text(
-                    'Post',
-                    style: TextStyle(
-                      color: theme.colorScheme.onSurface,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
-                  ),
-                  actions: [
-                    IconButton(
-                      icon: Icon(Icons.more_horiz,
+    ref.listen<CreateCommentResult>(
+      postsProvider.select((p) => p.createCommentResult),
+      (previous, next) {
+        if (next.state == CreateCommentResultState.isData) {
+          setState(() {
+            _pendingComment = null;
+          });
+        } else if (next.state == CreateCommentResultState.isError) {
+          setState(() {
+            _pendingComment = null;
+          });
+          SnackBarService.notifyAction(context,
+              message: next.response.message ??
+                  'Failed to post comment. Please try again.',
+              status: SnackbarStatus.fail);
+        }
+      },
+    );
+
+    return Portal(
+      child: Scaffold(
+        backgroundColor: theme.colorScheme.background,
+        resizeToAvoidBottomInset: true,
+        body: Stack(
+          children: [
+            GestureDetector(
+              onTap: () {
+                // Dismiss keyboard when tapping anywhere
+                FocusScope.of(context).unfocus();
+              },
+              child: CustomScrollView(
+                controller: _scrollController,
+                slivers: [
+                  SliverAppBar(
+                    backgroundColor:
+                        theme.colorScheme.surface.withOpacity(0.95),
+                    elevation: 0,
+                    floating: true,
+                    snap: true,
+                    leading: IconButton(
+                      icon: Icon(Icons.arrow_back,
                           color: theme.colorScheme.onSurface),
-                      onPressed: () {},
+                      onPressed: () => Navigator.of(context).pop(),
                     ),
-                  ],
-                  centerTitle: false,
-                ),
-                SliverToBoxAdapter(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      PostCardDetail(
-                        post: widget.post,
-                        onMorePressed: () {},
-                        onLikePressed: () {},
-                        onCommentPressed: () {},
-                        onSharePressed: () {},
+                    title: Text(
+                      'Post',
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurface,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
                       ),
-                      Divider(
-                        height: 1,
-                        color: theme.colorScheme.outline.withOpacity(0.2),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
-                        child: Text(
-                          'Comments',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: theme.colorScheme.onSurface,
-                          ),
-                        ),
+                    ),
+                    actions: [
+                      IconButton(
+                        icon: Icon(Icons.more_horiz,
+                            color: theme.colorScheme.onSurface),
+                        onPressed: () {},
                       ),
                     ],
+                    centerTitle: false,
                   ),
-                ),
-                SliverToBoxAdapter(
-                  child: _buildCommentsSection(commentResult, ref),
-                ),
-                const SliverToBoxAdapter(child: Gap(80)),
-              ],
+                  SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        PostCardDetail(
+                          post: widget.post,
+                          onMorePressed: () {},
+                          onLikePressed: () {},
+                          onCommentPressed: () {},
+                          onSharePressed: () {},
+                        ),
+                        Divider(
+                          height: 1,
+                          color: theme.colorScheme.outline.withOpacity(0.2),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                          child: Text(
+                            'Comments',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: _buildCommentsSection(
+                        commentResult, createCommentResult.state),
+                  ),
+                  const SliverToBoxAdapter(child: Gap(80)),
+                ],
+              ),
             ),
-          ),
-          // Comment input
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: CommentInput(
-              controller: _commentController,
-              onSendPressed: _onSendComment,
+            // Comment input
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (_replyToUsername != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        border: Border.all(color: Colors.blue.shade100),
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(12),
+                          topRight: Radius.circular(12),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.reply, color: Colors.blue, size: 18),
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.shade100,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              _replyToUsername!,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.blue,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _replyToUsername = null;
+                              });
+                            },
+                            child: const Icon(Icons.close,
+                                color: Colors.blue, size: 18),
+                          ),
+                        ],
+                      ),
+                    ),
+                  if (_replyToUsername != null)
+                    Divider(
+                        height: 1, color: Colors.blue.shade100, thickness: 1),
+                  CommentInput(
+                    onSendPressed: _onSendComment,
+                    onMarkupChanged: (markup) {
+                      _commentText = markup;
+                    },
+                    replyToUsername: _replyToUsername,
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildCommentsSection(CommentResult commentResult, WidgetRef ref) {
+  Widget _buildCommentsSection(CommentResult commentResult,
+      CreateCommentResultState createCommentState) {
+    final user = ref.watch(authProvider).userData;
+    final userName = user?.firstName ?? 'You';
+    final userImage = user?.patientMetadata?.profileUrl ?? '';
+
     switch (commentResult.state) {
       case CommentResultState.isLoading:
         return Padding(
@@ -221,7 +328,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                   color: Colors.red.shade400,
                 ),
                 const SizedBox(height: 24),
-                Text(
+                const Text(
                   'Failed to load comments',
                   style: TextStyle(
                     fontSize: 18,
@@ -242,7 +349,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                   onPressed: () {
                     ref
                         .read(postsProvider.notifier)
-                        .getComments(widget.post.id);
+                        .getComments(widget.post.id ?? '');
                   },
                   icon: const Icon(Icons.refresh_rounded),
                   label: const Text('Retry'),
@@ -258,7 +365,8 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
 
       case CommentResultState.isData:
         final comments = commentResult.response.payload?.comments ?? [];
-        if (comments.isEmpty) {
+        if (comments.isEmpty &&
+            createCommentState != CreateCommentResultState.isLoading) {
           return Center(
             child: Padding(
               padding: const EdgeInsets.all(24.0),
@@ -293,12 +401,27 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
           );
         }
         return Column(
-          children: comments
-              .map((comment) => RealCommentBox(
-                    comment: comment,
-                    ref: ref,
-                  ))
-              .toList(),
+          children: [
+            if (createCommentState == CreateCommentResultState.isLoading &&
+                _pendingComment != null)
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: LoadingCommentBox(
+                  userName: userName,
+                  userImage: userImage,
+                  commentText: _pendingComment!,
+                ),
+              ),
+            ...comments
+                .map((comment) => RealCommentBox(
+                      comment: comment,
+                      ref: ref,
+                      onReplyPressed: _handleReply,
+                      replies: comment.replies,
+                    ))
+                .toList(),
+          ],
         );
 
       case CommentResultState.isEmpty:

@@ -1,3 +1,4 @@
+import '../../entities/createComment.dart';
 import '../../entities/getpostbyId.dart';
 import '../../entities/post.dart';
 
@@ -19,7 +20,7 @@ enum PostResultState {
 
 class CreateCommentResult {
   final CreateCommentResultState state;
-  final GetPostById response;
+  final CreateComment response;
 
   CreateCommentResult(this.state, this.response);
 }

@@ -45,7 +45,7 @@ class PostCardDetail extends StatelessWidget {
             onMorePressed: onMorePressed,
           ),
           const Gap(14),
-          ExpandableText(text: post.content),
+          ExpandableText(text: post.content ?? ''),
           if (post.fileContent != null) ...[
             const Gap(5),
             PostImage(
@@ -55,8 +55,8 @@ class PostCardDetail extends StatelessWidget {
           ],
           const Gap(16),
           PostActions(
-            likesCount: post.likesCount,
-            commentsCount: post.commentsCount,
+            likesCount: post.likesCount ?? 0,
+            commentsCount: post.commentsCount ?? 0,
             viewsCount: 23223, // This should come from post data
             onLikePressed: onLikePressed,
             onCommentPressed: onCommentPressed,

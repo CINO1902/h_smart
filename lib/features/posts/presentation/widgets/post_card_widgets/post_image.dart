@@ -25,10 +25,10 @@ class PostImage extends StatelessWidget {
           builder: (_) {
             return Fullview(
               imageUrl: imageUrl,
-              doctorName: post.doctorName,
-              postText: post.content,
-              likesCount: post.likesCount,
-              commentsCount: post.commentsCount,
+              doctorName: post.doctorName ?? '',
+              postText: post.content ?? '',
+              likesCount: post.likesCount ?? 0,
+              commentsCount: post.commentsCount ?? 0,
             );
           },
           barrierColor: Colors.black,

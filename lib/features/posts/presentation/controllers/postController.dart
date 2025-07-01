@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:h_smart/features/posts/domain/entities/post.dart';
+import 'package:h_smart/features/posts/domain/entities/post.dart' hide Comment;
 import 'package:h_smart/features/posts/domain/repository/postRepo.dart';
 import 'package:h_smart/features/posts/domain/utils/states/postStates.dart';
 
+import '../../domain/entities/createComment.dart';
 import '../../domain/entities/getpostbyId.dart';
 
 class PostController extends ChangeNotifier {
@@ -16,8 +17,10 @@ class PostController extends ChangeNotifier {
   }
 
   PostResult postResult = PostResult(PostResultState.isLoading, GetPost());
-  CommentResult commentResult = CommentResult(CommentResultState.isLoading, GetPostById());
-  CreateCommentResult createCommentResult = CreateCommentResult(CreateCommentResultState.isLoading, GetPostById());
+  CommentResult commentResult =
+      CommentResult(CommentResultState.isLoading, GetPostById());
+  CreateCommentResult createCommentResult =
+      CreateCommentResult(CreateCommentResultState.isLoading, CreateComment());
   List<dynamic> _allPosts = [];
   int _currentPage = 1;
   int _limit = 10;
@@ -101,10 +104,37 @@ class PostController extends ChangeNotifier {
   }
 
   Future<void> createComment(String postId, String comment) async {
-    final result = await postRepository.createComment(postId, comment);
-    if (result.state == CreateCommentResultState.isData) {
+    createCommentResult = CreateCommentResult(
+        CreateCommentResultState.isLoading, CreateComment());
+    notifyListeners();
+
+    try {
+      final result = await postRepository.createComment(postId, comment);
+      if (result.state == CreateCommentResultState.isData &&
+          result.response.payload != null) {
+        final newCommentPayload = result.response.payload!;
+        final newComment = Comment(
+          id: newCommentPayload.id,
+          comment: newCommentPayload.comment,
+          createdAt: newCommentPayload.createdAt,
+          postId: newCommentPayload.postId,
+          replies: newCommentPayload.replies,
+          updatedAt: newCommentPayload.updatedAt,
+          userId: newCommentPayload.userId,
+          userImage: newCommentPayload.userImage,
+          userName: newCommentPayload.userName,
+        );
+
+        // Add the new comment to the beginning of the existing list
+        commentResult.response.payload?.comments?.insert(0, newComment);
+      }
       createCommentResult = result;
+    } catch (e) {
+      createCommentResult = CreateCommentResult(
+          CreateCommentResultState.isError,
+          CreateComment(message: 'Failed to create comment'));
     }
+
     notifyListeners();
   }
 }

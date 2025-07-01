@@ -4,9 +4,12 @@ import 'package:gap/gap.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:h_smart/constant/AutoScrollText.dart';
 import 'package:h_smart/core/theme/theme_mode_provider.dart';
+import 'package:timeago/timeago.dart' as timeago;
+
+import '../../../domain/entities/getpostbyId.dart';
 
 class ReplyBox extends ConsumerWidget {
-  final Map reply;
+  final Reply reply;
   final String? repliedToName;
   final WidgetRef ref;
 
@@ -37,12 +40,12 @@ class ReplyBox extends ConsumerWidget {
             radius: 14,
             backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
             backgroundImage:
-                reply['avatar'] != null && reply['avatar'].isNotEmpty
-                    ? CachedNetworkImageProvider(reply['avatar'])
+                reply.userImage != null && reply.userImage!.isNotEmpty
+                    ? CachedNetworkImageProvider(reply.userImage!)
                     : null,
-            child: (reply['avatar'] == null || reply['avatar'].isEmpty)
+            child: (reply.userImage == null || reply.userImage!.isEmpty)
                 ? Text(
-                    reply['name'][0],
+                    reply.userName?[0] ?? '',
                     style: TextStyle(
                       color: theme.colorScheme.primary,
                       fontWeight: FontWeight.bold,
@@ -58,32 +61,21 @@ class ReplyBox extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    if (reply['type'] == 'replytoreply' &&
-                        repliedToName != null)
-                      AutoScrollText(
-                        text: '${reply['name']} replied to $repliedToName',
-                        maxWidth: MediaQuery.of(context).size.width * .4,
-                        align: TextAlign.start,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          color: theme.colorScheme.onSurface,
-                        ),
-                      )
-                    else
-                      AutoScrollText(
-                        text: reply['name'],
-                        maxWidth: MediaQuery.of(context).size.width * .5,
-                        align: TextAlign.start,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          color: theme.colorScheme.onSurface,
-                        ),
+                    AutoScrollText(
+                      text: reply.userName ?? '',
+                      maxWidth: MediaQuery.of(context).size.width * .4,
+                      align: TextAlign.start,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        color: theme.colorScheme.onSurface,
                       ),
+                    ),
                     const Gap(6),
                     Text(
-                      reply['time'],
+                      reply.createdAt != null
+                          ? timeago.format(reply.createdAt!)
+                          : 'just now',
                       style: TextStyle(
                         color: theme.colorScheme.onSurface.withOpacity(0.6),
                         fontSize: 11,
@@ -93,7 +85,7 @@ class ReplyBox extends ConsumerWidget {
                 ),
                 const Gap(2),
                 Text(
-                  reply['comment'],
+                  reply.reply ?? '',
                   style: TextStyle(
                     fontSize: 14,
                     color: theme.colorScheme.onSurface,

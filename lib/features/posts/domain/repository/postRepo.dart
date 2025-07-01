@@ -3,6 +3,7 @@ import 'dart:developer';
 import '../../../../core/exceptions/network_exception.dart';
 import '../../data/repository/post_repo.dart';
 import '../../domain/utils/states/postStates.dart';
+import '../entities/createComment.dart';
 import '../entities/getpostbyId.dart';
 import '../entities/post.dart';
 
@@ -67,7 +68,7 @@ class PostRepositoryImp implements PostRepository {
   Future<CreateCommentResult> createComment(
       String postId, String comment) async {
     CreateCommentResult createCommentResult =
-        CreateCommentResult(CreateCommentResultState.isLoading, GetPostById());
+        CreateCommentResult(CreateCommentResultState.isLoading, CreateComment());
     try {
       createCommentResult = await postDataSource.createComment(postId, comment);
     } catch (e) {
@@ -76,11 +77,11 @@ class PostRepositoryImp implements PostRepository {
         NetworkException exp = e as NetworkException;
         final message = exp.errorMessage ?? e.message;
         createCommentResult = CreateCommentResult(
-            CreateCommentResultState.isError, GetPostById(message: message));
+            CreateCommentResultState.isError, CreateComment(message: message));
       } else {
         createCommentResult = CreateCommentResult(
             CreateCommentResultState.isError,
-            GetPostById(message: "Something Went Wrong"));
+            CreateComment(message: "Something Went Wrong"));
       }
     }
     return createCommentResult;

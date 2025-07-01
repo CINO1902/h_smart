@@ -1,6 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:h_smart/features/posts/domain/entities/post.dart';
+
+import '../../../../../constant/SchimmerWidget.dart';
+import '../../../../../core/utils/appColor.dart';
 
 class PostHeader extends StatelessWidget {
   final Post post;
@@ -18,25 +22,40 @@ class PostHeader extends StatelessWidget {
 
     return Row(
       children: [
-        CircleAvatar(
-          radius: 22,
-          backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
-          child: Text(
-            post.doctorName[0].toUpperCase(),
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.primary,
-            ),
-          ),
-        ),
+        post.userProfileUrl == null
+            ? CircleAvatar(
+                radius: 24,
+                backgroundColor: AppColors.kprimaryColor500.withOpacity(0.1),
+                child: Text(
+                  post.doctorName?[0].toUpperCase() ?? '',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.kprimaryColor500,
+                  ),
+                ),
+              )
+            : ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: CachedNetworkImage(
+                  imageUrl: post.userProfileUrl ?? '',
+                  height: 40,
+                  width: 40,
+                  placeholder: (context, url) => const ShimmerWidget(
+                    height: 24,
+                    width: 24,
+                  ),
+                  errorWidget: (context, url, error) =>
+                      const Icon(Icons.error, size: 40),
+                ),
+              ),
         const Gap(12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                post.doctorName,
+                post.doctorName ?? '',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 17,

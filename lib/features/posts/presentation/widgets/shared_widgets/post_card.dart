@@ -94,26 +94,41 @@ class _PostCardState extends State<PostCard> {
                       width: 2,
                     ),
                   ),
-                  child: CircleAvatar(
-                    radius: 24,
-                    backgroundColor:
-                        AppColors.kprimaryColor500.withOpacity(0.1),
-                    child: Text(
-                      post.doctorName[0].toUpperCase(),
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.kprimaryColor500,
-                      ),
-                    ),
-                  ),
+                  child: post.userProfileUrl == null
+                      ? CircleAvatar(
+                          radius: 24,
+                          backgroundColor:
+                              AppColors.kprimaryColor500.withOpacity(0.1),
+                          child: Text(
+                            post.doctorName?[0].toUpperCase() ?? '',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.kprimaryColor500,
+                            ),
+                          ),
+                        )
+                      : ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: CachedNetworkImage(
+                            imageUrl: post.userProfileUrl ?? '',
+                            height: 40,
+                            width: 40,
+                            placeholder: (context, url) => const ShimmerWidget(
+                              height: 24,
+                              width: 24,
+                            ),
+                            errorWidget: (context, url, error) =>
+                                const Icon(Icons.error, size: 40),
+                          ),
+                        ),
                 ),
                 title: Row(
                   children: [
                     Container(
                       width: MediaQuery.of(context).size.width * 0.45,
                       child: AutoScrollText(
-                        text: post.doctorName,
+                        text: post.doctorName ?? '',
                         maxWidth: MediaQuery.of(context).size.width * 0.45,
                         align: TextAlign.left,
                         style: const TextStyle(
@@ -131,7 +146,7 @@ class _PostCardState extends State<PostCard> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        post.postCategoryName,
+                        post.postCategoryName ?? '',
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.blue,
@@ -142,7 +157,7 @@ class _PostCardState extends State<PostCard> {
                   ],
                 ),
                 subtitle: Text(
-                  timeago.format(post.createdAt),
+                  timeago.format(post.createdAt ?? DateTime.now()),
                   style: TextStyle(
                     color: Colors.grey[600],
                     fontSize: 12,
@@ -157,7 +172,7 @@ class _PostCardState extends State<PostCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    post.content,
+                    post.content ?? '',
                     style: const TextStyle(
                       fontSize: 15,
                       height: 1.5,
@@ -182,13 +197,13 @@ class _PostCardState extends State<PostCard> {
                         ),
                       ),
                     ),
-                  if (post.postTags.isNotEmpty)
+                  if (post.postTags?.isNotEmpty ?? false)
                     Padding(
                       padding: const EdgeInsets.only(top: 12.0),
                       child: Wrap(
                         spacing: 8,
                         runSpacing: 8,
-                        children: post.postTags
+                        children: post.postTags!
                             .map((tag) => Container(
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 12, vertical: 6),
@@ -228,11 +243,11 @@ class _PostCardState extends State<PostCard> {
                     context: context,
                     builder: (_) {
                       return Fullview(
-                        imageUrl: post.fileContent!,
-                        doctorName: post.doctorName,
-                        postText: post.content,
-                        likesCount: post.likesCount,
-                        commentsCount: post.commentsCount,
+                        imageUrl: post.fileContent ?? '',
+                        doctorName: post.doctorName ?? '',
+                        postText: post.content ?? '',
+                        likesCount: post.likesCount ?? 0,
+                        commentsCount: post.commentsCount ?? 0,
                       );
                     },
                     barrierColor: Colors.black,
@@ -255,7 +270,7 @@ class _PostCardState extends State<PostCard> {
                     child: AspectRatio(
                       aspectRatio: 16 / 9,
                       child: CachedNetworkImage(
-                        imageUrl: post.fileContent!,
+                        imageUrl: post.fileContent ?? '',
                         fit: BoxFit.cover,
                         placeholder: (context, url) => const ShimmerWidget(
                           height: double.infinity,

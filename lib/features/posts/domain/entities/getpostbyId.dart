@@ -50,6 +50,7 @@ class Payload {
     DateTime? createdAt;
     int? dislikesCount;
     String? doctorId;
+    String? doctorImage;
     String? doctorName;
     String? fileContent;
     String? id;
@@ -61,6 +62,7 @@ class Payload {
     String? postVisibility;
     DateTime? updatedAt;
     String? userId;
+    String? userProfileUrl;
 
     Payload({
         this.comments,
@@ -69,6 +71,7 @@ class Payload {
         this.createdAt,
         this.dislikesCount,
         this.doctorId,
+        this.doctorImage,
         this.doctorName,
         this.fileContent,
         this.id,
@@ -80,6 +83,7 @@ class Payload {
         this.postVisibility,
         this.updatedAt,
         this.userId,
+        this.userProfileUrl,
     });
 
     Payload copyWith({
@@ -89,6 +93,7 @@ class Payload {
         DateTime? createdAt,
         int? dislikesCount,
         String? doctorId,
+        String? doctorImage,
         String? doctorName,
         String? fileContent,
         String? id,
@@ -100,6 +105,7 @@ class Payload {
         String? postVisibility,
         DateTime? updatedAt,
         String? userId,
+        String? userProfileUrl,
     }) => 
         Payload(
             comments: comments ?? this.comments,
@@ -108,6 +114,7 @@ class Payload {
             createdAt: createdAt ?? this.createdAt,
             dislikesCount: dislikesCount ?? this.dislikesCount,
             doctorId: doctorId ?? this.doctorId,
+            doctorImage: doctorImage ?? this.doctorImage,
             doctorName: doctorName ?? this.doctorName,
             fileContent: fileContent ?? this.fileContent,
             id: id ?? this.id,
@@ -119,6 +126,7 @@ class Payload {
             postVisibility: postVisibility ?? this.postVisibility,
             updatedAt: updatedAt ?? this.updatedAt,
             userId: userId ?? this.userId,
+            userProfileUrl: userProfileUrl ?? this.userProfileUrl,
         );
 
     factory Payload.fromJson(Map<String, dynamic> json) => Payload(
@@ -128,6 +136,7 @@ class Payload {
         createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
         dislikesCount: json["dislikes_count"],
         doctorId: json["doctor_id"],
+        doctorImage: json["doctor_image"],
         doctorName: json["doctor_name"],
         fileContent: json["file_content"],
         id: json["id"],
@@ -139,6 +148,7 @@ class Payload {
         postVisibility: json["post_visibility"],
         updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
         userId: json["user_id"],
+        userProfileUrl: json["user_profile_url"],
     );
 
     Map<String, dynamic> toJson() => {
@@ -148,6 +158,7 @@ class Payload {
         "created_at": createdAt?.toIso8601String(),
         "dislikes_count": dislikesCount,
         "doctor_id": doctorId,
+        "doctor_image": doctorImage,
         "doctor_name": doctorName,
         "file_content": fileContent,
         "id": id,
@@ -159,6 +170,7 @@ class Payload {
         "post_visibility": postVisibility,
         "updated_at": updatedAt?.toIso8601String(),
         "user_id": userId,
+        "user_profile_url": userProfileUrl,
     };
 }
 
@@ -167,10 +179,10 @@ class Comment {
     DateTime? createdAt;
     String? id;
     String? postId;
-    List<dynamic>? replies;
+    List<Reply>? replies;
     DateTime? updatedAt;
     String? userId;
-    dynamic userImage;
+    String? userImage;
     String? userName;
 
     Comment({
@@ -190,10 +202,10 @@ class Comment {
         DateTime? createdAt,
         String? id,
         String? postId,
-        List<dynamic>? replies,
+        List<Reply>? replies,
         DateTime? updatedAt,
         String? userId,
-        dynamic userImage,
+        String? userImage,
         String? userName,
     }) => 
         Comment(
@@ -213,7 +225,7 @@ class Comment {
         createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
         id: json["id"],
         postId: json["post_id"],
-        replies: json["replies"] == null ? [] : List<dynamic>.from(json["replies"]!.map((x) => x)),
+        replies: json["replies"] == null ? [] : List<Reply>.from(json["replies"]!.map((x) => Reply.fromJson(x))),
         updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
         userId: json["user_id"],
         userImage: json["user_image"],
@@ -225,7 +237,78 @@ class Comment {
         "created_at": createdAt?.toIso8601String(),
         "id": id,
         "post_id": postId,
-        "replies": replies == null ? [] : List<dynamic>.from(replies!.map((x) => x)),
+        "replies": replies == null ? [] : List<dynamic>.from(replies!.map((x) => x.toJson())),
+        "updated_at": updatedAt?.toIso8601String(),
+        "user_id": userId,
+        "user_image": userImage,
+        "user_name": userName,
+    };
+}
+
+class Reply {
+    String? commentId;
+    DateTime? createdAt;
+    String? id;
+    List<dynamic>? repliesToReplies;
+    String? reply;
+    DateTime? updatedAt;
+    String? userId;
+    dynamic userImage;
+    String? userName;
+
+    Reply({
+        this.commentId,
+        this.createdAt,
+        this.id,
+        this.repliesToReplies,
+        this.reply,
+        this.updatedAt,
+        this.userId,
+        this.userImage,
+        this.userName,
+    });
+
+    Reply copyWith({
+        String? commentId,
+        DateTime? createdAt,
+        String? id,
+        List<dynamic>? repliesToReplies,
+        String? reply,
+        DateTime? updatedAt,
+        String? userId,
+        dynamic userImage,
+        String? userName,
+    }) => 
+        Reply(
+            commentId: commentId ?? this.commentId,
+            createdAt: createdAt ?? this.createdAt,
+            id: id ?? this.id,
+            repliesToReplies: repliesToReplies ?? this.repliesToReplies,
+            reply: reply ?? this.reply,
+            updatedAt: updatedAt ?? this.updatedAt,
+            userId: userId ?? this.userId,
+            userImage: userImage ?? this.userImage,
+            userName: userName ?? this.userName,
+        );
+
+    factory Reply.fromJson(Map<String, dynamic> json) => Reply(
+        commentId: json["comment_id"],
+        createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
+        id: json["id"],
+        repliesToReplies: json["replies_to_replies"] == null ? [] : List<dynamic>.from(json["replies_to_replies"]!.map((x) => x)),
+        reply: json["reply"],
+        updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
+        userId: json["user_id"],
+        userImage: json["user_image"],
+        userName: json["user_name"],
+    );
+
+    Map<String, dynamic> toJson() => {
+        "comment_id": commentId,
+        "created_at": createdAt?.toIso8601String(),
+        "id": id,
+        "replies_to_replies": repliesToReplies == null ? [] : List<dynamic>.from(repliesToReplies!.map((x) => x)),
+        "reply": reply,
         "updated_at": updatedAt?.toIso8601String(),
         "user_id": userId,
         "user_image": userImage,
