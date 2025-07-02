@@ -8,6 +8,7 @@ class CommentInput extends ConsumerStatefulWidget {
   final String hintText;
   final Function(String)? onMarkupChanged;
   final String? replyToUsername;
+  final TextEditingController? controller;
 
   const CommentInput({
     super.key,
@@ -15,6 +16,7 @@ class CommentInput extends ConsumerStatefulWidget {
     this.hintText = 'Add a comment...',
     this.onMarkupChanged,
     this.replyToUsername,
+    this.controller,
   });
 
   @override
@@ -22,7 +24,13 @@ class CommentInput extends ConsumerStatefulWidget {
 }
 
 class _CommentInputState extends ConsumerState<CommentInput> {
-  final TextEditingController _controller = TextEditingController();
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = widget.controller ?? TextEditingController();
+  }
 
   @override
   Widget build(BuildContext context) {

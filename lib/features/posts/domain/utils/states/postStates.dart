@@ -1,4 +1,5 @@
 import '../../entities/createComment.dart';
+import '../../entities/createreplyResponse.dart';
 import '../../entities/getpostbyId.dart';
 import '../../entities/post.dart';
 
@@ -34,6 +35,14 @@ enum CreateCommentResultState {
   networkissue
 }
 
+class CreateReplyResult {
+  final CreateReplyResultState state;
+  final CreateReplyResponse response;
+
+  CreateReplyResult(this.state, this.response);
+}
+
+enum CreateReplyResultState { isLoading, isError, isData, isNull, isEmpty }
 class CommentResult {
   final CommentResultState state;
   final GetPostById response;

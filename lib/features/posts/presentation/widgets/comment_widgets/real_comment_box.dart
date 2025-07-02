@@ -6,12 +6,20 @@ import 'package:h_smart/core/theme/theme_mode_provider.dart';
 import 'package:h_smart/features/posts/domain/entities/getpostbyId.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'reply_box.dart';
+import 'loading_reply_box.dart' as loading_reply_box;
 
 class RealCommentBox extends ConsumerWidget {
   final Comment comment;
   final WidgetRef ref;
   final void Function(String userName) onReplyPressed;
   final List<Reply>? replies;
+  final bool showLoadingReplyBox;
+  final String? loadingReplyText;
+  final String? loadingReplyUserName;
+  final String? loadingReplyUserImage;
+  final bool showShowMoreRepliesButton;
+  final bool isLoadingMoreReplies;
+  final VoidCallback onShowMoreReplies;
 
   const RealCommentBox({
     super.key,
@@ -19,6 +27,13 @@ class RealCommentBox extends ConsumerWidget {
     required this.ref,
     required this.onReplyPressed,
     this.replies,
+    this.showLoadingReplyBox = false,
+    this.loadingReplyText,
+    this.loadingReplyUserName,
+    this.loadingReplyUserImage,
+    this.showShowMoreRepliesButton = false,
+    this.isLoadingMoreReplies = false,
+    required this.onShowMoreReplies,
   });
 
   @override
@@ -117,20 +132,33 @@ class RealCommentBox extends ConsumerWidget {
                     ),
                   ),
                 ),
-                if ((replies ?? comment.replies)?.isNotEmpty ?? false) ...[
+                if ((replies ?? comment.replies)?.isNotEmpty ??
+                    false || showLoadingReplyBox) ...[
                   const SizedBox(height: 8),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: (replies ?? comment.replies)!
-                        .map((reply) => Padding(
-                              padding: const EdgeInsets.only(
-                                  left: 10.0, bottom: 6.0),
-                              child: ReplyBox(
-                                reply: reply,
-                                ref: ref,
-                              ),
-                            ))
-                        .toList(),
+                    children: [
+                      if (showLoadingReplyBox && loadingReplyText != null)
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(left: 10.0, bottom: 6.0),
+                          child: loading_reply_box.LoadingReplyBox(
+                            userName: loadingReplyUserName ?? '',
+                            userImage: loadingReplyUserImage ?? '',
+                            replyText: loadingReplyText!,
+                          ),
+                        ),
+                      ...((replies ?? comment.replies) ?? [])
+                          .map((reply) => Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 10.0, bottom: 6.0),
+                                child: ReplyBox(
+                                  reply: reply,
+                                  ref: ref,
+                                ),
+                              ))
+                          .toList(),
+                    ],
                   ),
                 ],
               ],

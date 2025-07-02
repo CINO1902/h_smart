@@ -4,155 +4,187 @@
 
 import 'dart:convert';
 
-GetPostById getPostByIdFromJson(String str) => GetPostById.fromJson(json.decode(str));
+GetPostById getPostByIdFromJson(String str) =>
+    GetPostById.fromJson(json.decode(str));
 
 String getPostByIdToJson(GetPostById data) => json.encode(data.toJson());
 
 class GetPostById {
-    bool? error;
-    String? message;
-    Payload? payload;
+  bool? error;
+  String? message;
+  Payload? payload;
 
-    GetPostById({
-        this.error,
-        this.message,
-        this.payload,
-    });
+  GetPostById({
+    this.error,
+    this.message,
+    this.payload,
+  });
 
-    GetPostById copyWith({
-        bool? error,
-        String? message,
-        Payload? payload,
-    }) => 
-        GetPostById(
-            error: error ?? this.error,
-            message: message ?? this.message,
-            payload: payload ?? this.payload,
-        );
+  GetPostById copyWith({
+    bool? error,
+    String? message,
+    Payload? payload,
+  }) =>
+      GetPostById(
+        error: error ?? this.error,
+        message: message ?? this.message,
+        payload: payload ?? this.payload,
+      );
 
-    factory GetPostById.fromJson(Map<String, dynamic> json) => GetPostById(
+  factory GetPostById.fromJson(Map<String, dynamic> json) => GetPostById(
         error: json["error"],
         message: json["message"],
-        payload: json["payload"] == null ? null : Payload.fromJson(json["payload"]),
-    );
+        payload:
+            json["payload"] == null ? null : Payload.fromJson(json["payload"]),
+      );
 
-    Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => {
         "error": error,
         "message": message,
         "payload": payload?.toJson(),
-    };
+      };
 }
 
 class Payload {
-    List<Comment>? comments;
-    int? commentsCount;
-    String? content;
-    DateTime? createdAt;
-    int? dislikesCount;
-    String? doctorId;
-    String? doctorImage;
-    String? doctorName;
-    String? fileContent;
-    String? id;
-    int? likesCount;
-    String? postCategoryId;
-    String? postCategoryName;
-    String? postStatus;
-    List<String>? postTags;
-    String? postVisibility;
-    DateTime? updatedAt;
-    String? userId;
-    String? userProfileUrl;
+  List<Comment>? comments;
+  int? commentsCount;
+  String? content;
+  DateTime? createdAt;
+  int? dislikesCount;
+  String? doctorId;
+  String? doctorImage;
+  String? doctorName;
+  List<Reply>? replies;
+  String? fileContent;
+  String? id;
+  int? likesCount;
+  String? postCategoryId;
+  String? postCategoryName;
+  String? postStatus;
+  List<String>? postTags;
+  String? postVisibility;
+  int? repliesCount;
+  int? repliesToRepliesCount;
+  DateTime? updatedAt;
+  String? userId;
+  String? userProfileUrl;
 
-    Payload({
-        this.comments,
-        this.commentsCount,
-        this.content,
-        this.createdAt,
-        this.dislikesCount,
-        this.doctorId,
-        this.doctorImage,
-        this.doctorName,
-        this.fileContent,
-        this.id,
-        this.likesCount,
-        this.postCategoryId,
-        this.postCategoryName,
-        this.postStatus,
-        this.postTags,
-        this.postVisibility,
-        this.updatedAt,
-        this.userId,
-        this.userProfileUrl,
-    });
+  Payload({
+    this.comments,
+    this.commentsCount,
+    this.content,
+    this.createdAt,
+    this.dislikesCount,
+    this.doctorId,
+    this.doctorImage,
+    this.doctorName,
+    this.replies,
+    this.fileContent,
+    this.id,
+    this.likesCount,
+    this.postCategoryId,
+    this.postCategoryName,
+    this.postStatus,
+    this.postTags,
+    this.postVisibility,
+    this.repliesCount,
+    this.repliesToRepliesCount,
+    this.updatedAt,
+    this.userId,
+    this.userProfileUrl,
+  });
 
-    Payload copyWith({
-        List<Comment>? comments,
-        int? commentsCount,
-        String? content,
-        DateTime? createdAt,
-        int? dislikesCount,
-        String? doctorId,
-        String? doctorImage,
-        String? doctorName,
-        String? fileContent,
-        String? id,
-        int? likesCount,
-        String? postCategoryId,
-        String? postCategoryName,
-        String? postStatus,
-        List<String>? postTags,
-        String? postVisibility,
-        DateTime? updatedAt,
-        String? userId,
-        String? userProfileUrl,
-    }) => 
-        Payload(
-            comments: comments ?? this.comments,
-            commentsCount: commentsCount ?? this.commentsCount,
-            content: content ?? this.content,
-            createdAt: createdAt ?? this.createdAt,
-            dislikesCount: dislikesCount ?? this.dislikesCount,
-            doctorId: doctorId ?? this.doctorId,
-            doctorImage: doctorImage ?? this.doctorImage,
-            doctorName: doctorName ?? this.doctorName,
-            fileContent: fileContent ?? this.fileContent,
-            id: id ?? this.id,
-            likesCount: likesCount ?? this.likesCount,
-            postCategoryId: postCategoryId ?? this.postCategoryId,
-            postCategoryName: postCategoryName ?? this.postCategoryName,
-            postStatus: postStatus ?? this.postStatus,
-            postTags: postTags ?? this.postTags,
-            postVisibility: postVisibility ?? this.postVisibility,
-            updatedAt: updatedAt ?? this.updatedAt,
-            userId: userId ?? this.userId,
-            userProfileUrl: userProfileUrl ?? this.userProfileUrl,
-        );
+  Payload copyWith({
+    List<Comment>? comments,
+    int? commentsCount,
+    String? content,
+    DateTime? createdAt,
+    int? dislikesCount,
+    String? doctorId,
+    String? doctorImage,
+    String? doctorName,
+    List<Reply>? replies,
+    String? fileContent,
+    String? id,
+    int? likesCount,
+    String? postCategoryId,
+    String? postCategoryName,
+    String? postStatus,
+    List<String>? postTags,
+    String? postVisibility,
+    int? repliesCount,
+    int? repliesToRepliesCount,
+    DateTime? updatedAt,
+    String? userId,
+    String? userProfileUrl,
+  }) =>
+      Payload(
+        comments: comments ?? this.comments,
+        commentsCount: commentsCount ?? this.commentsCount,
+        content: content ?? this.content,
+        createdAt: createdAt ?? this.createdAt,
+        dislikesCount: dislikesCount ?? this.dislikesCount,
+        doctorId: doctorId ?? this.doctorId,
+        doctorImage: doctorImage ?? this.doctorImage,
+        doctorName: doctorName ?? this.doctorName,
+        replies: replies ?? this.replies,
+        fileContent: fileContent ?? this.fileContent,
+        id: id ?? this.id,
+        likesCount: likesCount ?? this.likesCount,
+        postCategoryId: postCategoryId ?? this.postCategoryId,
+        postCategoryName: postCategoryName ?? this.postCategoryName,
+        postStatus: postStatus ?? this.postStatus,
+        postTags: postTags ?? this.postTags,
+        postVisibility: postVisibility ?? this.postVisibility,
+        repliesCount: repliesCount ?? this.repliesCount,
+        repliesToRepliesCount:
+            repliesToRepliesCount ?? this.repliesToRepliesCount,
+        updatedAt: updatedAt ?? this.updatedAt,
+        userId: userId ?? this.userId,
+        userProfileUrl: userProfileUrl ?? this.userProfileUrl,
+      );
 
-    factory Payload.fromJson(Map<String, dynamic> json) => Payload(
-        comments: json["comments"] == null ? [] : List<Comment>.from(json["comments"]!.map((x) => Comment.fromJson(x))),
+  factory Payload.fromJson(Map<String, dynamic> json) => Payload(
+        comments: json["comments"] == null
+            ? []
+            : List<Comment>.from(
+                json["comments"]!.map((x) => Comment.fromJson(x))),
         commentsCount: json["comments_count"],
         content: json["content"],
-        createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
+        createdAt: json["created_at"] == null
+            ? null
+            : DateTime.parse(json["created_at"]),
         dislikesCount: json["dislikes_count"],
         doctorId: json["doctor_id"],
         doctorImage: json["doctor_image"],
         doctorName: json["doctor_name"],
+        replies: json["replies"] == null
+            ? []
+            : List<Reply>.from(
+                json["replies"]!.map((x) => Reply.fromJson(x))),
         fileContent: json["file_content"],
         id: json["id"],
         likesCount: json["likes_count"],
         postCategoryId: json["post_category_id"],
         postCategoryName: json["post_category_name"],
         postStatus: json["post_status"],
-        postTags: json["post_tags"] == null ? [] : List<String>.from(json["post_tags"]!.map((x) => x)),
+        postTags: json["post_tags"] == null
+            ? []
+            : List<String>.from(json["post_tags"]!.map((x) => x)),
         postVisibility: json["post_visibility"],
-        updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
+        repliesCount: json["replies_count"],
+        repliesToRepliesCount: json["replies_to_replies_count"],
+        updatedAt: json["updated_at"] == null
+            ? null
+            : DateTime.parse(json["updated_at"]),
         userId: json["user_id"],
         userProfileUrl: json["user_profile_url"],
-    );
+      );
 
-    Map<String, dynamic> toJson() => {
-        "comments": comments == null ? [] : List<dynamic>.from(comments!.map((x) => x.toJson())),
+  Map<String, dynamic> toJson() => {
+        "comments": comments == null
+            ? []
+            : List<dynamic>.from(comments!.map((x) => x.toJson())),
         "comments_count": commentsCount,
         "content": content,
         "created_at": createdAt?.toIso8601String(),
@@ -160,158 +192,186 @@ class Payload {
         "doctor_id": doctorId,
         "doctor_image": doctorImage,
         "doctor_name": doctorName,
+        "replies": replies == null
+            ? []
+            : List<dynamic>.from(replies!.map((x) => x.toJson())),
         "file_content": fileContent,
         "id": id,
         "likes_count": likesCount,
         "post_category_id": postCategoryId,
         "post_category_name": postCategoryName,
         "post_status": postStatus,
-        "post_tags": postTags == null ? [] : List<dynamic>.from(postTags!.map((x) => x)),
+        "post_tags":
+            postTags == null ? [] : List<dynamic>.from(postTags!.map((x) => x)),
         "post_visibility": postVisibility,
+        "replies_count": repliesCount,
+        "replies_to_replies_count": repliesToRepliesCount,
         "updated_at": updatedAt?.toIso8601String(),
         "user_id": userId,
         "user_profile_url": userProfileUrl,
-    };
+      };
 }
 
 class Comment {
-    String? comment;
-    DateTime? createdAt;
-    String? id;
-    String? postId;
-    List<Reply>? replies;
-    DateTime? updatedAt;
-    String? userId;
-    String? userImage;
-    String? userName;
+  String? comment;
+  DateTime? createdAt;
+  String? id;
+  String? postId;
+  List<Reply>? replies;
+  DateTime? updatedAt;
+  String? userId;
+  String? userImage;
+  String? userName;
+  int? repliesCount;
 
-    Comment({
-        this.comment,
-        this.createdAt,
-        this.id,
-        this.postId,
-        this.replies,
-        this.updatedAt,
-        this.userId,
-        this.userImage,
-        this.userName,
-    });
+  Comment({
+    this.comment,
+    this.createdAt,
+    this.id,
+    this.postId,
+    this.replies,
+    this.updatedAt,
+    this.userId,
+    this.userImage,
+    this.userName,
+    this.repliesCount,
+  });
 
-    Comment copyWith({
-        String? comment,
-        DateTime? createdAt,
-        String? id,
-        String? postId,
-        List<Reply>? replies,
-        DateTime? updatedAt,
-        String? userId,
-        String? userImage,
-        String? userName,
-    }) => 
-        Comment(
-            comment: comment ?? this.comment,
-            createdAt: createdAt ?? this.createdAt,
-            id: id ?? this.id,
-            postId: postId ?? this.postId,
-            replies: replies ?? this.replies,
-            updatedAt: updatedAt ?? this.updatedAt,
-            userId: userId ?? this.userId,
-            userImage: userImage ?? this.userImage,
-            userName: userName ?? this.userName,
-        );
+  Comment copyWith({
+    String? comment,
+    DateTime? createdAt,
+    String? id,
+    String? postId,
+    List<Reply>? replies,
+    DateTime? updatedAt,
+    String? userId,
+    String? userImage,
+    String? userName,
+    int? repliesCount,
+  }) =>
+      Comment(
+        comment: comment ?? this.comment,
+        createdAt: createdAt ?? this.createdAt,
+        id: id ?? this.id,
+        postId: postId ?? this.postId,
+        replies: replies ?? this.replies,
+        updatedAt: updatedAt ?? this.updatedAt,
+        userId: userId ?? this.userId,
+        userImage: userImage ?? this.userImage,
+        userName: userName ?? this.userName,
+        repliesCount: repliesCount ?? this.repliesCount,
+      );
 
-    factory Comment.fromJson(Map<String, dynamic> json) => Comment(
+  factory Comment.fromJson(Map<String, dynamic> json) => Comment(
         comment: json["comment"],
-        createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
+        createdAt: json["created_at"] == null
+            ? null
+            : DateTime.parse(json["created_at"]),
         id: json["id"],
         postId: json["post_id"],
-        replies: json["replies"] == null ? [] : List<Reply>.from(json["replies"]!.map((x) => Reply.fromJson(x))),
-        updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
+        replies: json["replies"] == null
+            ? []
+            : List<Reply>.from(json["replies"]!.map((x) => Reply.fromJson(x))),
+        updatedAt: json["updated_at"] == null
+            ? null
+            : DateTime.parse(json["updated_at"]),
         userId: json["user_id"],
         userImage: json["user_image"],
-        userName: json["user_name"],
-    );
+        userName: json["user_name"]!,
+        repliesCount: json["replies_count"],
+      );
 
-    Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => {
         "comment": comment,
         "created_at": createdAt?.toIso8601String(),
         "id": id,
         "post_id": postId,
-        "replies": replies == null ? [] : List<dynamic>.from(replies!.map((x) => x.toJson())),
+        "replies": replies == null
+            ? []
+            : List<dynamic>.from(replies!.map((x) => x.toJson())),
         "updated_at": updatedAt?.toIso8601String(),
         "user_id": userId,
         "user_image": userImage,
         "user_name": userName,
-    };
+        "replies_count": repliesCount,
+      };
 }
 
 class Reply {
-    String? commentId;
-    DateTime? createdAt;
-    String? id;
-    List<dynamic>? repliesToReplies;
-    String? reply;
-    DateTime? updatedAt;
-    String? userId;
-    dynamic userImage;
-    String? userName;
+  String? commentId;
+  DateTime? createdAt;
+  String? id;
+  List<dynamic>? repliesToReplies;
+  String? reply;
+  DateTime? updatedAt;
+  String? userId;
+  dynamic userImage;
+  String? userName;
 
-    Reply({
-        this.commentId,
-        this.createdAt,
-        this.id,
-        this.repliesToReplies,
-        this.reply,
-        this.updatedAt,
-        this.userId,
-        this.userImage,
-        this.userName,
-    });
+  Reply({
+    this.commentId,
+    this.createdAt,
+    this.id,
+    this.repliesToReplies,
+    this.reply,
+    this.updatedAt,
+    this.userId,
+    this.userImage,
+    this.userName,
+  });
 
-    Reply copyWith({
-        String? commentId,
-        DateTime? createdAt,
-        String? id,
-        List<dynamic>? repliesToReplies,
-        String? reply,
-        DateTime? updatedAt,
-        String? userId,
-        dynamic userImage,
-        String? userName,
-    }) => 
-        Reply(
-            commentId: commentId ?? this.commentId,
-            createdAt: createdAt ?? this.createdAt,
-            id: id ?? this.id,
-            repliesToReplies: repliesToReplies ?? this.repliesToReplies,
-            reply: reply ?? this.reply,
-            updatedAt: updatedAt ?? this.updatedAt,
-            userId: userId ?? this.userId,
-            userImage: userImage ?? this.userImage,
-            userName: userName ?? this.userName,
-        );
+  Reply copyWith({
+    String? commentId,
+    DateTime? createdAt,
+    String? id,
+    List<dynamic>? repliesToReplies,
+    String? reply,
+    DateTime? updatedAt,
+    String? userId,
+    dynamic userImage,
+    String? userName,
+  }) =>
+      Reply(
+        commentId: commentId ?? this.commentId,
+        createdAt: createdAt ?? this.createdAt,
+        id: id ?? this.id,
+        repliesToReplies: repliesToReplies ?? this.repliesToReplies,
+        reply: reply ?? this.reply,
+        updatedAt: updatedAt ?? this.updatedAt,
+        userId: userId ?? this.userId,
+        userImage: userImage ?? this.userImage,
+        userName: userName ?? this.userName,
+      );
 
-    factory Reply.fromJson(Map<String, dynamic> json) => Reply(
+  factory Reply.fromJson(Map<String, dynamic> json) => Reply(
         commentId: json["comment_id"],
-        createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
+        createdAt: json["created_at"] == null
+            ? null
+            : DateTime.parse(json["created_at"]),
         id: json["id"],
-        repliesToReplies: json["replies_to_replies"] == null ? [] : List<dynamic>.from(json["replies_to_replies"]!.map((x) => x)),
+        repliesToReplies: json["replies_to_replies"] == null
+            ? []
+            : List<dynamic>.from(json["replies_to_replies"]!.map((x) => x)),
         reply: json["reply"],
-        updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
+        updatedAt: json["updated_at"] == null
+            ? null
+            : DateTime.parse(json["updated_at"]),
         userId: json["user_id"],
         userImage: json["user_image"],
         userName: json["user_name"],
-    );
+      );
 
-    Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => {
         "comment_id": commentId,
         "created_at": createdAt?.toIso8601String(),
         "id": id,
-        "replies_to_replies": repliesToReplies == null ? [] : List<dynamic>.from(repliesToReplies!.map((x) => x)),
+        "replies_to_replies": repliesToReplies == null
+            ? []
+            : List<dynamic>.from(repliesToReplies!.map((x) => x)),
         "reply": reply,
         "updated_at": updatedAt?.toIso8601String(),
         "user_id": userId,
         "user_image": userImage,
         "user_name": userName,
-    };
+      };
 }

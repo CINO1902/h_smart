@@ -60,10 +60,12 @@ class ReplyBox extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     AutoScrollText(
                       text: reply.userName ?? '',
-                      maxWidth: MediaQuery.of(context).size.width * .4,
+                      maxWidth: MediaQuery.of(context).size.width * .3,
                       align: TextAlign.start,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,

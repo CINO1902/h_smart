@@ -8,7 +8,6 @@ import 'package:h_smart/features/posts/presentation/widgets/index.dart';
 import 'package:h_smart/features/posts/presentation/providers/posts_provider.dart';
 import 'package:h_smart/features/posts/domain/utils/states/postStates.dart';
 import 'package:h_smart/features/auth/presentation/provider/auth_provider.dart';
-import 'package:h_smart/features/posts/domain/entities/getpostbyId.dart';
 import 'package:h_smart/features/posts/presentation/widgets/comment_widgets/loading_comment_box.dart';
 
 class PostDetailPage extends ConsumerStatefulWidget {
@@ -20,31 +19,59 @@ class PostDetailPage extends ConsumerStatefulWidget {
 }
 
 class _PostDetailPageState extends ConsumerState<PostDetailPage> {
-  final GlobalKey<FlutterMentionsState> _mentionsKey =
-      GlobalKey<FlutterMentionsState>();
   final ScrollController _scrollController = ScrollController();
   String? _pendingComment;
   String _commentText = '';
   String? _replyToUsername;
+  String? _replyingCommentId;
+  String? _pendingReply;
+  final TextEditingController _commentController = TextEditingController();
+  final ScrollController _commentsScrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    _commentsScrollController.addListener(_onCommentsScroll);
     // Call getComments when the page opens
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(postsProvider.notifier).getComments(widget.post.id ?? '');
     });
   }
 
+  void _onCommentsScroll() {
+    final controller = _commentsScrollController;
+    if (!controller.hasClients) return;
+    final postsController = ref.read(postsProvider.notifier);
+    final state = ref.read(postsProvider);
+    if (controller.position.pixels >=
+        controller.position.maxScrollExtent - 100) {
+      if (state.hasMoreComments && !state.isLoadingMoreComments) {
+        postsController.loadMoreComments(widget.post.id ?? '');
+      }
+    }
+  }
+
   void _onScroll() {
     // Dismiss keyboard when scrolling
     FocusScope.of(context).unfocus();
+
+    final controller = _scrollController;
+    if (!controller.hasClients) return;
+    final postsController = ref.read(postsProvider.notifier);
+    final state = ref.read(postsProvider);
+    if (controller.position.pixels >=
+        controller.position.maxScrollExtent - 200) {
+      if (state.hasMoreComments && !state.isLoadingMoreComments) {
+        postsController.loadMoreComments(widget.post.id ?? '');
+      }
+    }
   }
 
-  void _handleReply(String userName) {
+  void _handleReply(String userName, String commentId) {
     setState(() {
       _replyToUsername = userName;
+      _replyingCommentId = commentId;
     });
   }
 
@@ -55,22 +82,33 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
       return;
     }
 
-    setState(() {
-      _pendingComment = _commentText;
-      _replyToUsername = null;
-    });
-
-    ref
-        .read(postsProvider.notifier)
-        .createComment(widget.post.id ?? '', _commentText);
-    setState(() {
-      _commentText = '';
-    });
+    if (_replyToUsername != null && _replyingCommentId != null) {
+      setState(() {
+        _pendingReply = _commentText;
+      });
+      ref
+          .read(postsProvider.notifier)
+          .createReply(_replyingCommentId!, _commentText);
+      _commentController.clear();
+      setState(() {
+        _replyToUsername = null;
+        _replyingCommentId = null;
+      });
+    } else {
+      setState(() {
+        _pendingComment = _commentText;
+      });
+      ref
+          .read(postsProvider.notifier)
+          .createComment(widget.post.id ?? '', _commentText);
+      _commentController.clear();
+    }
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _commentsScrollController.dispose();
     super.dispose();
   }
 
@@ -80,6 +118,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
     final postsController = ref.watch(postsProvider);
     final commentResult = postsController.commentResult;
     final createCommentResult = postsController.createCommentResult;
+    final createReplyResult = postsController.createReplyResult;
 
     ref.listen<CreateCommentResult>(
       postsProvider.select((p) => p.createCommentResult),
@@ -96,6 +135,20 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
               message: next.response.message ??
                   'Failed to post comment. Please try again.',
               status: SnackbarStatus.fail);
+        }
+      },
+    );
+
+    ref.listen<CreateReplyResult>(
+      postsProvider.select((p) => p.createReplyResult),
+      (previous, next) {
+        if (next.state == CreateReplyResultState.isData ||
+            next.state == CreateReplyResultState.isError) {
+          setState(() {
+            _pendingReply = null;
+            _replyToUsername = null;
+            _replyingCommentId = null;
+          });
         }
       },
     );
@@ -173,10 +226,10 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                     ),
                   ),
                   SliverToBoxAdapter(
-                    child: _buildCommentsSection(
-                        commentResult, createCommentResult.state),
+                    child: _buildCommentsSection(commentResult,
+                        createCommentResult.state, createReplyResult.state),
                   ),
-                  const SliverToBoxAdapter(child: Gap(80)),
+                  const SliverToBoxAdapter(child: Gap(140)),
                 ],
               ),
             ),
@@ -226,6 +279,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                             onTap: () {
                               setState(() {
                                 _replyToUsername = null;
+                                _replyingCommentId = null;
                               });
                             },
                             child: const Icon(Icons.close,
@@ -243,6 +297,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                       _commentText = markup;
                     },
                     replyToUsername: _replyToUsername,
+                    controller: _commentController,
                   ),
                 ],
               ),
@@ -253,11 +308,14 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
     );
   }
 
-  Widget _buildCommentsSection(CommentResult commentResult,
-      CreateCommentResultState createCommentState) {
+  Widget _buildCommentsSection(
+      CommentResult commentResult,
+      CreateCommentResultState createCommentState,
+      CreateReplyResultState createReplyState) {
     final user = ref.watch(authProvider).userData;
     final userName = user?.firstName ?? 'You';
     final userImage = user?.patientMetadata?.profileUrl ?? '';
+    final postsController = ref.watch(postsProvider);
 
     switch (commentResult.state) {
       case CommentResultState.isLoading:
@@ -413,14 +471,44 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                   commentText: _pendingComment!,
                 ),
               ),
-            ...comments
-                .map((comment) => RealCommentBox(
-                      comment: comment,
-                      ref: ref,
-                      onReplyPressed: _handleReply,
-                      replies: comment.replies,
-                    ))
-                .toList(),
+            ...comments.map((comment) => RealCommentBox(
+                  comment: comment,
+                  ref: ref,
+                  onReplyPressed: (userName) =>
+                      _handleReply(userName, comment.id ?? ''),
+                  replies: comment.replies,
+                  showLoadingReplyBox:
+                      createReplyState == CreateReplyResultState.isLoading &&
+                          _pendingReply != null &&
+                          _replyingCommentId == comment.id,
+                  loadingReplyText: _pendingReply,
+                  loadingReplyUserName: userName,
+                  loadingReplyUserImage: userImage,
+                  showShowMoreRepliesButton: postsController
+                      .hasMoreRepliesForComment(comment.id ?? ''),
+                  isLoadingMoreReplies: postsController
+                      .isLoadingMoreRepliesForComment(comment.id ?? ''),
+                  onShowMoreReplies: () {
+                    ref
+                        .read(postsProvider.notifier)
+                        .loadMoreReplies(comment.id ?? '');
+                  },
+                )),
+            if (postsController.isLoadingMoreComments)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16.0),
+                child: Center(child: CircularProgressIndicator.adaptive()),
+              ),
+            if (!postsController.hasMoreComments && comments.isNotEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16.0),
+                child: Center(
+                  child: Text(
+                    'No more comments',
+                    style: TextStyle(color: Colors.grey, fontSize: 15),
+                  ),
+                ),
+              ),
           ],
         );
 
