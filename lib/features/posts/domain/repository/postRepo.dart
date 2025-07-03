@@ -6,17 +6,25 @@ import '../../domain/utils/states/postStates.dart';
 import '../entities/createComment.dart';
 import '../entities/createreplyResponse.dart';
 import '../entities/getpostbyId.dart';
+import '../entities/moreReplytoreply.dart';
 import '../entities/post.dart';
+import '../entities/replyModel.dart';
+import '../entities/replytoreplyResponse.dart';
 
 abstract class PostRepository {
   Future<PostResult> getpost({int page = 1, int limit = 10});
   Future<CreateCommentResult> createComment(String postId, String comment);
   Future<CreateReplyResult> createReply(String commentId, String comment);
+  Future<CreateReplytoReplyResult> createReplyToReply(
+      String replyId, String comment, String commentId);
 
   Future<CommentResult> getComments(String postId,
       {int commentPage = 1, int commentLimit = 10});
 
-  Future<CommentResult> getReplies(String commentId,
+  Future<ReplyResult> getReplies(String commentId,
+      {int page = 1, int limit = 3});
+
+  Future<NestedReplyResult> getNestedReplies(String replyId,
       {int page = 1, int limit = 3});
 }
 
@@ -115,25 +123,73 @@ class PostRepositoryImp implements PostRepository {
   }
 
   @override
-  Future<CommentResult> getReplies(String commentId,
+  Future<ReplyResult> getReplies(String commentId,
       {int page = 1, int limit = 3}) async {
-    CommentResult commentResult =
-        CommentResult(CommentResultState.isLoading, GetPostById());
+    ReplyResult replyResult =
+        ReplyResult(ReplyResultState.isLoading, ReplyModel());
     try {
-      commentResult =
+      replyResult =
           await postDataSource.getReplies(commentId, page: page, limit: limit);
     } catch (e) {
       log(e.toString());
       if (e.runtimeType == NetworkException) {
         NetworkException exp = e as NetworkException;
         final message = exp.errorMessage ?? e.message;
-        commentResult = CommentResult(
-            CommentResultState.isError, GetPostById(message: message));
+        replyResult =
+            ReplyResult(ReplyResultState.isError, ReplyModel(message: message));
       } else {
-        commentResult = CommentResult(CommentResultState.isError,
-            GetPostById(message: "Something Went Wrong"));
+        replyResult = ReplyResult(ReplyResultState.isError,
+            ReplyModel(message: "Something Went Wrong"));
       }
     }
-    return commentResult;
+    return replyResult;
+  }
+
+  @override
+  Future<CreateReplytoReplyResult> createReplyToReply(
+      String replyId, String comment, String commentId) async {
+    CreateReplytoReplyResult createReplytoReplyResult = CreateReplytoReplyResult (
+        CreateReplytoReplyState.isLoading, ReplyToReplyModel());
+    try {
+      createReplytoReplyResult =
+          await postDataSource.createReplyToReply(replyId, comment, commentId);
+    } catch (e) {
+      log(e.toString());
+      if (e.runtimeType == NetworkException) {
+        NetworkException exp = e as NetworkException;
+        final message = exp.errorMessage ?? e.message;
+        createReplytoReplyResult = CreateReplytoReplyResult(
+            CreateReplytoReplyState.isError,
+            ReplyToReplyModel(message: message));
+      } else {
+        createReplytoReplyResult = CreateReplytoReplyResult(
+            CreateReplytoReplyState.isError,
+            ReplyToReplyModel(message: "Something Went Wrong"));
+      }
+    }
+    return createReplytoReplyResult;
+  }
+
+  @override
+  Future<NestedReplyResult> getNestedReplies(String replyId,
+      {int page = 1, int limit = 3}) async {
+    NestedReplyResult replyResult =
+        NestedReplyResult(NestedReplyResultState.isLoading, MoreReplyToReplyModel());  
+    try {
+      replyResult = await postDataSource.getNestedReplies(replyId,
+          page: page, limit: limit);
+    } catch (e) {
+      log(e.toString());
+      if (e.runtimeType == NetworkException) {
+        NetworkException exp = e as NetworkException;
+        final message = exp.errorMessage ?? e.message;
+        replyResult =
+            NestedReplyResult(NestedReplyResultState.isError, MoreReplyToReplyModel(message: message));
+      } else {
+        replyResult = NestedReplyResult(NestedReplyResultState.isError,
+            MoreReplyToReplyModel(message: "Something Went Wrong"));
+      }
+    }
+    return replyResult;
   }
 }

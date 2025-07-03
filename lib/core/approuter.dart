@@ -54,6 +54,7 @@ import 'package:h_smart/features/settings/presentation/pages/backup_codes_page.d
 import 'package:h_smart/features/settings/presentation/pages/active_sessions_page.dart';
 import 'package:h_smart/features/settings/presentation/pages/health_profile_screen.dart';
 import 'package:h_smart/features/auth/presentation/pages/ChangePasswordPage.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Pages
 
@@ -420,7 +421,14 @@ class AppRouter {
         pageBuilder: (context, state) => buildPageWithDefaultTransition(
           context: context,
           state: state,
-          child: PostDetailPage(post: state.extra as Post),
+          child: Consumer(
+            builder: (context, ref, child) {
+              return PostDetailPage(
+                post: state.extra as Post,
+                parentRef: ref,
+              );
+            },
+          ),
         ),
       ),
       GoRoute(

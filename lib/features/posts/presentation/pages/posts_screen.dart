@@ -112,73 +112,71 @@ class _PostsScreenState extends ConsumerState<PostsScreen> {
 
       case PostResultState.isError:
       case PostResultState.networkissue:
-        return Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    postResult.state == PostResultState.networkissue
-                        ? Icons.wifi_off_rounded
-                        : Icons.error_outline_rounded,
-                    size: 60,
-                    color: Colors.red.shade400,
-                  ),
+        return Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  shape: BoxShape.circle,
                 ),
-                const SizedBox(height: 24),
-                Text(
+                child: Icon(
                   postResult.state == PostResultState.networkissue
-                      ? 'Connection Lost'
-                      : 'Oops! Something went wrong',
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.red,
-                  ),
-                  textAlign: TextAlign.center,
+                      ? Icons.wifi_off_rounded
+                      : Icons.error_outline_rounded,
+                  size: 60,
+                  color: Colors.red.shade400,
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  postResult.state == PostResultState.networkissue
-                      ? 'Please check your internet connection and try again'
-                      : 'We couldn\'t load the posts. Please try again in a moment.',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[600],
-                    height: 1.5,
-                  ),
-                  textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              Text(
+                postResult.state == PostResultState.networkissue
+                    ? 'Connection Lost'
+                    : 'Oops! Something went wrong',
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
                 ),
-                const SizedBox(height: 32),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    ref.read(postsProvider.notifier).refreshPosts();
-                  },
-                  icon: const Icon(Icons.refresh_rounded),
-                  label: const Text('Try Again'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 2,
-                  ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                postResult.state == PostResultState.networkissue
+                    ? 'Please check your internet connection and try again'
+                    : 'We couldn\'t load the posts. Please try again in a moment.',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                  height: 1.5,
                 ),
-              ],
-            ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              ElevatedButton.icon(
+                onPressed: () {
+                  ref.read(postsProvider.notifier).refreshPosts();
+                },
+                icon: const Icon(Icons.refresh_rounded),
+                label: const Text('Try Again'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 2,
+                ),
+              ),
+            ],
           ),
         );
 

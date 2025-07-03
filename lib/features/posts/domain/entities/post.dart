@@ -50,7 +50,7 @@ class GetPost {
 }
 
 class Post {
-    List<Comment>? comments;
+    Comments? comments;
     int? commentsCount;
     String? content;
     DateTime? createdAt;
@@ -93,7 +93,7 @@ class Post {
     });
 
     Post copyWith({
-        List<Comment>? comments,
+        Comments? comments,
         int? commentsCount,
         String? content,
         DateTime? createdAt,
@@ -136,7 +136,7 @@ class Post {
         );
 
     factory Post.fromJson(Map<String, dynamic> json) => Post(
-        comments: json["comments"] == null ? [] : List<Comment>.from(json["comments"]!.map((x) => Comment.fromJson(x))),
+        comments: json["comments"] == null ? null : Comments.fromJson(json["comments"]),
         commentsCount: json["comments_count"],
         content: json["content"],
         createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
@@ -158,7 +158,7 @@ class Post {
     );
 
     Map<String, dynamic> toJson() => {
-        "comments": comments == null ? [] : List<dynamic>.from(comments!.map((x) => x.toJson())),
+        "comments": comments?.toJson(),
         "comments_count": commentsCount,
         "content": content,
         "created_at": createdAt?.toIso8601String(),
@@ -180,12 +180,47 @@ class Post {
     };
 }
 
+class Comments {
+    List<Comment>? comments;
+    int? commentsCount;
+    int? totalCount;
+
+    Comments({
+        this.comments,
+        this.commentsCount,
+        this.totalCount,
+    });
+
+    Comments copyWith({
+        List<Comment>? comments,
+        int? commentsCount,
+        int? totalCount,
+    }) => 
+        Comments(
+            comments: comments ?? this.comments,
+            commentsCount: commentsCount ?? this.commentsCount,
+            totalCount: totalCount ?? this.totalCount,
+        );
+
+    factory Comments.fromJson(Map<String, dynamic> json) => Comments(
+        comments: json["comments"] == null ? [] : List<Comment>.from(json["comments"]!.map((x) => Comment.fromJson(x))),
+        commentsCount: json["comments_count"],
+        totalCount: json["total_count"],
+    );
+
+    Map<String, dynamic> toJson() => {
+        "comments": comments == null ? [] : List<dynamic>.from(comments!.map((x) => x.toJson())),
+        "comments_count": commentsCount,
+        "total_count": totalCount,
+    };
+}
+
 class Comment {
     String? comment;
     DateTime? createdAt;
     String? id;
     String? postId;
-    List<dynamic>? replies;
+    Repliesreplies? replies;
     DateTime? updatedAt;
     String? userId;
     String? userImage;
@@ -208,7 +243,7 @@ class Comment {
         DateTime? createdAt,
         String? id,
         String? postId,
-        List<dynamic>? replies,
+        Repliesreplies? replies,
         DateTime? updatedAt,
         String? userId,
         String? userImage,
@@ -231,7 +266,7 @@ class Comment {
         createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
         id: json["id"],
         postId: json["post_id"],
-        replies: json["replies"] == null ? [] : List<dynamic>.from(json["replies"]!.map((x) => x)),
+        replies: json["replies"] == null ? null : Repliesreplies.fromJson(json["replies"]),
         updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
         userId: json["user_id"],
         userImage: json["user_image"],
@@ -243,10 +278,116 @@ class Comment {
         "created_at": createdAt?.toIso8601String(),
         "id": id,
         "post_id": postId,
-        "replies": replies == null ? [] : List<dynamic>.from(replies!.map((x) => x)),
+        "replies": replies?.toJson(),
         "updated_at": updatedAt?.toIso8601String(),
         "user_id": userId,
         "user_image": userImage,
         "user_name": userName,
+    };
+}
+
+class Reply {
+    String? commentId;
+    DateTime? createdAt;
+    String? id;
+    Repliesreplies? repliesToReplies;
+    String? reply;
+    DateTime? updatedAt;
+    String? userId;
+    dynamic userImage;
+    String? userName;
+
+    Reply({
+        this.commentId,
+        this.createdAt,
+        this.id,
+        this.repliesToReplies,
+        this.reply,
+        this.updatedAt,
+        this.userId,
+        this.userImage,
+        this.userName,
+    });
+
+    Reply copyWith({
+        String? commentId,
+        DateTime? createdAt,
+        String? id,
+        Repliesreplies? repliesToReplies,
+        String? reply,
+        DateTime? updatedAt,
+        String? userId,
+        dynamic userImage,
+        String? userName,
+    }) => 
+        Reply(
+            commentId: commentId ?? this.commentId,
+            createdAt: createdAt ?? this.createdAt,
+            id: id ?? this.id,
+            repliesToReplies: repliesToReplies ?? this.repliesToReplies,
+            reply: reply ?? this.reply,
+            updatedAt: updatedAt ?? this.updatedAt,
+            userId: userId ?? this.userId,
+            userImage: userImage ?? this.userImage,
+            userName: userName ?? this.userName,
+        );
+
+    factory Reply.fromJson(Map<String, dynamic> json) => Reply(
+        commentId: json["comment_id"],
+        createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
+        id: json["id"],
+        repliesToReplies: json["replies_to_replies"] == null ? null : Repliesreplies.fromJson(json["replies_to_replies"]),
+        reply: json["reply"],
+        updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
+        userId: json["user_id"],
+        userImage: json["user_image"],
+        userName: json["user_name"],
+    );
+
+    Map<String, dynamic> toJson() => {
+        "comment_id": commentId,
+        "created_at": createdAt?.toIso8601String(),
+        "id": id,
+        "replies_to_replies": repliesToReplies?.toJson(),
+        "reply": reply,
+        "updated_at": updatedAt?.toIso8601String(),
+        "user_id": userId,
+        "user_image": userImage,
+        "user_name": userName,
+    };
+}
+
+class Repliesreplies {
+    List<Reply>? replies;
+    int? repliesCount;
+    int? totalCount;
+
+    Repliesreplies({
+        this.replies,
+        this.repliesCount,
+        this.totalCount,
+    });
+
+    Repliesreplies copyWith({
+        List<Reply>? replies,
+        int? repliesCount,
+        int? totalCount,
+    }) => 
+        Repliesreplies(
+            replies: replies ?? this.replies,
+            repliesCount: repliesCount ?? this.repliesCount,
+            totalCount: totalCount ?? this.totalCount,
+        );
+
+    factory Repliesreplies.fromJson(Map<String, dynamic> json) => Repliesreplies(
+        replies: json["replies"] == null ? [] : List<Reply>.from(json["replies"]!.map((x) => Reply.fromJson(x))),
+        repliesCount: json["replies_count"],
+        totalCount: json["total_count"],
+    );
+
+    Map<String, dynamic> toJson() => {
+        "replies": replies == null ? [] : List<dynamic>.from(replies!.map((x) => x.toJson())),
+        "replies_count": repliesCount,
+        "total_count": totalCount,
     };
 }

@@ -9,6 +9,8 @@ class CommentInput extends ConsumerStatefulWidget {
   final Function(String)? onMarkupChanged;
   final String? replyToUsername;
   final TextEditingController? controller;
+  final bool isLoading;
+  final int maxLength;
 
   const CommentInput({
     super.key,
@@ -17,6 +19,8 @@ class CommentInput extends ConsumerStatefulWidget {
     this.onMarkupChanged,
     this.replyToUsername,
     this.controller,
+    this.isLoading = false,
+    this.maxLength = 100,
   });
 
   @override
@@ -103,6 +107,7 @@ class _CommentInputState extends ConsumerState<CommentInput> {
                     color: theme.colorScheme.onSurface,
                   ),
                   cursorColor: theme.colorScheme.primary,
+                  maxLength: widget.maxLength,
                   decoration: InputDecoration(
                     hintText: widget.replyToUsername != null
                         ? 'Reply to ${widget.replyToUsername}'
@@ -146,14 +151,24 @@ class _CommentInputState extends ConsumerState<CommentInput> {
                 borderRadius: BorderRadius.circular(20),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(20),
-                  onTap: widget.onSendPressed,
-                  child: const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Icon(
-                      Icons.send,
-                      color: Colors.white,
-                      size: 22,
-                    ),
+                  onTap: widget.isLoading ? null : widget.onSendPressed,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: widget.isLoading
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator.adaptive(
+                              strokeWidth: 2,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : const Icon(
+                            Icons.send,
+                            color: Colors.white,
+                            size: 22,
+                          ),
                   ),
                 ),
               ),
