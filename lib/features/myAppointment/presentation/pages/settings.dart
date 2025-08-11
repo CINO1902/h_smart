@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
 
@@ -33,7 +34,7 @@ class _SettingsState extends State<Settings> {
       body: Container(
         margin: const EdgeInsets.all(20),
         padding: const EdgeInsets.all(10),
-        height: 180,
+        height: 240,
         decoration: BoxDecoration(
             border: Border.all(color: const Color(0xffC1D3FF)),
             borderRadius: BorderRadius.circular(16),
@@ -45,6 +46,12 @@ class _SettingsState extends State<Settings> {
                   Navigator.pushNamed(context, '/ChangePassword');
                 },
                 child: recordtype('Change Password')),
+            const Gap(10),
+            InkWell(
+                onTap: () {
+                  context.push('/hospital/default-settings');
+                },
+                child: recordtype('Default Hospital')),
             const Gap(10),
             Container(
               height: 44,

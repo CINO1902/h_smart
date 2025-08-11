@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:h_smart/constant/network_api.dart';
 import 'package:h_smart/features/auth/domain/entities/ContinueRegistrationModel.dart';
 import 'package:h_smart/features/auth/domain/entities/createaccount.dart';
@@ -17,21 +18,56 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../core/approuter.dart';
+import '../../../../core/service/token_refresh_service.dart';
+import 'accesstokenrefresh.dart';
+
 /// A provider class responsible for all authentication-related operations,
 /// including login, registration, OTP verification, and user profile management.
 class AuthProvider extends ChangeNotifier {
   AuthProvider(this._authRepository) {
-    // Call your “on-create” method here:
+    // Call your "on-create" method here:
     init();
   }
 
   final AuthRepository _authRepository;
+  ProviderContainer? _container;
 
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
     emailLogin = prefs.getString('emailLogin') ?? '';
     // print(emailLogin);
+
+    // Check if user is already logged in and start token refresh timer
+    await _checkAndStartTokenRefresh();
+
     notifyListeners();
+  }
+
+  /// Checks if user is logged in and starts token refresh observer if needed
+  Future<void> _checkAndStartTokenRefresh() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('jwt_token');
+    final refreshToken = prefs.getString('refresh_token');
+
+    if (token != null &&
+        refreshToken != null &&
+        token.isNotEmpty &&
+        refreshToken.isNotEmpty) {
+      // User is logged in, start the token refresh observer
+      startTokenRefreshObserver();
+
+      // Store token creation time if not already stored
+      if (prefs.getInt('token_created_at') == null) {
+        await prefs.setInt(
+            'token_created_at', DateTime.now().millisecondsSinceEpoch);
+      }
+    }
+  }
+
+  /// Sets the provider container for token refresh service
+  void setContainer(ProviderContainer container) {
+    _container = container;
   }
 
   /// Local state fields
@@ -49,7 +85,7 @@ class AuthProvider extends ChangeNotifier {
 
   /// Result states for various API calls
   LoginResult loginResult = LoginResult(
-    LoginResultStates.isIdle,
+    LoginResultStates.isData,
     LoginResponse(),
   );
 
@@ -99,6 +135,22 @@ class AuthProvider extends ChangeNotifier {
   bool get infoLoading => _infoLoading;
   bool get hasFetchedInfo => _hasFetchedInfo;
 
+  /// Starts the smart token refresh observer
+  void startTokenRefreshObserver() {
+    if (_container != null) {
+      TokenRefreshService.instance.startTokenRefresh(_container!);
+    } else {
+      print('Warning: Container not set, cannot start token refresh observer');
+    }
+  }
+
+  /// Stops the token refresh observer
+  void stopTokenRefreshObserver() {
+    TokenRefreshService.instance.stopTokenRefresh();
+  }
+
+
+
   /// Performs login and stores JWT on success
   Future<void> login({
     required String email,
@@ -113,10 +165,19 @@ class AuthProvider extends ChangeNotifier {
 
     if (response.state == LoginResultStates.isData) {
       final token = response.response.payload?.accessToken;
+      final refreshToken = response.response.payload?.refreshToken;
       final profileCompleted = response.response.payload?.isProfileComplete;
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('jwt_token', token ?? '');
+      await prefs.setString('refresh_token', refreshToken ?? '');
       await prefs.setBool('profile_completed', profileCompleted ?? false);
+      // AuthService(prefs, _authRepository);
+      // Start the token refresh observer after successful login
+      startTokenRefreshObserver();
+
+      // Store token creation time
+      await prefs.setInt(
+          'token_created_at', DateTime.now().millisecondsSinceEpoch);
     }
     loginResult = response;
     notifyListeners();
@@ -252,16 +313,30 @@ class AuthProvider extends ChangeNotifier {
   //   notifyListeners();
   // }
 
-  /// Clears user data on logout
+  /// Clears user data on logout and navigates to login screen
   Future<void> logout() async {
     _hasFetchedInfo = false;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('user_payload');
     await prefs.remove('jwt_token');
+    await prefs.remove('refresh_token');
+    await prefs.remove('profile_completed');
+    await prefs.remove('token_created_at');
+
+    // Stop the token refresh observer on logout
+    stopTokenRefreshObserver();
+
     markhometarget(false);
-    init(); 
+    init();
     _isLoggedOut = false;
     notifyListeners();
+
+    // Navigate to login screen after logout
+    try {
+      AppRouter.router.go('/login');
+    } catch (e) {
+      print('Error navigating to login screen: $e');
+    }
   }
 
   /// Handles user registration
@@ -438,4 +513,96 @@ class AuthProvider extends ChangeNotifier {
     continueRegisterResult = response;
     notifyListeners();
   }
+
+  /// Clears the selected profile image
+  void clearProfileImage() {
+    _profileImage = null;
+    notifyListeners();
+  }
+
+  Future<void> reactivateAccessToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final refreshToken = prefs.getString('refresh_token');
+    loginResult = LoginResult(LoginResultStates.isLoading, LoginResponse());
+    notifyListeners();
+    
+    try {
+      final response =
+          await _authRepository.ReactivateAccessToken(refreshToken ?? '');
+      loginResult = response;
+      
+      if (response.state == LoginResultStates.isData) {
+        // AuthService(prefs, _authRepository);
+        final token = response.response.payload?.accessToken;
+        final refreshToken = response.response.payload?.refreshToken;
+        final profileCompleted = response.response.payload?.isProfileComplete;
+
+        await prefs.setString('jwt_token', token ?? '');
+        await prefs.setString('refresh_token', refreshToken ?? '');
+        await prefs.setBool('profile_completed', profileCompleted ?? false);
+        
+        // Update token creation time for the smart observer
+        await prefs.setInt('token_created_at', DateTime.now().millisecondsSinceEpoch);
+
+        // Restart the token refresh observer after successful token refresh
+        startTokenRefreshObserver();
+        
+        print('Token refresh successful');
+      } else {
+        // Token refresh failed - check if it's a network error or authentication error
+        final errorMessage = response.response.message?.toLowerCase() ?? '';
+        final isNetworkError = _isNetworkError(errorMessage);
+        
+        if (!isNetworkError) {
+          // Authentication error (invalid refresh token, etc.) - logout user
+          print('Token refresh failed with authentication error: ${response.response.message}');
+          print('Logging out user due to invalid tokens');
+          await logout();
+        } else {
+          // Network error - don't logout, just log the error
+          print('Token refresh failed due to network error: ${response.response.message}');
+        }
+      }
+    } catch (e) {
+      // Handle exceptions during token refresh
+      final errorMessage = e.toString().toLowerCase();
+      final isNetworkError = _isNetworkError(errorMessage);
+      
+      if (!isNetworkError) {
+        // Non-network exception - logout user
+        print('Token refresh failed with exception: $e');
+        print('Logging out user due to token refresh failure');
+        await logout();
+      } else {
+        // Network exception - don't logout, just log the error
+        print('Token refresh failed due to network exception: $e');
+      }
+      
+      // Set error state
+      loginResult = LoginResult(
+        LoginResultStates.isError, 
+        LoginResponse(message: 'Token refresh failed: $e')
+      );
+    }
+    
+    notifyListeners();
+  }
+  
+  /// Helper method to determine if an error is network-related
+  bool _isNetworkError(String errorMessage) {
+    final networkKeywords = [
+      'network', 'timeout', 'connection', 'unreachable', 
+      'no internet', 'offline', 'dns', 'socket', 'host'
+    ];
+    
+    return networkKeywords.any((keyword) => errorMessage.contains(keyword));
+  }
+
+  @override
+  void dispose() {
+    stopTokenRefreshObserver();
+    super.dispose();
+  }
 }
+
+// your HTTP client

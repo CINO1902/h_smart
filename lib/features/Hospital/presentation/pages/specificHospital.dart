@@ -88,7 +88,7 @@ class _SpecificHospitalState extends ConsumerState<SpecificHospital> {
                 controller: _scrollController,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  childAspectRatio: 6 / 7,
+                  childAspectRatio: 6 / 8,
                   crossAxisSpacing: 20,
                   mainAxisSpacing: 20,
                 ),
@@ -105,10 +105,9 @@ class _SpecificHospitalState extends ConsumerState<SpecificHospital> {
                   return InkWell(
                     onTap: () {
                       context.push('/hospital/more-detail',
-                          extra: {"hospital": hospital});
+                          extra: {"hospital": hospital, "homeref": ref});
                     },
                     child: HospitalWidget(
-                      ref: ref,
                       hospital: hospital,
                       enableHero: false,
                     ),

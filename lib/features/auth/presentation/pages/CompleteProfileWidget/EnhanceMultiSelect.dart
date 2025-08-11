@@ -112,8 +112,8 @@ class EnhancedMultiSelect extends ConsumerWidget {
             fontWeight: FontWeight.w500,
           ),
           onTap: (val) {
-            final updated = List<String?>.from(initial)..remove(val);
-            onConfirm(updated);
+            // final updated = List<String?>.from(initial)..remove(val);
+            // onConfirm(updated);
           },
         ),
       ),

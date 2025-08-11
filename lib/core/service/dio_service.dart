@@ -67,7 +67,8 @@ class DioService implements HttpService {
     // Retrieve stored token if needed
     String? token;
     if (methodrequest == RequestMethod.getWithToken ||
-        methodrequest == RequestMethod.postWithToken) {
+        methodrequest == RequestMethod.postWithToken ||
+        methodrequest == RequestMethod.putWithToken) {
       final prefs = await SharedPreferences.getInstance();
       token = prefs.getString('jwt_token');
     }
@@ -131,6 +132,14 @@ class DioService implements HttpService {
           return await dio.post(
             url,
             data: data,
+            cancelToken: cancelToken,
+            options: options,
+          );
+        case RequestMethod.putWithToken:
+          return await dio.put(
+            url,
+            data: data,
+            queryParameters: params,
             cancelToken: cancelToken,
             options: options,
           );

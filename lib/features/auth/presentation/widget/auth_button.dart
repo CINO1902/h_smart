@@ -10,6 +10,7 @@ class AuthButton extends StatelessWidget {
   final Widget? icon;
   final Color? backgroundColor;
   final Color? textColor;
+  final EdgeInsetsGeometry? margin;
 
   const AuthButton({
     Key? key,
@@ -21,6 +22,7 @@ class AuthButton extends StatelessWidget {
     this.icon,
     this.backgroundColor,
     this.textColor,
+    this.margin,
   }) : super(key: key);
 
   @override
@@ -28,7 +30,7 @@ class AuthButton extends StatelessWidget {
     return Container(
       width: double.infinity,
       height: height,
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: margin ?? const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         gradient: backgroundColor == null

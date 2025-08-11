@@ -12,4 +12,5 @@ abstract class AuthDatasource {
   Future<ContinueRegisterResult> continueRegistration(
       ContinueRegistrationModel continuemodel);
   Future<EmailVerificationResult> callActivationToken(email);
+    Future<LoginResult> ReactivateAccessToken(String token);
 }

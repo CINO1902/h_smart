@@ -15,6 +15,7 @@ class AuthTextField extends StatelessWidget {
   final TextInputAction textInputAction;
   final ValueChanged<String>? onFieldSubmitted;
   final AutovalidateMode autovalidateMode;
+  final ValueChanged<String>? onChanged;
 
   const AuthTextField({
     Key? key,
@@ -31,6 +32,7 @@ class AuthTextField extends StatelessWidget {
     this.textInputAction = TextInputAction.next,
     this.onFieldSubmitted,
     this.autovalidateMode = AutovalidateMode.onUserInteraction,
+    this.onChanged,
   }) : super(key: key);
 
   @override
@@ -57,6 +59,7 @@ class AuthTextField extends StatelessWidget {
         onFieldSubmitted: onFieldSubmitted,
         autovalidateMode: autovalidateMode,
         validator: validator,
+        onChanged: onChanged,
         decoration: InputDecoration(
           labelText: label,
           hintText: hint,

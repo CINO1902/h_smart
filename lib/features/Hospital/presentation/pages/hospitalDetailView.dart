@@ -2,25 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:h_smart/constant/snackbar.dart';
 import 'package:h_smart/core/utils/appColor.dart';
 import 'package:h_smart/features/Hospital/domain/entities/GetHospital.dart';
-import 'package:h_smart/features/Hospital/domain/entities/DoctorsResponse.dart';
+import 'package:h_smart/features/doctorRecord/domain/entities/DoctorsResponse.dart';
 import 'package:h_smart/features/Hospital/presentation/provider/getHospitalProvider.dart';
 import 'package:h_smart/features/Hospital/presentation/widgets/hospital_detail/hospital_header.dart';
 import 'package:h_smart/features/Hospital/presentation/widgets/hospital_detail/hospital_info_section.dart';
-import 'package:h_smart/features/Hospital/presentation/widgets/hospital_detail/doctors_section.dart';
+import 'package:h_smart/features/doctorRecord/presentation/widgets/doctors_section.dart';
 
 import '../../domain/states/hospitalStates.dart';
+import '../widgets/connectHospitalButton.dart';
 
 class HospitalDetailView extends ConsumerStatefulWidget {
   final Hospital hospital;
-  const HospitalDetailView({super.key, required this.hospital});
+  final WidgetRef homeref;
+  const HospitalDetailView(
+      {super.key, required this.hospital, required this.homeref});
 
   @override
   ConsumerState<HospitalDetailView> createState() => _HospitalDetailViewState();
 }
 
-class _HospitalDetailViewState extends ConsumerState<HospitalDetailView> {
+class _HospitalDetailViewState extends ConsumerState<HospitalDetailView>
+    with TickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
   double _imageHeight = 400;
   double _logoSize = 90;
@@ -35,12 +40,41 @@ class _HospitalDetailViewState extends ConsumerState<HospitalDetailView> {
   final double _minLogoSize = 50;
   bool _showInitialLogo = false;
 
+  // Animation controllers for button transitions
+  late AnimationController _buttonAnimationController;
+  late AnimationController _iconAnimationController;
+  late Animation<Color?> _buttonColorAnimation;
+  late Animation<double> _iconRotationAnimation;
+
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+
+    // Initialize animation controllers
+    _buttonAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    _iconAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+
+    _iconRotationAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _iconAnimationController,
+      curve: Curves.easeInOut,
+    ));
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(hospitalprovider).callDoctorsbyhospitalid(widget.hospital.id);
+      // Only fetch doctors if user is connected to the hospital
+      if (widget.hospital.isConnected == true) {
+        ref.read(hospitalprovider).callDoctorsbyhospitalid(widget.hospital.id);
+      }
       if (mounted) {
         setState(() {
           _logoPosition = (MediaQuery.of(context).size.width - _logoSize) / 2;
@@ -60,9 +94,21 @@ class _HospitalDetailViewState extends ConsumerState<HospitalDetailView> {
   }
 
   @override
+  void deactivate() {
+    // TODO: implement deactivate
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.homeref.read(hospitalprovider).disposeTapToConnect();
+      widget.homeref.read(hospitalprovider).disposeTapToDisconnect();
+    });
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _buttonAnimationController.dispose();
+    _iconAnimationController.dispose();
     super.dispose();
   }
 
@@ -117,13 +163,100 @@ class _HospitalDetailViewState extends ConsumerState<HospitalDetailView> {
     });
   }
 
+  Widget _buildConnectionRequiredMessage(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Text(
+            'Doctors',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onBackground,
+            ),
+          ),
+        ),
+        const Gap(15),
+        Container(
+          width: double.infinity,
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: theme.colorScheme.shadow.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              Icon(
+                Icons.lock_outline,
+                size: 48,
+                color: theme.colorScheme.primary,
+              ),
+              const Gap(16),
+              Text(
+                'Connect to Hospital Required',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: theme.colorScheme.onSurface,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const Gap(8),
+              Text(
+                'You need to connect to this hospital to view the list of doctors and their information.',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: theme.colorScheme.onSurface.withOpacity(0.7),
+                  height: 1.4,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const Gap(16),
+              Text(
+                'Please use the "Connect to Hospital" button above to get access.',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final connectState =
+        ref.watch(hospitalprovider).connectToHospitalResult.state;
     DoctorsResponse doctorsResponse =
         ref.watch(hospitalprovider).doctorResult.response;
     DoctorResultStates doctorResultStates =
         ref.watch(hospitalprovider).doctorResult.state;
+
+    // Automatically fetch doctors when user successfully connects
+    if (connectState == ConnectToHospitalResultStates.isData &&
+        widget.hospital.isConnected == true &&
+        doctorResultStates == DoctorResultStates.isIdle) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(hospitalprovider).callDoctorsbyhospitalid(widget.hospital.id);
+      });
+    }
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
       body: Stack(
@@ -167,39 +300,16 @@ class _HospitalDetailViewState extends ConsumerState<HospitalDetailView> {
                         ],
                       ),
                       const Gap(16),
-                      // Join Hospital Button
+                      // Hospital Connection Button with Animation
                       Container(
-                        width: double.infinity,
-                        height: 45,
-                        margin: const EdgeInsets.symmetric(horizontal: 20),
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'Join Hospital functionality coming soon!'),
-                                duration: Duration(seconds: 2),
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.add_circle_outline),
-                          label: const Text(
-                            'Connect to Hospital',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: theme.colorScheme.primary,
-                            foregroundColor: theme.colorScheme.onPrimary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 0,
-                          ),
-                        ),
-                      ),
+                          width: double.infinity,
+                          height: 45,
+                          margin: const EdgeInsets.symmetric(horizontal: 20),
+                          child: AnimatedConnectionButton(
+                            hospital: widget.hospital,
+                            iconAnimationController: _iconAnimationController,
+                            iconRotationAnimation: _iconRotationAnimation,
+                          )),
                     ],
                   ),
                 ),
@@ -207,13 +317,16 @@ class _HospitalDetailViewState extends ConsumerState<HospitalDetailView> {
               const Gap(30),
               HospitalInfoSection(hospital: widget.hospital),
               const Gap(20),
-              DoctorsSection(
-                doctorsResponse: doctorsResponse,
-                doctorResultStates: doctorResultStates,
-                onRetry: () => ref
-                    .read(hospitalprovider)
-                    .callDoctorsbyhospitalid(widget.hospital.id),
-              ),
+              // Conditionally show doctors section based on connection status
+              widget.hospital.isConnected == true
+                  ? DoctorsSection(
+                      doctorsResponse: doctorsResponse,
+                      doctorResultStates: doctorResultStates,
+                      onRetry: () => ref
+                          .read(hospitalprovider)
+                          .callDoctorsbyhospitalid(widget.hospital.id),
+                    )
+                  : _buildConnectionRequiredMessage(context),
               const Gap(30),
             ],
           ),

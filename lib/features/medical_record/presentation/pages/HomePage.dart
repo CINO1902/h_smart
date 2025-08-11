@@ -9,11 +9,15 @@ import 'package:h_smart/features/auth/presentation/provider/auth_provider.dart';
 import 'package:h_smart/features/medical_record/presentation/provider/medicalRecord.dart';
 import 'package:h_smart/core/utils/appColor.dart';
 import 'package:h_smart/features/medical_record/presentation/widgets/homeViews/prescriptionChip.dart';
+import 'package:h_smart/core/service/app_lifecycle_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../auth/domain/usecases/authStates.dart';
 import '../../domain/usecases/userStates.dart';
 import 'dart:async';
 import '../widgets/homeViews/QuickActionButton.dart';
 import '../widgets/homeViews/ScheduleCard.dart';
+import '../widgets/homeViews/DefaultHospitalCard.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({
@@ -51,12 +55,17 @@ class _HomePageState extends ConsumerState<HomePage>
     if (!isInitialized) {
       // Schedule your async calls after first frame
       WidgetsBinding.instance.addPostFrameCallback((_) async {
-        ref.read(authProvider.notifier).loadSavedPayload();
-        ref.read(authProvider.notifier).fetchUserInfo();
-        ref.read(medicalRecordProvider.notifier).getOverview();
-        ref.read(authProvider.notifier).markhometarget(true);
+        await _initializeHomePage();
       });
     }
+  }
+
+  /// Initialize HomePage with token refresh check
+  Future<void> _initializeHomePage() async {
+    ref.read(authProvider.notifier).loadSavedPayload();
+    // Check if token refresh is needed before running initialization functions
+
+    // Proceed with normal initialization
   }
 
   @override
@@ -140,13 +149,14 @@ class _HomePageState extends ConsumerState<HomePage>
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<AuthProvider>(authProvider, (previous, next) {
-      if (next.isLoggedOut && mounted) {
-        SnackBarService.notifyAction(context,
-            message: 'Access token has expired', status: SnackbarStatus.fail);
-        ref.read(authProvider).resetLoggedOutUser();
-        ref.read(authProvider).logout();
-        context.go('/login');
+    ref.listen<AuthProvider>(authProvider, (previous, next) async {
+      await Future.delayed(const Duration(seconds: 1));
+      if (next.loginResult.state == LoginResultStates.isData) {
+        if (!ref.watch(authProvider).isHomePageInitialized) {
+          ref.read(authProvider.notifier).fetchUserInfo();
+          ref.read(medicalRecordProvider.notifier).getOverview();
+          ref.read(authProvider.notifier).markhometarget(true);
+        }
       }
     });
 
@@ -199,7 +209,18 @@ class _HomePageState extends ConsumerState<HomePage>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Default Hospital Card - Full Width at Top
+                const SafeArea(
+                  bottom: false,
+                  child: Padding(
+                    padding: EdgeInsets.only(bottom: 2),
+                    child: DefaultHospitalCard(),
+                  ),
+                ),
+                const Gap(5),
+                // Greetings and Notification Row
                 SafeArea(
+                  top: false,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -253,7 +274,6 @@ class _HomePageState extends ConsumerState<HomePage>
 
                 // ─── Enhanced Prescription Scroller ───
                 Container(
-                  padding: const EdgeInsets.only(top: 20),
                   child: ref.watch(medicalRecordProvider).overview.status ==
                           GetOverResultStates.loading
                       ? const Row(
@@ -269,8 +289,9 @@ class _HomePageState extends ConsumerState<HomePage>
                           : ref.watch(medicalRecordProvider).overview.status ==
                                   GetOverResultStates.success
                               ? prescription?.isEmpty ?? false
-                                  ? const SizedBox()
+                                  ? const SizedBox.shrink()
                                   : Container(
+                                      padding: const EdgeInsets.only(top: 20),
                                       height: 36,
                                       child: Builder(
                                         builder: (context) {
@@ -446,7 +467,8 @@ class _HomePageState extends ConsumerState<HomePage>
                         image: 'images/Doctors.png',
                         title: 'Doctors',
                         backgroundColor: AppColors.kSuccessColor50,
-                        onTap: () => context.push('/doctors'),
+                        onTap: () =>
+                            context.push('/connected-hospital-doctors'),
                       ),
                       QuickActionButton(
                         image: 'images/medandpres.png',
@@ -483,7 +505,7 @@ class _HomePageState extends ConsumerState<HomePage>
                       crossAxisCount: 3,
                       mainAxisSpacing: 8,
                       crossAxisSpacing: 8,
-                      childAspectRatio: 1.1,
+                      childAspectRatio: 1,
                     ),
                   ),
                 ),

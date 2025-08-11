@@ -50,6 +50,7 @@ class LoginPayload {
   String? accessToken;
   String? email;
   bool? isProfileComplete;
+  String? refreshToken;
   String? role;
   String? status;
   String? userId;
@@ -58,6 +59,7 @@ class LoginPayload {
     this.accessToken,
     this.email,
     this.isProfileComplete,
+    this.refreshToken,
     this.role,
     this.status,
     this.userId,
@@ -67,6 +69,7 @@ class LoginPayload {
     String? accessToken,
     String? email,
     bool? isProfileComplete,
+    String? refreshToken,
     String? role,
     String? status,
     String? userId,
@@ -75,6 +78,7 @@ class LoginPayload {
         accessToken: accessToken ?? this.accessToken,
         email: email ?? this.email,
         isProfileComplete: isProfileComplete ?? this.isProfileComplete,
+        refreshToken: refreshToken ?? this.refreshToken,
         role: role ?? this.role,
         status: status ?? this.status,
         userId: userId ?? this.userId,
@@ -84,6 +88,7 @@ class LoginPayload {
         accessToken: json["access_token"],
         email: json["email"],
         isProfileComplete: json["is_profile_complete"],
+        refreshToken: json["refresh_token"],
         role: json["role"],
         status: json["status"],
         userId: json["user_id"],
@@ -93,8 +98,11 @@ class LoginPayload {
         "access_token": accessToken,
         "email": email,
         "is_profile_complete": isProfileComplete,
+        "refresh_token": refreshToken,
         "role": role,
         "status": status,
         "user_id": userId,
       };
 }
+
+

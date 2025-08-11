@@ -13,14 +13,21 @@ import 'package:h_smart/main.dart';
 
 void main() {
   testWidgets('App loads successfully', (WidgetTester tester) async {
+    // Create a test container
+    final container = ProviderContainer();
+    
     // Build our app and trigger a frame.
     await tester.pumpWidget(
-      ProviderScope(
-        child: const MyApp(),
+      UncontrolledProviderScope(
+        container: container,
+        child: MyApp(container: container),
       ),
     );
 
     // Verify that the app loads without crashing
     expect(find.byType(MaterialApp), findsOneWidget);
+    
+    // Clean up
+    container.dispose();
   });
 }

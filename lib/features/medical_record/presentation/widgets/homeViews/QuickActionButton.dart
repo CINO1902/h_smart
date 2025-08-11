@@ -38,7 +38,7 @@ class QuickActionButton extends StatelessWidget {
           ],
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Container(
               padding: const EdgeInsets.all(8),
@@ -52,10 +52,10 @@ class QuickActionButton extends StatelessWidget {
                 fit: BoxFit.contain,
               ),
             ),
-            const SizedBox(height: 12),
+            // const SizedBox(height: 5),
             SizedBox(
               width: MediaQuery.of(context).size.width * 0.2,
-              height: 25,
+              height: 30,
               child: Text(
                 title,
                 textAlign: TextAlign.center,

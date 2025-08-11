@@ -28,7 +28,7 @@ class AuthPhoneField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
@@ -46,7 +46,6 @@ class AuthPhoneField extends StatelessWidget {
         textInputAction: textInputAction,
         onSubmitted: onSubmitted,
         validator: validator,
-      
         decoration: InputDecoration(
           labelText: 'Phone Number',
           hintText: 'Enter phone number',

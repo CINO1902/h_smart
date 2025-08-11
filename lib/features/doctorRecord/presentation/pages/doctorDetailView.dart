@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:h_smart/features/Hospital/domain/entities/Doctor.dart';
+import 'package:h_smart/features/doctorRecord/domain/entities/Doctor.dart';
 
 class DoctorDetailView extends ConsumerStatefulWidget {
   final Doctor doctor;
@@ -521,7 +521,7 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
         child: InkWell(
           onTap: () {
             if (!isWeekend) {
-              _showTimeSelectionDialog(context, date);
+              _showTimeSelectionDialog(context, date, theme);
             }
           },
           borderRadius: BorderRadius.circular(12),
@@ -654,7 +654,8 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
     }
   }
 
-  void _showTimeSelectionDialog(BuildContext context, DateTime date) {
+  void _showTimeSelectionDialog(
+      BuildContext context, DateTime date, ThemeData theme) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -663,8 +664,8 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
         constraints: BoxConstraints(
           maxHeight: MediaQuery.of(context).size.height * 0.7,
         ),
-        decoration: const BoxDecoration(
-          color: Colors.white,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.background,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(

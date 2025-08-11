@@ -130,15 +130,19 @@ class PostController extends ChangeNotifier {
       print('Error loading more posts: $e');
     }
 
-    _isLoadingMore = false;
+    _isLoadingMore = false;       
     notifyListeners();
   }
 
-  void refreshPosts() {
+  Future<void> refreshPosts() async {
     getpost();
   }
+  
+
 
   Future<void> getComments(String postId, {int page = 1, int? limit}) async {
+      
+
     if (page == 1) {
       commentResult = CommentResult(
           CommentResultState.isLoading, getpostbyid.GetPostById());

@@ -50,7 +50,17 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   Future<void> _onRegister() async {
     if (!_formKey.currentState!.validate()) return;
     final auth = ref.read(authProvider);
+// ... existing code ...
 
+    if (_phoneController.text.trim().isEmpty) {
+      SnackBarService.notifyAction(
+        context,
+        message: 'Phone number is required',
+        status: SnackbarStatus.fail,
+      );
+      return;
+    }
+// ... existing code ...
     // if (auth.registerResult.state == RegisterResultStates.isLoading) return;
 
     if (!_agreedToTerms) {

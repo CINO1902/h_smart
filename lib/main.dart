@@ -1,48 +1,44 @@
 // lib/main.dart
+import 'dart:developer';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:go_router/go_router.dart';
 import 'package:h_smart/core/approuter.dart';
 import 'package:h_smart/core/theme/theme_provider.dart';
 import 'package:h_smart/core/theme/text_scale_provider.dart';
 
-
-import 'firebase_options.dart';
 import 'core/service/locator.dart';
-import 'core/api/firebaseinit.dart';
+import 'core/service/token_refresh_service.dart';
+import 'core/service/app_lifecycle_service.dart';
+import 'package:h_smart/features/auth/presentation/provider/auth_provider.dart';
+import 'package:h_smart/features/auth/domain/usecases/authStates.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {
-  print('Handling message: ${message.messageId}');
-}
+import 'features/auth/presentation/controller/accesstokenrefresh.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  if (Platform.isAndroid) {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-  } else {
-    await Firebase.initializeApp(
-      name: 'hsmart-bb867',
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+  final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  print('before env load object');
+  try {
+    await dotenv.load(fileName: "assests/config/.env");
+  } catch (e, st) {
+    // log or handle missing env
+    log(e.toString());
   }
-
-  FlutterNativeSplash.preserve(
-    widgetsBinding: WidgetsFlutterBinding.ensureInitialized(),
-  );
-
-  await FirebaseApi().requestpermission();
-  FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
-
+  
+  // Create the provider container
+  final container = ProviderContainer();
+  
   runApp(
-    ProviderScope(
-      child: MyApp(),
+    UncontrolledProviderScope(
+      container: container,
+      child: MyApp(container: container),
     ),
   );
 
@@ -50,7 +46,9 @@ void main() async {
 }
 
 class MyApp extends ConsumerStatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  final ProviderContainer container;
+  
+  const MyApp({Key? key, required this.container}) : super(key: key);
 
   @override
   ConsumerState<MyApp> createState() => _MyAppState();
@@ -62,6 +60,43 @@ class _MyAppState extends ConsumerState<MyApp> {
     super.initState();
     // Now that we've decided which screen to show, we can remove the splash:
     FlutterNativeSplash.remove();
+
+    // Initialize token refresh service after the widget is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeTokenRefresh();
+    });
+  }
+
+  void _initializeTokenRefresh() async {
+    // Set the container in the AuthController
+    final authController = ref.read(authProvider.notifier);
+    authController.setContainer(widget.container);
+
+    // Initialize the app lifecycle service
+    AppLifecycleService.instance.initialize(authController);
+    
+    // Start the smart token refresh observer if user is logged in
+    await _initializeTokenObserver();
+  }
+
+  /// Initialize the token observer if user is logged in
+  Future<void> _initializeTokenObserver() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('jwt_token');
+      final refreshToken = prefs.getString('refresh_token');
+
+      // If tokens exist, start the token observer
+      if (token != null && refreshToken != null && token.isNotEmpty && refreshToken.isNotEmpty) {
+        print('Tokens found, starting token refresh observer');
+        final authController = ref.read(authProvider.notifier);
+        authController.startTokenRefreshObserver();
+      } else {
+        print('No tokens found, skipping token observer initialization');
+      }
+    } catch (e) {
+      print('Error initializing token observer: $e');
+    }
   }
 
   @override

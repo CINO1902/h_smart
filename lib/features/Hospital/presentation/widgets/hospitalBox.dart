@@ -6,22 +6,21 @@ import 'package:gap/gap.dart';
 import 'package:h_smart/core/utils/appColor.dart';
 import 'package:h_smart/features/Hospital/domain/entities/GetHospital.dart';
 import 'package:h_smart/constant/AutoScrollText.dart';
+import 'package:h_smart/features/Hospital/presentation/provider/getHospitalProvider.dart';
+import 'package:h_smart/constant/snackbar.dart';
 
-class HospitalWidget extends StatelessWidget {
+class HospitalWidget extends ConsumerWidget {
   const HospitalWidget({
     super.key,
-    required this.ref,
     required this.hospital,
     this.enableHero = true,
   });
-
-  final WidgetRef ref;
 
   final Hospital hospital;
   final bool enableHero;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     const double cardHeight = 208;
     const double imageHeight = cardHeight * 0.55;
@@ -29,6 +28,7 @@ class HospitalWidget extends StatelessWidget {
       height: cardHeight,
       width: double.infinity,
       decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
         border: Border.all(color: theme.colorScheme.primary),
         borderRadius: BorderRadius.circular(16),
       ),
@@ -100,10 +100,9 @@ class HospitalWidget extends StatelessWidget {
           Expanded(
             child: Container(
               width: double.infinity,
-              margin: const EdgeInsets.only(top: 5),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
-                borderRadius: const BorderRadius.only(
+              margin: const EdgeInsets.only(top: 10),
+              decoration: const BoxDecoration(
+                borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(16),
                   bottomRight: Radius.circular(16),
                 ),
@@ -125,7 +124,10 @@ class HospitalWidget extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    // const Gap(3),
+                    const Gap(2),
+                    // Default Hospital Selection
+                    _buildDefaultHospitalSelector(context, ref, theme),
+                    const Gap(2),
                     // Location row
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -175,6 +177,94 @@ class HospitalWidget extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDefaultHospitalSelector(
+      BuildContext context, WidgetRef ref, ThemeData theme) {
+    final hospitalProvider = ref.watch(hospitalprovider);
+    final defaultHospitalResult = hospitalProvider.defaultHospitalResult;
+
+    // Check if this hospital is the default one
+    bool isDefault = false;
+    if (defaultHospitalResult.isData &&
+        defaultHospitalResult.response.payload != null &&
+        defaultHospitalResult.response.payload!.summary.hasDefault) {
+      final defaultHospital =
+          defaultHospitalResult.response.payload!.summary.defaultHospital;
+      isDefault = defaultHospital?.id == hospital.id;
+    }
+
+    // Only show for connected hospitals
+    if (hospital.isConnected != true) {
+      return const SizedBox.shrink();
+    }
+
+    return GestureDetector(
+      onTap: () async {
+        if (!isDefault) {
+          try {
+            await ref
+                .read(hospitalprovider)
+                .setDefaultHospital(hospital.id ?? '');
+            if (context.mounted) {
+              SnackBarService.showSnackBar(
+                context,
+                title: 'Success',
+                body: 'Set as default hospital successfully',
+                status: SnackbarStatus.success,
+              );
+            }
+          } catch (e) {
+            if (context.mounted) {
+              SnackBarService.showSnackBar(
+                context,
+                title: 'Error',
+                body: 'Failed to set default hospital',
+                status: SnackbarStatus.fail,
+              );
+            }
+          }
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: isDefault
+              ? AppColors.ksuccessColor300.withOpacity(0.1)
+              : theme.colorScheme.surfaceVariant.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isDefault
+                ? AppColors.ksuccessColor300.withOpacity(0.3)
+                : theme.colorScheme.outline.withOpacity(0.3),
+            width: 0.5,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isDefault ? Icons.star : Icons.star_border,
+              size: 12,
+              color: isDefault
+                  ? AppColors.ksuccessColor300
+                  : theme.colorScheme.onSurfaceVariant.withOpacity(0.6),
+            ),
+            const Gap(2),
+            Text(
+              isDefault ? 'Default' : 'Set Default',
+              style: TextStyle(
+                fontSize: 8,
+                fontWeight: FontWeight.w500,
+                color: isDefault
+                    ? AppColors.ksuccessColor300
+                    : theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

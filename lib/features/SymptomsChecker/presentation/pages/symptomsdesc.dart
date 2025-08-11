@@ -19,8 +19,8 @@ class _SymptomsDescState extends State<SymptomsDesc> {
           elevation: 0,
           titleSpacing: 0.1,
           foregroundColor: Colors.black,
-          titleTextStyle: const TextStyle(
-              color: Colors.black,
+          titleTextStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
+              color: Theme.of(context).colorScheme.onBackground,
               fontWeight: FontWeight.w600,
               fontFamily: 'Poppins'),
           title: Text(

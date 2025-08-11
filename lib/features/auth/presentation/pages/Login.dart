@@ -220,59 +220,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             const Gap(24),
 
             // Biometric login button
-            if (hasBiometricEnabled && securityState.savedEmail.isNotEmpty)
-              Container(
-                margin: const EdgeInsets.only(bottom: 24),
-                child: ElevatedButton.icon(
-                  onPressed: _onBiometricLogin,
-                  icon: Icon(
-                    biometricType == 'Face ID'
-                        ? Icons.face_outlined
-                        : biometricType == 'Touch ID'
-                            ? Icons.fingerprint_outlined
-                            : Icons.key_outlined,
-                    color: Colors.white,
-                  ),
-                  label: Text(
-                    'Sign in with $biometricType',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.kprimaryColor500,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 2,
-                  ),
-                ),
-              ),
-
-            // Divider
-            if (hasBiometricEnabled && securityState.savedEmail.isNotEmpty) ...[
-              Row(
-                children: [
-                  Expanded(child: Divider(color: Colors.grey.shade300)),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      'or',
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                  Expanded(child: Divider(color: Colors.grey.shade300)),
-                ],
-              ),
-              const Gap(24),
-            ],
+            // (Removed the old ElevatedButton.icon for biometric login)
 
             Form(
               key: _formKey,
@@ -307,11 +255,55 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                   _buildRememberAndForgot(),
                   const Gap(16),
-                  AuthButton(
-                    text: 'LOGIN',
-                    onPressed: _onLogin,
-                    isLoading: ref.watch(authProvider).loginResult.state ==
-                        LoginResultStates.isLoading,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // LOGIN button (expanded)
+                      Expanded(
+                        child: AuthButton(
+                          text: 'LOGIN',
+                          onPressed: _onLogin,
+                          isLoading:
+                              ref.watch(authProvider).loginResult.state ==
+                                  LoginResultStates.isLoading,
+                          height: 54,
+                          margin: EdgeInsets.zero,
+                        ),
+                      ),
+                      if (hasBiometricEnabled &&
+                          securityState.savedEmail.isNotEmpty)
+                        const SizedBox(width: 16),
+                      // Biometric icon button (only if enabled and credentials saved)
+                      if (hasBiometricEnabled &&
+                          securityState.savedEmail.isNotEmpty)
+                        SizedBox(
+                          width: 54,
+                          height: 54,
+                          child: OutlinedButton(
+                            onPressed: _onBiometricLogin,
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(
+                                  color: AppColors.kprimaryColor500, width: 2),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              backgroundColor: Colors.transparent,
+                              foregroundColor: AppColors.kprimaryColor500,
+                              padding: EdgeInsets.zero,
+                            ),
+                            child: Icon(
+                              biometricType == 'Face ID'
+                                  ? Icons.face_outlined
+                                  : biometricType == 'Touch ID'
+                                      ? Icons.fingerprint_outlined
+                                      : Icons.key_outlined,
+                              size: 36,
+                              color: AppColors.kprimaryColor500,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                   const Gap(16),
                   _buildRegisterLink(),

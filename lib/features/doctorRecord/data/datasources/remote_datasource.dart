@@ -4,7 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../constant/enum.dart';
 import '../../../../core/service/http_service.dart';
-import '../../domain/entities/SpecialisedDoctor.dart';
 import '../../domain/entities/mydoctor.dart';
 import '../../domain/usecases/doctorStates.dart';
 
@@ -12,28 +11,6 @@ class DoctorDatasourceImp implements DoctorDatasource {
   final HttpService httpService;
   DoctorDatasourceImp(this.httpService);
 
-  @override
-  Future<GetDoctorListResult> getDoctorList() async {
-    GetDoctorListResult getDoctorListResult = GetDoctorListResult(
-        GetDoctorListResultStates.isLoading, SpecializeDoctor());
-    final pref = await SharedPreferences.getInstance();
-    String token = pref.getString('jwt_token') ?? '';
-    httpService.header = {
-      'Authorization': 'Bearer $token',
-    };
-    final response = await httpService.request(
-      url: '/Doctor-List/',
-      methodrequest: RequestMethod.get,
-    );
-
-    if (response.statusCode == 200) {
-      final decodedres = SpecializeDoctor.fromJson(response.data);
-      getDoctorListResult =
-          GetDoctorListResult(GetDoctorListResultStates.isData, decodedres);
-    }
-
-    return getDoctorListResult;
-  }
 
   @override
   Future<List> getDoctorCategory() async {

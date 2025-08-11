@@ -22,6 +22,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/theme/theme_mode_provider.dart';
 import 'CompleteProfileWidget/EnhanceMultiSelect.dart';
 import 'CompleteProfileWidget/EnhancedDropDown.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class CompleteProfilePage extends ConsumerStatefulWidget {
   const CompleteProfilePage({Key? key}) : super(key: key);
@@ -41,11 +44,14 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
 
   DateTime _selectedDate = DateTime.now();
   bool _dateChosen = false;
-  late PhoneNumber _phoneNumber;
+  PhoneNumber _phoneNumber =
+      PhoneNumber(countryISOCode: '', countryCode: '', number: '');
   String? _selectedGender;
   String? _selectedBloodType;
   List<String> _selectedAllergies = [];
   List<String> _selectedConditions = [];
+
+  bool _showValidationErrors = false;
 
   static const _genders = ['male', 'female', 'other'];
   static const _bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
@@ -63,6 +69,9 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
     'Heart Disease',
     'None'
   ];
+
+  List<Map<String, dynamic>> _addressPredictions = [];
+  bool _isLoadingPredictions = false;
 
   @override
   void initState() {
@@ -115,6 +124,9 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
   }
 
   Future<void> _onContinue() async {
+    setState(() {
+      _showValidationErrors = true;
+    });
     print(_selectedAllergies);
     final auth = ref.read(authProvider);
     if (auth.continueRegisterResult.state ==
@@ -122,6 +134,14 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
       return;
     }
     if (!_formKey.currentState!.validate()) return;
+    if (_phoneController.text.trim().isEmpty) {
+      SnackBarService.notifyAction(
+        context,
+        message: 'Phone number is required',
+        status: SnackbarStatus.fail,
+      );
+      return;
+    }
     if (!_dateChosen) {
       SnackBarService.notifyAction(
         context,
@@ -187,6 +207,7 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
           body: message,
           status: SnackbarStatus.success,
         );
+        ref.read(authProvider).clearProfileImage();
         context.go('/profile-complete');
       } else if (result.state == ContinueRegisterResultStates.islogout) {
         ref.read(authProvider).logout();
@@ -204,6 +225,32 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
         message: 'Error uploading profile $e',
         status: SnackbarStatus.fail,
       );
+    }
+  }
+
+  Future<void> _getAddressPredictions(String input) async {
+    if (input.isEmpty) {
+      setState(() => _addressPredictions = []);
+      return;
+    }
+    setState(() => _isLoadingPredictions = true);
+    final apiKey = dotenv.env['Places-APi'];
+    final url = Uri.parse(
+      'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${Uri.encodeComponent(input)}&key=$apiKey&types=address&components=country:ng',
+    );
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      setState(() {
+        _addressPredictions =
+            List<Map<String, dynamic>>.from(data['predictions'] ?? []);
+        _isLoadingPredictions = false;
+      });
+    } else {
+      setState(() {
+        _addressPredictions = [];
+        _isLoadingPredictions = false;
+      });
     }
   }
 
@@ -347,18 +394,62 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
                                 const Gap(16),
 
                                 // Address Field
-                                AuthTextField(
-                                  controller: _addressController,
-                                  label: 'Address',
-                                  hint: 'Enter your full address',
-                                  prefixIcon: const Icon(
-                                    Icons.location_on_outlined,
-                                    color: AppColors.kprimaryColor500,
-                                  ),
-                                  validator: (value) =>
-                                      (value == null || value.isEmpty)
-                                          ? 'Address is required'
-                                          : null,
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    AuthTextField(
+                                      controller: _addressController,
+                                      label: 'Address',
+                                      hint: 'Enter your full address',
+                                      prefixIcon: const Icon(
+                                        Icons.location_on_outlined,
+                                        color: AppColors.kprimaryColor500,
+                                      ),
+                                      onChanged: _getAddressPredictions,
+                                      validator: (value) =>
+                                          (value == null || value.isEmpty)
+                                              ? 'Address is required'
+                                              : null,
+                                    ),
+                                    if (_addressPredictions.isNotEmpty)
+                                      Container(
+                                        constraints: const BoxConstraints(
+                                            maxHeight: 200),
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).cardColor,
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black
+                                                  .withOpacity(0.05),
+                                              blurRadius: 10,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: ListView.builder(
+                                          shrinkWrap: true,
+                                          itemCount: _addressPredictions.length,
+                                          itemBuilder: (context, index) {
+                                            final prediction =
+                                                _addressPredictions[index];
+                                            return ListTile(
+                                              title: Text(
+                                                  prediction['description'] ??
+                                                      ''),
+                                              onTap: () {
+                                                _addressController.text =
+                                                    prediction['description'] ??
+                                                        '';
+                                                setState(() =>
+                                                    _addressPredictions = []);
+                                              },
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                  ],
                                 ),
 
                                 const Gap(24),
@@ -388,19 +479,23 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
                                           ? 'Emergency contact name is required'
                                           : null,
                                 ),
-                                const Gap(16),
+                                const Gap(10),
 
                                 // Phone Number Field
                                 AuthPhoneField(
                                   controller: _phoneController,
                                   label: 'Phone Number',
-                                  onChanged: (number) => _phoneNumber = number,
+                                  onChanged: (number) {
+                                    setState(() {
+                                      _phoneNumber = number;
+                                    });
+                                  },
                                   hint: 'Enter your phone number',
                                   textInputAction: TextInputAction.next,
-                                  validator: (value) => (value == null ||
-                                          value.completeNumber.isEmpty)
-                                      ? 'Phone number is required'
-                                      : null,
+                                  validator: (value) =>
+                                      value == null || !value.isValidNumber()
+                                          ? 'Enter a valid phone number'
+                                          : null,
                                 ),
 
                                 const Gap(24),
@@ -417,63 +512,50 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
                                 const Gap(16),
 
                                 // Gender and Blood Type in a row
-                                Row(
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          EnhancedDropdown(
-                                            label: 'Gender *',
-                                            value: _selectedGender,
-                                            items: _genders,
-                                            onChanged: (val) => setState(
-                                                () => _selectedGender = val),
-                                          ),
-                                          if (_selectedGender == null)
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  left: 16, top: 4),
-                                              child: Text(
-                                                'Gender is required',
-                                                style: TextStyle(
-                                                  color: Colors.red[600],
-                                                  fontSize: 12,
-                                                ),
-                                              ),
-                                            ),
-                                        ],
-                                      ),
+                                    EnhancedDropdown(
+                                      label: 'Gender *',
+                                      value: _selectedGender,
+                                      items: _genders,
+                                      onChanged: (val) =>
+                                          setState(() => _selectedGender = val),
                                     ),
+                                    if (_showValidationErrors &&
+                                        _selectedGender == null)
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 16, top: 4),
+                                        child: Text(
+                                          'Gender is required',
+                                          style: TextStyle(
+                                            color: Colors.red[600],
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
                                     const Gap(16),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          EnhancedDropdown(
-                                            label: 'Blood Type *',
-                                            value: _selectedBloodType,
-                                            items: _bloodTypes,
-                                            onChanged: (val) => setState(
-                                                () => _selectedBloodType = val),
-                                          ),
-                                          if (_selectedBloodType == null)
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  left: 16, top: 4),
-                                              child: Text(
-                                                'Blood type is required',
-                                                style: TextStyle(
-                                                  color: Colors.red[600],
-                                                  fontSize: 12,
-                                                ),
-                                              ),
-                                            ),
-                                        ],
-                                      ),
+                                    EnhancedDropdown(
+                                      label: 'Blood Type *',
+                                      value: _selectedBloodType,
+                                      items: _bloodTypes,
+                                      onChanged: (val) => setState(
+                                          () => _selectedBloodType = val),
                                     ),
+                                    if (_showValidationErrors &&
+                                        _selectedBloodType == null)
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 16, top: 4),
+                                        child: Text(
+                                          'Blood type is required',
+                                          style: TextStyle(
+                                            color: Colors.red[600],
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
                                   ],
                                 ),
                                 const Gap(16),

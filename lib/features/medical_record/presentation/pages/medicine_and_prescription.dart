@@ -17,10 +17,8 @@ class MedicineAndPres extends ConsumerStatefulWidget {
 
 class _MedicineAndPresState extends ConsumerState<MedicineAndPres>
     with SingleTickerProviderStateMixin {
-  late final TabController controller = TabController(length: 2, vsync: this)
-    ..addListener(() {
-      setState(() {});
-    });
+  late final TabController controller = TabController(length: 2, vsync: this);
+
   @override
   void initState() {
     super.initState();
@@ -31,41 +29,24 @@ class _MedicineAndPresState extends ConsumerState<MedicineAndPres>
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final medicalRecord = ref.read(medicalRecordProvider);
-    // If data is already loaded, trigger an update (show loader at top)
-    if (medicalRecord.prescription.status ==
-            GetPrescriptionResultStates.success &&
-        (medicalRecord.prescription.data.payload?.isNotEmpty ?? false) &&
-        !medicalRecord.isUpdating) {
-      // This will only trigger if not already updating
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(medicalRecordProvider).getprescription();
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          centerTitle: true,
-          elevation: 0,
-          titleSpacing: 0.1,
-          // foregroundColor: Colors.black,
-          // backgroundColor: Colors.white,
-          titleTextStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: Theme.of(context).colorScheme.onBackground,
-              fontWeight: FontWeight.w600,
-              fontFamily: 'Poppins'),
-          title: const Text(
-            'Medicine & Prescription',
-            style: TextStyle(fontSize: 16),
-          )),
+        centerTitle: true,
+        elevation: 0,
+        titleSpacing: 0.1,
+        titleTextStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
+            color: Theme.of(context).colorScheme.onBackground,
+            fontWeight: FontWeight.w600,
+            fontFamily: 'Poppins'),
+        title: const Text(
+          'Medicine & Prescription',
+          style: TextStyle(fontSize: 16),
+        ),
+      ),
       body: Column(
         children: [
-          // Enhanced Tab Design
+          // Enhanced Tab Design with smooth sliding indicator
           Container(
             margin: const EdgeInsets.all(20),
             padding: const EdgeInsets.all(4),
@@ -81,21 +62,25 @@ class _MedicineAndPresState extends ConsumerState<MedicineAndPres>
                 ),
               ],
             ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => controller.animateTo(0),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        color: controller.index == 0
-                            ? AppColors.kprimaryColor500
-                            : Colors.transparent,
-                        boxShadow: controller.index == 0
-                            ? [
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final tabWidth = constraints.maxWidth / 2;
+                return Stack(
+                  children: [
+                    AnimatedBuilder(
+                      animation: controller.animation!,
+                      builder: (context, _) {
+                        final animationValue = controller.animation!.value;
+                        return Transform.translate(
+                          offset: Offset(animationValue * tabWidth, 0),
+                          child: Container(
+                            height: 40,
+                            width: tabWidth,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              color: AppColors.kprimaryColor500,
+                              boxShadow: [
                                 BoxShadow(
                                   color: AppColors.kprimaryColor500
                                       .withOpacity(0.3),
@@ -103,85 +88,90 @@ class _MedicineAndPresState extends ConsumerState<MedicineAndPres>
                                   blurRadius: 4,
                                   offset: const Offset(0, 2),
                                 ),
-                              ]
-                            : null,
-                      ),
-                      child: Center(
-                        child: Text(
-                          "Current Prescriptions",
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                            color: controller.index == 0
-                                ? Colors.white
-                                : Colors.grey[600],
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => controller.animateTo(0),
+                            child: Container(
+                              height: 40,
+                              alignment: Alignment.center,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              child: AnimatedBuilder(
+                                animation: controller.animation!,
+                                builder: (context, _) {
+                                  final value = controller.animation!.value;
+                                  return Text(
+                                    "Current Prescriptions",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                      color: value < 0.5
+                                          ? Colors.white
+                                          : Colors.grey[600],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => controller.animateTo(1),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        color: controller.index == 1
-                            ? AppColors.kprimaryColor500
-                            : Colors.transparent,
-                        boxShadow: controller.index == 1
-                            ? [
-                                BoxShadow(
-                                  color: AppColors.kprimaryColor500
-                                      .withOpacity(0.3),
-                                  spreadRadius: 1,
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ]
-                            : null,
-                      ),
-                      child: Center(
-                        child: Text(
-                          "Past Prescriptions",
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                            color: controller.index == 1
-                                ? Colors.white
-                                : Colors.grey[600],
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => controller.animateTo(1),
+                            child: Container(
+                              alignment: Alignment.center,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              child: AnimatedBuilder(
+                                animation: controller.animation!,
+                                builder: (context, _) {
+                                  final value = controller.animation!.value;
+                                  return Text(
+                                    "Past Prescriptions",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                      color: value > 0.5
+                                          ? Colors.white
+                                          : Colors.grey[600],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+                      ],
+                    )
+                  ],
+                );
+              },
             ),
           ),
+          // Tab views
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: TabBarView(
                 controller: controller,
                 children: [
-                  // Current Prescriptions Tab
                   Builder(builder: (context) {
                     final medicalRecord = ref.watch(medicalRecordProvider);
 
                     if (medicalRecord.prescription.status ==
                         GetPrescriptionResultStates.loading) {
-                      // Show shimmer loader while loading
                       return ListView.builder(
                         itemCount: 3,
                         itemBuilder: (context, index) =>
                             const _PrescriptionShimmerCard(),
                       );
                     } else if (medicalRecord.isUpdating) {
-                      // Show loader at the top, but keep showing cached prescriptions
                       return Column(
                         children: [
                           const LinearProgressIndicator(),
@@ -287,7 +277,6 @@ class _MedicineAndPresState extends ConsumerState<MedicineAndPres>
                       );
                     }
                   }),
-                  // Past Prescriptions Tab
                   Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -352,7 +341,6 @@ class _PrescriptionShimmerCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Header shimmer
           const Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -363,7 +351,6 @@ class _PrescriptionShimmerCard extends StatelessWidget {
               ],
             ),
           ),
-          // Medications shimmer
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
@@ -382,7 +369,6 @@ class _PrescriptionShimmerCard extends StatelessWidget {
             ),
           ),
           const Gap(16),
-          // Footer shimmer
           Padding(
             padding: const EdgeInsets.all(16),
             child: Row(

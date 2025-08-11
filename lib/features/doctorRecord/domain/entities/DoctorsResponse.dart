@@ -1,4 +1,4 @@
-import '../../../doctorRecord/domain/entities/Doctor.dart';
+import 'package:h_smart/features/doctorRecord/domain/entities/Doctor.dart';
 
 class DoctorsResponse {
   final List<Doctor>? doctors;

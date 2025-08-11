@@ -10,8 +10,6 @@ import '../../../domain/utils/states/postStates.dart';
 import 'reply_box.dart';
 import 'loading_reply_box.dart' as loading_reply_box;
 import 'package:h_smart/constant/SchimmerWidget.dart';
-import 'package:h_smart/features/posts/domain/entities/post.dart'
-    as post_entities;
 import 'package:h_smart/features/posts/presentation/providers/posts_provider.dart';
 
 class RealCommentBox extends ConsumerWidget {

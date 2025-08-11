@@ -193,4 +193,22 @@ class AuthDatasourceImp implements AuthDatasource {
 
     return changePasswordResult;
   }
+
+  @override
+  Future<LoginResult> ReactivateAccessToken(String token) async {
+    LoginResult loginResult =
+        LoginResult(LoginResultStates.isLoading, LoginResponse());
+
+    final response = await httpService.request(
+        url: '/auth/refresh',
+        methodrequest: RequestMethod.post,
+        data: {"refresh_token": token});
+
+    if (response.statusCode == 200) {
+      final decodedresponse = LoginResponse.fromJson(response.data);
+      loginResult = LoginResult(LoginResultStates.isData, decodedresponse);
+    }
+
+    return loginResult;
+  }
 }

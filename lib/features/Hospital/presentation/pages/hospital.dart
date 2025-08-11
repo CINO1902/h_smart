@@ -42,6 +42,19 @@ class _HospitalState extends ConsumerState<Hospital> {
     }
   }
 
+  String _getErrorMessage(HospitalResultStates state) {
+    switch (state) {
+      case HospitalResultStates.isError:
+        return 'Something went wrong. Please try again.';
+      case HospitalResultStates.isTimedOut:
+        return 'Request timed out. Please check your connection.';
+      case HospitalResultStates.noNetWork:
+        return 'No internet connection. Please check your network.';
+      default:
+        return 'An unexpected error occurred.';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -206,6 +219,55 @@ class _HospitalState extends ConsumerState<Hospital> {
                 ),
               ),
             )
+          // SEARCH ERROR STATE
+          else if (isSearching &&
+              (hospitalProv.searchResult.state ==
+                      HospitalResultStates.isError ||
+                  hospitalProv.searchResult.state ==
+                      HospitalResultStates.isTimedOut ||
+                  hospitalProv.searchResult.state ==
+                      HospitalResultStates.noNetWork))
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error_outline_rounded,
+                      size: 64,
+                      color: theme.colorScheme.error,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Search failed',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onBackground,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _getErrorMessage(hospitalProv.searchResult.state),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: theme.colorScheme.onBackground.withOpacity(0.6),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        ref
+                            .read(hospitalprovider)
+                            .searchHospital(_searchController.text);
+                      },
+                      child: const Text('Retry Search'),
+                    ),
+                  ],
+                ),
+              ),
+            )
           // NORMAL LOADING SHIMMER
           else if (!isSearching &&
               hospitalProv.hospitalResult.state ==
@@ -224,6 +286,53 @@ class _HospitalState extends ConsumerState<Hospital> {
                   childAspectRatio: 6 / 7,
                   crossAxisSpacing: 20,
                   mainAxisSpacing: 20,
+                ),
+              ),
+            )
+          // ERROR STATE
+          else if (!isSearching &&
+              (hospitalProv.hospitalResult.state ==
+                      HospitalResultStates.isError ||
+                  hospitalProv.hospitalResult.state ==
+                      HospitalResultStates.isTimedOut ||
+                  hospitalProv.hospitalResult.state ==
+                      HospitalResultStates.noNetWork))
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error_outline_rounded,
+                      size: 64,
+                      color: theme.colorScheme.error,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Failed to load hospitals',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onBackground,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _getErrorMessage(hospitalProv.hospitalResult.state),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: theme.colorScheme.onBackground.withOpacity(0.6),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        ref.read(hospitalprovider).getHospital();
+                      },
+                      child: const Text('Retry'),
+                    ),
+                  ],
                 ),
               ),
             )
@@ -276,11 +385,12 @@ class _HospitalState extends ConsumerState<Hospital> {
                           final hospital = items[idx];
                           return InkWell(
                             onTap: () {
-                              context.push('/hospital/more-detail',
-                                  extra: {"hospital": hospital});
+                              context.push('/hospital/more-detail', extra: {
+                                "hospital": hospital,
+                                "homeref": ref
+                              });
                             },
                             child: HospitalWidget(
-                              ref: ref,
                               hospital: hospital,
                             ),
                           );
@@ -291,7 +401,7 @@ class _HospitalState extends ConsumerState<Hospital> {
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
-                        childAspectRatio: 6 / 7,
+                        childAspectRatio: 6 / 8,
                         crossAxisSpacing: 20,
                         mainAxisSpacing: 20,
                       ),

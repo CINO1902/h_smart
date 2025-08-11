@@ -14,6 +14,7 @@ import 'package:h_smart/features/doctorRecord/presentation/pages/aboutDoctor.dar
 import 'package:h_smart/features/doctorRecord/presentation/pages/appointscheduled.dart';
 import 'package:h_smart/features/doctorRecord/presentation/pages/doctorDetailView.dart';
 import 'package:h_smart/features/doctorRecord/presentation/pages/rateexperience.dart';
+import 'package:h_smart/features/doctorRecord/presentation/pages/connectedHospitalDoctors.dart';
 import 'package:h_smart/features/init/initpage.dart';
 import 'package:h_smart/features/init/onboarding.dart';
 import 'package:h_smart/features/medical_record/presentation/pages/index.dart';
@@ -26,6 +27,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../features/Hospital/presentation/pages/specificHospital.dart';
 import '../features/Hospital/presentation/pages/hospital.dart';
 import '../features/Hospital/presentation/pages/viewhospistaldetail.dart';
+import '../features/Hospital/presentation/pages/DefaultHospitalSettings.dart';
 import '../features/TestAndResport/presentation/pages/report.dart';
 import '../features/auth/presentation/pages/CompleteProfile.dart'
     show CompleteProfilePage;
@@ -70,6 +72,23 @@ class AppRouter {
       final token = prefs.getString('jwt_token');
       final loc = state.matchedLocation;
       final profileCompleted = prefs.getBool('profile_completed') ?? false;
+
+      // Check if token refresh is needed for authenticated routes
+      if (token != null && token.isNotEmpty) {
+        final tokenCreatedAt = prefs.getInt('token_created_at');
+        if (tokenCreatedAt != null) {
+          final now = DateTime.now().millisecondsSinceEpoch;
+          final timeSinceTokenCreation =
+              Duration(milliseconds: now - tokenCreatedAt);
+
+          // If token has been active for more than 13 minutes, trigger token refresh
+          if (timeSinceTokenCreation > const Duration(minutes: 13)) {
+            print('Token refresh needed due to token age');
+            // The main app will handle the token refresh on startup
+            // For now, we'll let the navigation proceed and let the auth controller handle it
+          }
+        }
+      }
 
       // 1. If onboarding not seen, always go to onboarding (unless already there)
       if (!hasSeenOnboarding && loc != '/onboarding') {
@@ -229,19 +248,26 @@ class AppRouter {
           child: const indexpage(),
         ),
       ),
-      GoRoute(
-          path: '/doctor',
-          pageBuilder: (context, state) => buildPageWithDefaultTransition(
-                context: context,
-                state: state,
-                child: const Doctor(),
-              )),
+      // GoRoute(
+      //     path: '/doctor',
+      //     pageBuilder: (context, state) => buildPageWithDefaultTransition(
+      //           context: context,
+      //           state: state,
+      //           child: const Doctor(),
+      //         )),
       GoRoute(
           path: '/doctor/about',
           pageBuilder: (context, state) => buildPageWithDefaultTransition(
                 context: context,
                 state: state,
                 child: const AboutDoctor(),
+              )),
+      GoRoute(
+          path: '/connected-hospital-doctors',
+          pageBuilder: (context, state) => buildPageWithDefaultTransition(
+                context: context,
+                state: state,
+                child: const ConnectedHospitalDoctorsPage(),
               )),
       GoRoute(
           path: '/doctor/scheduled',
@@ -395,6 +421,7 @@ class AppRouter {
                 state: state,
                 child: HospitalDetailView(
                   hospital: (state.extra as Map)['hospital'],
+                  homeref:(state.extra as Map)['homeref'], 
                 ),
               )),
       GoRoute(
@@ -414,6 +441,13 @@ class AppRouter {
                 child: SpecificHospital(
                   title: (state.extra as Map)['title'],
                 ),
+              )),
+      GoRoute(
+          path: '/hospital/default-settings',
+          pageBuilder: (context, state) => buildPageWithDefaultTransition(
+                context: context,
+                state: state,
+                child: const DefaultHospitalSettings(),
               )),
       GoRoute(
         path: '/post/:id',

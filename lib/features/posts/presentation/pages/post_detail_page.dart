@@ -56,6 +56,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
         if (next.state == CreateCommentResultState.isData) {
           setState(() {
             _pendingComment = null;
+            _commentText = '';
           });
           _commentController.clear();
           SnackBarService.notifyAction(context,
@@ -81,6 +82,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
             _pendingReply = null;
             _replyToUsername = null;
             _replyingCommentId = null;
+            _commentText = '';
           });
           _commentController.clear();
           SnackBarService.notifyAction(context,
@@ -106,6 +108,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
             _pendingReplyToReply = null;
             _replyToReplyUsername = null;
             _replyingReplyId = null;
+            _commentText = '';
           });
           _commentController.clear();
           SnackBarService.notifyAction(context,

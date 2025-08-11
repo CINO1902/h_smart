@@ -21,6 +21,7 @@ abstract class AuthRepository {
   Future<SetUpHealthResult> setuphealthissues(setup);
   Future<ContinueRegisterResult> continueRegistration(
       ContinueRegistrationModel continuemodel);
+  Future<LoginResult> ReactivateAccessToken(String token);
 }
 
 class AuthRepositoryImp implements AuthRepository {
@@ -242,5 +243,26 @@ class AuthRepositoryImp implements AuthRepository {
       }
     }
     return changePasswordResult;
+  }
+
+  @override
+  Future<LoginResult> ReactivateAccessToken(String token) async {
+    LoginResult loginResult =
+        LoginResult(LoginResultStates.isLoading, LoginResponse());
+    try {
+      loginResult = await authDatasource.ReactivateAccessToken(token);
+    } catch (e) {
+      log(e.toString());
+      if (e.runtimeType == NetworkException) {
+        NetworkException exp = e as NetworkException;
+        final message = exp.errorMessage ?? e.message;
+        loginResult = LoginResult(
+            LoginResultStates.isError, LoginResponse(message: message));
+      } else {
+        loginResult = LoginResult(LoginResultStates.isError,
+            LoginResponse(message: "Something Went Wrong"));
+      }
+    }
+    return loginResult;
   }
 }

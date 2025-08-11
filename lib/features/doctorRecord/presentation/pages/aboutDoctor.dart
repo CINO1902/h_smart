@@ -5,8 +5,6 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
 import 'package:h_smart/constant/Inkbutton.dart';
-import 'package:h_smart/features/medical_record/presentation/provider/medicalRecord.dart';
-import 'package:provider/provider.dart';
 
 import '../provider/doctorprovider.dart';
 
@@ -22,7 +20,6 @@ class _AboutDoctorState extends ConsumerState<AboutDoctor> {
   void deactivate() {
     // TODO: implement deactivate
     super.deactivate();
-    ref.read(doctorprovider).ondispose();
   }
 
   @override
@@ -104,16 +101,7 @@ class _AboutDoctorState extends ConsumerState<AboutDoctor> {
                         ),
                         const Gap(5),
                         Text(
-                          ref.watch(doctorprovider).doctorclicked
-                              ? ref.watch(doctorprovider).clickdoctordescription
-                              : ref.watch(doctorprovider).mydoctorclicked
-                                  ? ref
-                                      .watch(doctorprovider)
-                                      .mydoctorlist[0]
-                                      .doctor
-                                      .specialization
-                                      .name
-                                  : 'Psychiatry',
+                          'Psychiatry',
                           style: const TextStyle(
                               fontSize: 11, fontWeight: FontWeight.w500),
                         ),
@@ -296,89 +284,63 @@ class _AboutDoctorState extends ConsumerState<AboutDoctor> {
                     ),
                   ),
                 ),
-                ref.watch(doctorprovider).doctorclicked
-                    ? InkWell(
-                        onTap: () async {
-                          await ref.watch(doctorprovider).addtoFavourite(ref
-                              .read(doctorprovider)
-                              .clickeddoctorcategory
-                              .user
-                              .id);
-                          SmartDialog.showToast(ref.watch(doctorprovider).msg);
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.only(right: 20),
-                          padding: const EdgeInsets.all(5),
-                          height: 40,
-                          width: 40,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          child: ref.watch(doctorprovider).loadfav
-                              ? SvgPicture.asset(
-                                  'images/star-favourite.svg',
-                                  color: Colors.black.withOpacity(.6),
-                                )
-                              : ref.watch(doctorprovider).favdoctorid ==
-                                      ref
-                                          .watch(doctorprovider)
-                                          .clickeddoctorcategory
-                                          .user
-                                          .id
-                                  ? SvgPicture.asset(
-                                      'images/star-favourite.svg',
-                                      color: Colors.amber.withOpacity(.8),
-                                    )
-                                  : SvgPicture.asset(
-                                      'images/favourite.svg',
-                                      color: Colors.black.withOpacity(.6),
-                                    ),
-                        ),
-                      )
-                    : ref.watch(doctorprovider).mydoctorclicked
-                        ? InkWell(
-                            onTap: () async {
-                              await ref
-                                  .read(doctorprovider)
-                                  .removefromFavourite(ref
-                                      .read(doctorprovider)
-                                      .clickeddoctorcategory
-                                      .user
-                                      .id);
-                              SmartDialog.showToast(
-                                  ref.watch(doctorprovider).msg);
-                            },
-                            child: Container(
-                              margin: const EdgeInsets.only(right: 20),
-                              padding: const EdgeInsets.all(5),
-                              height: 40,
-                              width: 40,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                              child: ref.watch(doctorprovider).loadfav
-                                  ? SvgPicture.asset(
-                                      'images/star-favourite.svg',
-                                      color: Colors.black.withOpacity(.6),
-                                    )
-                                  : ref.watch(doctorprovider).favdoctorid ==
-                                          ref
-                                              .watch(doctorprovider)
-                                              .mydoctorlist[0]
-                                              .doctor
-                                              .user
-                                              .id
-                                      ? SvgPicture.asset(
-                                          'images/star-favourite.svg',
-                                          color: Colors.amber.withOpacity(.8),
-                                        )
-                                      : SvgPicture.asset(
-                                          'images/favourite.svg',
-                                          color: Colors.black.withOpacity(.6),
-                                        ),
-                            ),
+                InkWell(
+                  onTap: () async {
+                    SmartDialog.showToast(ref.watch(doctorprovider).msg);
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(right: 20),
+                    padding: const EdgeInsets.all(5),
+                    height: 40,
+                    width: 40,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: ref.watch(doctorprovider).loadfav
+                        ? SvgPicture.asset(
+                            'images/star-favourite.svg',
+                            color: Colors.black.withOpacity(.6),
                           )
-                        : const SizedBox(),
+                        : SvgPicture.asset(
+                            'images/favourite.svg',
+                            color: Colors.black.withOpacity(.6),
+                          ),
+                  ),
+                ),
+                InkWell(
+                  onTap: () async {
+                    SmartDialog.showToast(ref.watch(doctorprovider).msg);
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(right: 20),
+                    padding: const EdgeInsets.all(5),
+                    height: 40,
+                    width: 40,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: ref.watch(doctorprovider).loadfav
+                        ? SvgPicture.asset(
+                            'images/star-favourite.svg',
+                            color: Colors.black.withOpacity(.6),
+                          )
+                        : ref.watch(doctorprovider).favdoctorid ==
+                                ref
+                                    .watch(doctorprovider)
+                                    .mydoctorlist[0]
+                                    .doctor
+                                    .user
+                                    .id
+                            ? SvgPicture.asset(
+                                'images/star-favourite.svg',
+                                color: Colors.amber.withOpacity(.8),
+                              )
+                            : SvgPicture.asset(
+                                'images/favourite.svg',
+                                color: Colors.black.withOpacity(.6),
+                              ),
+                  ),
+                )
               ],
             ),
           ),

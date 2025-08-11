@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:h_smart/features/doctorRecord/domain/entities/SpecialisedDoctor.dart';
 import 'package:h_smart/features/doctorRecord/domain/entities/mydoctor.dart';
 import 'package:h_smart/features/doctorRecord/domain/repositories/doctor_repo.dart';
 import 'package:h_smart/features/doctorRecord/domain/usecases/doctorStates.dart';
@@ -17,68 +16,14 @@ class Doctorprovider extends ChangeNotifier {
   bool mydocloading = true;
   CallMyDoctorResult callMyDoctorResult =
       CallMyDoctorResult(CallMyDoctorResultState.isLoading, Mydoctor());
-  List<Payload> doctorcategory = [];
-  List<Payload> categorydoc = [];
   String favdoctorid = '';
   List<PayloadDoc> mydoctorlist = [];
-  String clickdoctordescription = '';
-  bool doctorclicked = false;
-  bool mydoctorclicked = false;
-  Doctor clickeddoctorcategory = Doctor(
-      firstName: '',
-      lastName: '',
-      phoneNumber: '',
-      bio: '',
-      docProfilePicture: '',
-      user: User(id: '', email: ''));
-  void calldoctorlist() async {
-    loading = true;
-    await doctorRepository.getDoctorList();
-    loading = false;
-  }
 
-  void searchbook(String query) {
-    print(query);
-    final suggestion = categorydoc.where((element) {
-      final symptoms = element.name.toLowerCase();
-      final input = query.toLowerCase();
 
-      return symptoms.contains(input);
-    }).toList();
 
-    doctorcategory = suggestion;
-    print(doctorcategory);
 
-    notifyListeners();
-  }
 
-  void calldoctorcatergory() async {
-    error = false;
-    final response = await doctorRepository.getDoctorCategory();
-    loading = false;
-    if (response[0].contains('1')) {
-      error = true;
-    } else {
-      error = false;
 
-      final decodedres =
-          SpecializeDoctor.fromJson(response[1] as Map<String, dynamic>);
-
-      categorydoc = decodedres.payload!;
-      doctorcategory = categorydoc;
-    }
-    notifyListeners();
-  }
-
-  void getclickeddoctor(index1, index2) {
-    doctorclicked = true;
-    clickdoctordescription = doctorcategory[index1].name;
-    clickeddoctorcategory = doctorcategory[index1].doctors[index2];
-  }
-
-  void actionmydoctorclicked() {
-    mydoctorclicked = true;
-  }
 
   Future<void> addtoFavourite(doctorid) async {
     loadfav = true;
@@ -119,10 +64,6 @@ class Doctorprovider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void ondispose() {
-    doctorclicked = false;
-    mydoctorclicked = false;
-  }
 
   Future<void> callmydoctor() async {
     callMyDoctorResult =

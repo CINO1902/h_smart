@@ -7,29 +7,42 @@ import 'dart:convert';
 GetHospital getHospitalFromJson(String str) =>
     GetHospital.fromJson(json.decode(str));
 
+String getHospitalToJson(GetHospital data) => json.encode(data.toJson());
+
 class GetHospital {
+  bool? error;
+  String? message;
   Payload? payload;
-  String? status;
 
   GetHospital({
+    this.error,
+    this.message,
     this.payload,
-    this.status,
   });
 
   GetHospital copyWith({
+    bool? error,
+    String? message,
     Payload? payload,
-    String? status,
   }) =>
       GetHospital(
+        error: error ?? this.error,
+        message: message ?? this.message,
         payload: payload ?? this.payload,
-        status: status ?? this.status,
       );
 
   factory GetHospital.fromJson(Map<String, dynamic> json) => GetHospital(
+        error: json["error"],
+        message: json["message"],
         payload:
             json["payload"] == null ? null : Payload.fromJson(json["payload"]),
-        status: json["status"],
       );
+
+  Map<String, dynamic> toJson() => {
+        "error": error,
+        "message": message,
+        "payload": payload?.toJson(),
+      };
 }
 
 class Payload {
@@ -59,6 +72,13 @@ class Payload {
             ? null
             : Pagination.fromJson(json["pagination"]),
       );
+
+  Map<String, dynamic> toJson() => {
+        "hospitals": hospitals == null
+            ? []
+            : List<dynamic>.from(hospitals!.map((x) => x.toJson())),
+        "pagination": pagination?.toJson(),
+      };
 }
 
 class Hospital {
@@ -75,6 +95,7 @@ class Hospital {
   String? hospitalsCoverImage;
   int? icuBeds;
   String? id;
+  bool? isConnected;
   String? licenseNumber;
   String? logo;
   int? operationTheaters;
@@ -102,6 +123,7 @@ class Hospital {
     this.hospitalsCoverImage,
     this.icuBeds,
     this.id,
+    this.isConnected,
     this.licenseNumber,
     this.logo,
     this.operationTheaters,
@@ -130,6 +152,7 @@ class Hospital {
     String? hospitalsCoverImage,
     int? icuBeds,
     String? id,
+    bool? isConnected,
     String? licenseNumber,
     String? logo,
     int? operationTheaters,
@@ -157,6 +180,7 @@ class Hospital {
         hospitalsCoverImage: hospitalsCoverImage ?? this.hospitalsCoverImage,
         icuBeds: icuBeds ?? this.icuBeds,
         id: id ?? this.id,
+        isConnected: isConnected ?? this.isConnected,
         licenseNumber: licenseNumber ?? this.licenseNumber,
         logo: logo ?? this.logo,
         operationTheaters: operationTheaters ?? this.operationTheaters,
@@ -189,6 +213,7 @@ class Hospital {
         hospitalsCoverImage: json["hospitals_cover_image"],
         icuBeds: json["icu_beds"],
         id: json["id"],
+        isConnected: json["is_connected"],
         licenseNumber: json["license_number"],
         logo: json["logo"],
         operationTheaters: json["operation_theaters"],
@@ -204,43 +229,86 @@ class Hospital {
             : DateTime.parse(json["updated_at"]),
         zipcode: json["zipcode"],
       );
+
+  Map<String, dynamic> toJson() => {
+        "admin_email": adminEmail,
+        "admin_first_name": adminFirstName,
+        "admin_last_name": adminLastName,
+        "admin_phone": adminPhone,
+        "city": city,
+        "country": country,
+        "created_at": createdAt?.toIso8601String(),
+        "email": email,
+        "facilities": facilities == null
+            ? []
+            : List<dynamic>.from(facilities!.map((x) => x)),
+        "hospital_name": hospitalName,
+        "hospitals_cover_image": hospitalsCoverImage,
+        "icu_beds": icuBeds,
+        "id": id,
+        "is_connected": isConnected,
+        "license_number": licenseNumber,
+        "logo": logo,
+        "operation_theaters": operationTheaters,
+        "ownershiptype": ownershiptype,
+        "phone": phone,
+        "registration_number": registrationNumber,
+        "state": state,
+        "status": status,
+        "street": street,
+        "total_beds": totalBeds,
+        "updated_at": updatedAt?.toIso8601String(),
+        "zipcode": zipcode,
+      };
 }
 
 class Pagination {
+  int? connectedCount;
   int? currentPage;
+  int? notConnectedCount;
   int? perPage;
   int? totalCount;
   int? totalPages;
 
   Pagination({
+    this.connectedCount,
     this.currentPage,
+    this.notConnectedCount,
     this.perPage,
     this.totalCount,
     this.totalPages,
   });
 
   Pagination copyWith({
+    int? connectedCount,
     int? currentPage,
+    int? notConnectedCount,
     int? perPage,
     int? totalCount,
     int? totalPages,
   }) =>
       Pagination(
+        connectedCount: connectedCount ?? this.connectedCount,
         currentPage: currentPage ?? this.currentPage,
+        notConnectedCount: notConnectedCount ?? this.notConnectedCount,
         perPage: perPage ?? this.perPage,
         totalCount: totalCount ?? this.totalCount,
         totalPages: totalPages ?? this.totalPages,
       );
 
   factory Pagination.fromJson(Map<String, dynamic> json) => Pagination(
+        connectedCount: json["connected_count"],
         currentPage: json["current_page"],
+        notConnectedCount: json["not_connected_count"],
         perPage: json["per_page"],
         totalCount: json["total_count"],
         totalPages: json["total_pages"],
       );
 
   Map<String, dynamic> toJson() => {
+        "connected_count": connectedCount,
         "current_page": currentPage,
+        "not_connected_count": notConnectedCount,
         "per_page": perPage,
         "total_count": totalCount,
         "total_pages": totalPages,

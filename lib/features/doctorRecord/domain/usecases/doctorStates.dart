@@ -1,4 +1,3 @@
-import '../entities/SpecialisedDoctor.dart';
 import '../entities/mydoctor.dart';
 
 class CallMyDoctorResult {
@@ -9,15 +8,6 @@ class CallMyDoctorResult {
 }
 
 enum CallMyDoctorResultState { isLoading, isError, isData, idle }
-
-class GetDoctorListResult {
-  final GetDoctorListResultStates state;
-  final SpecializeDoctor response;
-
-  GetDoctorListResult(this.state, this.response);
-}
-
-enum GetDoctorListResultStates { isLoading, isError, isData, idle }
 
 // class CallMyDoctorResult {
 //   final CallMyDoctorResultState state;

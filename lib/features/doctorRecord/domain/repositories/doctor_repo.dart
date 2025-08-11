@@ -4,11 +4,9 @@ import 'package:h_smart/features/doctorRecord/data/repositories/doctorRepo.dart'
 import 'package:h_smart/features/doctorRecord/domain/entities/mydoctor.dart';
 
 import '../../../../core/exceptions/network_exception.dart';
-import '../entities/SpecialisedDoctor.dart';
 import '../usecases/doctorStates.dart';
 
 abstract class DoctorRepository {
-  Future<GetDoctorListResult> getDoctorList();
   Future<List<dynamic>> getDoctorCategory();
   Future<List<dynamic>> addtofav(id);
   Future<CallMyDoctorResult> mydoctor();
@@ -20,28 +18,7 @@ class DoctorRepoImpl implements DoctorRepository {
 
   DoctorRepoImpl(this.doctorDatasource);
 
-  @override
-  Future<GetDoctorListResult> getDoctorList() async {
-    GetDoctorListResult getDoctorListResult = GetDoctorListResult(
-        GetDoctorListResultStates.isLoading, SpecializeDoctor());
 
-    try {
-      getDoctorListResult = await doctorDatasource.getDoctorList();
-    } catch (e) {
-      log(e.toString());
-      if (e.runtimeType == NetworkException) {
-        NetworkException exp = e as NetworkException;
-        getDoctorListResult = GetDoctorListResult(
-            GetDoctorListResultStates.isError,
-            SpecializeDoctor(message: exp.errorMessage));
-      } else {
-        getDoctorListResult = GetDoctorListResult(
-            GetDoctorListResultStates.isError,
-            SpecializeDoctor(message: "Something went wrong"));
-      }
-    }
-    return getDoctorListResult;
-  }
 
   @override
   Future<List> getDoctorCategory() async {
