@@ -1,5 +1,6 @@
-
 import 'package:h_smart/features/doctorRecord/data/repositories/doctorRepo.dart';
+import 'package:h_smart/features/doctorRecord/domain/entities/doctorBooking.dart';
+import 'package:h_smart/features/doctorRecord/domain/entities/appointmentBooking.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../constant/enum.dart';
@@ -11,65 +12,14 @@ class DoctorDatasourceImp implements DoctorDatasource {
   final HttpService httpService;
   DoctorDatasourceImp(this.httpService);
 
-
-  @override
-  Future<List> getDoctorCategory() async {
-    String result = '';
-
-    List<dynamic> returnvalue = [];
-
-    final response = await httpService.request(
-      url: '/Specialization-Operation/',
-      methodrequest: RequestMethod.get,
-    );
-
-    if (response.statusCode == 200) {
-      result = '2';
-
-      returnvalue.add(result);
-      returnvalue.add(response.data);
-    }
-
-    return returnvalue;
-  }
-
-  @override
-  Future<List> addtofav(id) async {
-    String result = '';
-
-    List<dynamic> returnvalue = [];
-    final pref = await SharedPreferences.getInstance();
-    String token = pref.getString('jwt_token') ?? '';
-    httpService.header = {
-      'Authorization': 'Bearer $token',
-    };
-    final response = await httpService.request(
-        url: '/my-doctor/',
-        methodrequest: RequestMethod.post,
-        data: {'doctor': id});
-
-    if (response.statusCode == 201) {
-      result = '2';
-
-      returnvalue.add(result);
-      returnvalue.add(response.data);
-    }
-
-    return returnvalue;
-  }
-
   @override
   Future<CallMyDoctorResult> mydoctor() async {
     CallMyDoctorResult callMyDoctorResult =
         CallMyDoctorResult(CallMyDoctorResultState.isLoading, Mydoctor());
-    final pref = await SharedPreferences.getInstance();
-    String token = pref.getString('jwt_token') ?? '';
-    httpService.header = {
-      'Authorization': 'Bearer $token',
-    };
+
     final response = await httpService.request(
       url: '/my/doctor/',
-      methodrequest: RequestMethod.get,
+      methodrequest: RequestMethod.getWithToken,
     );
 
     if (response.statusCode == 200) {
@@ -86,27 +36,58 @@ class DoctorDatasourceImp implements DoctorDatasource {
   }
 
   @override
-  Future<List> removefav(id) async {
-    String result = '';
-
-    List<dynamic> returnvalue = [];
-    final pref = await SharedPreferences.getInstance();
-    String token = pref.getString('jwt_token') ?? '';
-    httpService.header = {
-      'Authorization': 'Bearer $token',
-    };
+  Future<DoctorBookingResult> getdoctorBookings(String doctorId) async {
+    DoctorBookingResult doctorBookingResult = DoctorBookingResult(
+        DoctorBookingResultState.isLoading, DoctorBooking());
     final response = await httpService.request(
-      url: '/my/doctor/$id/',
-      methodrequest: RequestMethod.delete,
+      url: '/doctor-appointments/user/$doctorId',
+      methodrequest: RequestMethod.getWithToken,
     );
-
-    if (response.statusCode == 204) {
-      result = '2';
-
-      returnvalue.add(result);
-      returnvalue.add(response.data);
+    print(response.data);
+    if (response.statusCode == 200) {
+      final decodedresponse = DoctorBooking.fromJson(response.data);
+      doctorBookingResult =
+          DoctorBookingResult(DoctorBookingResultState.isData, decodedresponse);
     }
+    return doctorBookingResult;
+  }
 
-    return returnvalue;
+  @override
+  Future<AppointmentBookingResult> bookAppointment(AppointmentBookingRequest request) async {
+    AppointmentBookingResult appointmentBookingResult = AppointmentBookingResult(
+        AppointmentBookingResultState.isLoading, 
+        AppointmentBookingResponse(
+          data: AppointmentBookingData(
+            id: '', doctorId: '', userId: '', reason: '', type: '', 
+            status: '', slotBookedStartTime: '', slotBookedEndTime: '', 
+            createdAt: '', updatedAt: ''
+          ), 
+          message: ''
+        ));
+    
+    final response = await httpService.request(
+      url: '/doctor-bookings',
+      methodrequest: RequestMethod.postWithToken,
+      data: request.toJson(),
+    );
+    
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final decodedresponse = AppointmentBookingResponse.fromJson(response.data);
+      appointmentBookingResult = AppointmentBookingResult(
+          AppointmentBookingResultState.isData, decodedresponse);
+    } else {
+      appointmentBookingResult = AppointmentBookingResult(
+          AppointmentBookingResultState.isError, 
+          AppointmentBookingResponse(
+            data: AppointmentBookingData(
+              id: '', doctorId: '', userId: '', reason: '', type: '', 
+              status: '', slotBookedStartTime: '', slotBookedEndTime: '', 
+              createdAt: '', updatedAt: ''
+            ), 
+            message: response.data['message'] ?? 'Failed to book appointment'
+          ));
+    }
+    
+    return appointmentBookingResult;
   }
 }

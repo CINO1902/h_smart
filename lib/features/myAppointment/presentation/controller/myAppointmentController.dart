@@ -97,7 +97,7 @@ class Mydashprovider extends ChangeNotifier {
 
       final jsonMap = jsonDecode(responseBody) as Map<String, dynamic>;
       final returnedUrl = jsonMap['payload']['file_url'] as String?;
-
+      image = null;
       updateImageUrl = returnedUrl;
       if (returnedUrl == null) {
         throw Exception('Upload succeeded but no URL returned');

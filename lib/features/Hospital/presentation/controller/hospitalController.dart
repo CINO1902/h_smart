@@ -216,6 +216,9 @@ class GetHospitalProvider extends ChangeNotifier {
         }
         return hospital;
       }).toList();
+      
+      // Refresh default hospital data after successful disconnection
+      await getDefaultHospital();
     }
 
     disconnectFromHospitalResult = response;

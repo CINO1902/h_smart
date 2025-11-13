@@ -3,6 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:h_smart/features/doctorRecord/domain/entities/Doctor.dart';
+import 'package:h_smart/features/doctorRecord/domain/usecases/doctorStates.dart';
+import '../widgets/doctor_info_row.dart';
+import '../widgets/qualification_item.dart';
+import '../widgets/time_slot.dart';
+import '../widgets/digital_clock_selector.dart';
+import '../provider/doctorprovider.dart';
 
 class DoctorDetailView extends ConsumerStatefulWidget {
   final Doctor doctor;
@@ -30,6 +36,9 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
   late AnimationController _calendarAnimationController;
   late Animation<double> _calendarAnimation;
 
+  // Availability slots will be loaded from API
+  List<AvailabilitySlot> _availabilitySlots = [];
+
   @override
   void initState() {
     super.initState();
@@ -55,8 +64,45 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
             });
           }
         });
+        // Load doctor bookings when page opens
+        _loadDoctorBookings();
       }
     });
+  }
+
+  Future<void> _loadDoctorBookings() async {
+    final doctorProvider = ref.read(doctorprovider);
+    await doctorProvider.getdoctorBookings(widget.doctor.userId ?? '');
+    _convertBookingDataToAvailabilitySlots();
+  }
+
+  void _convertBookingDataToAvailabilitySlots() {
+    final doctorProvider = ref.read(doctorprovider);
+    final bookingResult = doctorProvider.doctorBookingResult;
+
+    if (bookingResult.state == DoctorBookingResultState.isData &&
+        bookingResult.response.data != null) {
+      setState(() {
+        _availabilitySlots = bookingResult.response.data!.map((bookingData) {
+          return AvailabilitySlot(
+            id: bookingData.id ?? '',
+            dayOfWeek: bookingData.dayOfWeek ?? '',
+            startTime: bookingData.startTime ?? [],
+            endTime: bookingData.endTime ?? [],
+            sessionTime: bookingData.sessionTime ?? '1 hour',
+            allowslotbetweenbreak: bookingData.allowslotbetweenbreak ?? false,
+            chosenTime: [], // No chosen time initially
+            doctorName: bookingData.doctorName ?? widget.doctor.fullName,
+            hospitalName: bookingData.hospitalName ?? '',
+          );
+        }).toList();
+      });
+    } else {
+      // If no booking data available, show empty slots or default message
+      setState(() {
+        _availabilitySlots = [];
+      });
+    }
   }
 
   @override
@@ -115,6 +161,116 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
       _borderRadius = newBorderRadius;
       _titleOpacity = newTitleOpacity;
     });
+  }
+
+  Widget _buildBookingContent(ThemeData theme) {
+    final doctorProvider = ref.watch(doctorprovider);
+    final bookingResult = doctorProvider.doctorBookingResult;
+
+    if (bookingResult.state == DoctorBookingResultState.isLoading) {
+      return const Padding(
+        padding: EdgeInsets.all(40),
+        child: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (bookingResult.state == DoctorBookingResultState.isError) {
+      return Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 48,
+              color: theme.colorScheme.error,
+            ),
+            const Gap(16),
+            Text(
+              'Failed to load booking information',
+              style: TextStyle(
+                fontSize: 16,
+                color: theme.colorScheme.error,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const Gap(8),
+            Text(
+              bookingResult.response.message ?? 'Please try again later',
+              style: TextStyle(
+                fontSize: 14,
+                color: theme.colorScheme.onSurface.withOpacity(0.6),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const Gap(16),
+            ElevatedButton(
+              onPressed: _loadDoctorBookings,
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_availabilitySlots.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            Icon(
+              Icons.calendar_today_outlined,
+              size: 48,
+              color: theme.colorScheme.onSurface.withOpacity(0.5),
+            ),
+            const Gap(16),
+            Text(
+              'No booking slots available',
+              style: TextStyle(
+                fontSize: 16,
+                color: theme.colorScheme.onSurface,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const Gap(8),
+            Text(
+              'This doctor currently has no available booking slots. Please check back later or contact the hospital directly.',
+              style: TextStyle(
+                fontSize: 14,
+                color: theme.colorScheme.onSurface.withOpacity(0.6),
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        mainAxisExtent: 90,
+      ),
+      itemCount: 8,
+      itemBuilder: (context, index) {
+        final time = DateTime.now().add(Duration(days: index));
+        return TimeSlot(
+          date: time,
+          theme: theme,
+          onTimeSlotTap: () {},
+          doctor: widget.doctor,
+          availableSlots: _availabilitySlots,
+        );
+      },
+    );
   }
 
   @override
@@ -229,24 +385,7 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
                                 ],
                               ),
                             ),
-                            GridView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              padding: const EdgeInsets.all(16),
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                crossAxisSpacing: 16,
-                                mainAxisSpacing: 16,
-                                mainAxisExtent: 90,
-                              ),
-                              itemCount: 8,
-                              itemBuilder: (context, index) {
-                                final time =
-                                    DateTime.now().add(Duration(days: index));
-                                return _buildTimeSlot(time, theme);
-                              },
-                            ),
+                            _buildBookingContent(theme),
                           ],
                         ),
                       )
@@ -302,11 +441,17 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
                                   ),
                                 ),
                                 const Gap(12),
-                                _buildInfoRow(Icons.email,
-                                    widget.doctor.email ?? 'N/A', theme),
+                                DoctorInfoRow(
+                                  icon: Icons.email,
+                                  text: widget.doctor.email ?? 'N/A',
+                                  theme: theme,
+                                ),
                                 const Gap(8),
-                                _buildInfoRow(Icons.phone,
-                                    widget.doctor.phone ?? 'N/A', theme),
+                                DoctorInfoRow(
+                                  icon: Icons.phone,
+                                  text: widget.doctor.phone ?? 'N/A',
+                                  theme: theme,
+                                ),
                               ],
                             ),
                           ),
@@ -340,16 +485,17 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
                                   ),
                                 ),
                                 const Gap(12),
-                                _buildQualificationItem(
-                                  'Medical Degree',
-                                  widget.doctor.qualification ?? 'N/A',
-                                  theme,
+                                QualificationItem(
+                                  title: 'Medical Degree',
+                                  value: widget.doctor.qualification ?? 'N/A',
+                                  theme: theme,
                                 ),
                                 const Gap(8),
-                                _buildQualificationItem(
-                                  'Experience',
-                                  '${widget.doctor.experienceYears ?? 0} years',
-                                  theme,
+                                QualificationItem(
+                                  title: 'Experience',
+                                  value:
+                                      '${widget.doctor.experienceYears ?? 0} years',
+                                  theme: theme,
                                 ),
                               ],
                             ),
@@ -440,460 +586,6 @@ class _DoctorDetailViewState extends ConsumerState<DoctorDetailView>
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildInfoRow(IconData icon, String text, ThemeData theme) {
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: theme.colorScheme.primary),
-        const Gap(12),
-        Expanded(
-          child: Text(
-            text,
-            style: TextStyle(
-              fontSize: 14,
-              color: theme.colorScheme.onSurface.withOpacity(0.7),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildQualificationItem(String title, String value, ThemeData theme) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const Gap(4),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTimeSlot(DateTime date, ThemeData theme) {
-    final isToday = date.day == DateTime.now().day;
-    final isWeekend =
-        date.weekday == DateTime.saturday || date.weekday == DateTime.sunday;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: isToday
-            ? theme.colorScheme.primary.withOpacity(0.1)
-            : theme.colorScheme.surfaceVariant,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isToday
-              ? theme.colorScheme.primary
-              : theme.colorScheme.outline.withOpacity(0.2),
-          width: isToday ? 2 : 1,
-        ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            if (!isWeekend) {
-              _showTimeSelectionDialog(context, date, theme);
-            }
-          },
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      _getDayName(date.weekday),
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: isToday
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurfaceVariant,
-                        fontSize: 14,
-                      ),
-                    ),
-                    if (isToday)
-                      Container(
-                        margin: const EdgeInsets.only(left: 6),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primary,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          'Today',
-                          style: TextStyle(
-                            color: theme.colorScheme.onPrimary,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                const Gap(4),
-                Text(
-                  '${date.day} ${_getMonthName(date.month)}',
-                  style: TextStyle(
-                    color: isWeekend
-                        ? theme.colorScheme.onSurfaceVariant.withOpacity(0.5)
-                        : theme.colorScheme.onSurfaceVariant,
-                    fontSize: 12,
-                  ),
-                ),
-                const Gap(4),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: isWeekend
-                        ? theme.colorScheme.surface
-                        : theme.colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    isWeekend ? 'Not Available' : 'Available',
-                    style: TextStyle(
-                      color: isWeekend
-                          ? theme.colorScheme.onSurface
-                          : theme.colorScheme.onPrimaryContainer,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _getDayName(int weekday) {
-    switch (weekday) {
-      case DateTime.monday:
-        return 'Mon';
-      case DateTime.tuesday:
-        return 'Tue';
-      case DateTime.wednesday:
-        return 'Wed';
-      case DateTime.thursday:
-        return 'Thu';
-      case DateTime.friday:
-        return 'Fri';
-      case DateTime.saturday:
-        return 'Sat';
-      case DateTime.sunday:
-        return 'Sun';
-      default:
-        return '';
-    }
-  }
-
-  String _getMonthName(int month) {
-    switch (month) {
-      case 1:
-        return 'Jan';
-      case 2:
-        return 'Feb';
-      case 3:
-        return 'Mar';
-      case 4:
-        return 'Apr';
-      case 5:
-        return 'May';
-      case 6:
-        return 'Jun';
-      case 7:
-        return 'Jul';
-      case 8:
-        return 'Aug';
-      case 9:
-        return 'Sep';
-      case 10:
-        return 'Oct';
-      case 11:
-        return 'Nov';
-      case 12:
-        return 'Dec';
-      default:
-        return '';
-    }
-  }
-
-  void _showTimeSelectionDialog(
-      BuildContext context, DateTime date, ThemeData theme) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) => Container(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.7,
-        ),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.background,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              margin: const EdgeInsets.only(top: 8),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Select Time for ${_getDayName(date.weekday)}, ${date.day} ${_getMonthName(date.month)}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const Gap(20),
-                  _DigitalClockSelector(
-                    onTimeSelected: (time) {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Appointment booked for $time'),
-                          duration: const Duration(seconds: 2),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DigitalClockSelector extends StatefulWidget {
-  final Function(String) onTimeSelected;
-
-  const _DigitalClockSelector({required this.onTimeSelected});
-
-  @override
-  State<_DigitalClockSelector> createState() => _DigitalClockSelectorState();
-}
-
-class _DigitalClockSelectorState extends State<_DigitalClockSelector> {
-  int _selectedHour = 9;
-  int _selectedMinute = 0;
-  String _period = 'AM';
-  bool _isHourSelected = true;
-
-  void _updateTime() {
-    setState(() {
-      if (_isHourSelected) {
-        _selectedHour = (_selectedHour % 12) + 1;
-      } else {
-        _selectedMinute = (_selectedMinute + 15) % 60;
-      }
-    });
-  }
-
-  void _togglePeriod() {
-    setState(() {
-      _period = _period == 'AM' ? 'PM' : 'AM';
-    });
-  }
-
-  void _toggleSelection() {
-    setState(() {
-      _isHourSelected = !_isHourSelected;
-    });
-  }
-
-  String _getFormattedTime() {
-    final hour = _selectedHour > 12 ? _selectedHour - 12 : _selectedHour;
-    final minute = _selectedMinute.toString().padLeft(2, '0');
-    return '$hour:$minute $_period';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        GestureDetector(
-          onTap: _toggleSelection,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildTimePart(
-                  _selectedHour.toString(),
-                  _isHourSelected,
-                  'HOUR',
-                ),
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 20),
-                  child: Text(
-                    ':',
-                    style: TextStyle(
-                      fontSize: 40,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue,
-                    ),
-                  ),
-                ),
-                _buildTimePart(
-                  _selectedMinute.toString().padLeft(2, '0'),
-                  !_isHourSelected,
-                  'MIN',
-                ),
-                const SizedBox(width: 10),
-                GestureDetector(
-                  onTap: _togglePeriod,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      _period,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const Gap(20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: _updateTime,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 30,
-                  vertical: 15,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: Text(
-                _isHourSelected ? 'Change Hour' : 'Change Minute',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            const Gap(20),
-            ElevatedButton(
-              onPressed: () => widget.onTimeSelected(_getFormattedTime()),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 30,
-                  vertical: 15,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text(
-                'Confirm',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTimePart(String value, bool isSelected, String label) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 40,
-            fontWeight: FontWeight.bold,
-            color: isSelected ? Colors.blue : Colors.grey,
-          ),
-        ),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: isSelected ? Colors.blue : Colors.grey,
-          ),
-        ),
-      ],
     );
   }
 }

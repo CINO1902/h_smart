@@ -1,8 +1,8 @@
 import '../../domain/usecases/doctorStates.dart';
+import '../../domain/entities/appointmentBooking.dart';
 
 abstract class DoctorDatasource {
-  Future<List<dynamic>> getDoctorCategory();
-  Future<List<dynamic>> addtofav(id);
+  Future<DoctorBookingResult> getdoctorBookings(String doctorId);
   Future<CallMyDoctorResult> mydoctor();
-  Future<List<dynamic>> removefav(id);
+  Future<AppointmentBookingResult> bookAppointment(AppointmentBookingRequest request);
 }

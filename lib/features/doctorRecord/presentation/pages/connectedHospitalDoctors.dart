@@ -9,8 +9,16 @@ import 'package:h_smart/features/doctorRecord/domain/entities/Doctor.dart';
 import 'package:h_smart/features/Hospital/domain/entities/GetHospital.dart';
 import 'package:h_smart/features/Hospital/domain/states/hospitalStates.dart';
 import 'package:h_smart/features/Hospital/presentation/provider/getHospitalProvider.dart';
-
 import 'package:h_smart/features/Hospital/presentation/controller/hospitalController.dart';
+
+// Import separated widgets
+import '../widgets/connected_hospital_header.dart';
+import '../widgets/doctor_search_field.dart';
+import '../widgets/doctor_card.dart';
+import '../widgets/no_connected_hospital_view.dart';
+import '../widgets/hospital_shimmer.dart';
+import '../widgets/doctors_error_state.dart';
+import '../widgets/doctors_empty_state.dart';
 
 class ConnectedHospitalDoctorsPage extends ConsumerStatefulWidget {
   const ConnectedHospitalDoctorsPage({super.key});
@@ -51,6 +59,20 @@ class _ConnectedHospitalDoctorsPageState
       _hasNavigatedAway = false;
       _refreshData();
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Listen for changes in hospital provider and refresh if needed
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final hospitalProvider = ref.read(hospitalprovider);
+      // Check if disconnection was successful and refresh data
+      if (hospitalProvider.disconnectFromHospitalResult.state == 
+          DisconnectFromHospitalResultStates.isData) {
+        _refreshData();
+      }
+    });
   }
 
   Future<void> _loadDefaultHospitalAndDoctors() async {
@@ -142,7 +164,7 @@ class _ConnectedHospitalDoctorsPageState
       ThemeData theme) {
     // Check if we're loading the default hospital
     if (hospitalProvider.defaultHospitalResult.isLoading) {
-      return _buildHospitalShimmer();
+      return const HospitalShimmer();
     }
 
     // Check if there's an error getting default hospital
@@ -163,8 +185,7 @@ class _ConnectedHospitalDoctorsPageState
             ),
             const Gap(8),
             Text(
-              hospitalProvider.defaultHospitalResult.response.message ??
-                  'Unknown error',
+              hospitalProvider.defaultHospitalResult.response.message,
               style: TextStyle(
                 fontSize: 14,
                 color: theme.colorScheme.onSurface.withOpacity(0.7),
@@ -205,11 +226,46 @@ class _ConnectedHospitalDoctorsPageState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Gap(20),
-                _buildConnectedHospitalHeader(theme),
+                ConnectedHospitalHeader(
+                  connectedHospital: connectedHospital!,
+                  ref: ref,
+                ),
                 const Gap(20),
-                _buildSearchField(theme),
+                DoctorSearchField(
+                  onChanged: _filterDoctors,
+                ),
                 const Gap(20),
-                Expanded(child: _buildDoctorsList(hospitalProvider, theme)),
+                Expanded(
+                  child: hospitalProvider.doctorResult.state == DoctorResultStates.isLoading
+                      ? const DoctorsListShimmer()
+                      : hospitalProvider.doctorResult.state == DoctorResultStates.isError
+                          ? DoctorsErrorState(
+                              onRetry: () {
+                                if (connectedHospital != null) {
+                                  ref
+                                      .read(hospitalprovider)
+                                      .callDoctorsbyhospitalid(connectedHospital!.id);
+                                }
+                              },
+                            )
+                          : filteredDoctors.isEmpty
+                              ? DoctorsEmptyState(
+                                  isSearching: searchQuery.isNotEmpty,
+                                )
+                              : ListView.builder(
+                                  itemCount: filteredDoctors.length,
+                                  itemBuilder: (context, index) {
+                                    final doctor = filteredDoctors[index];
+                                    return DoctorCard(
+                                      doctor: doctor,
+                                      onTap: () {
+                                        _hasNavigatedAway = true;
+                                        context.push('/doctorProfile', extra: doctor);
+                                      },
+                                    );
+                                  },
+                                ),
+                ),
               ],
             ),
           ),
@@ -218,523 +274,35 @@ class _ConnectedHospitalDoctorsPageState
     }
 
     // No connected hospital
-    return _buildNoConnectedHospitalView(context, theme);
-  }
-
-  Widget _buildNoConnectedHospitalView(BuildContext context, ThemeData theme) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: theme.colorScheme.shadow.withOpacity(0.1),
-                    blurRadius: 20,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.local_hospital_outlined,
-                    size: 80,
-                    color: theme.colorScheme.primary,
-                  ),
-                  const Gap(20),
-                  Text(
-                    'No Connected Hospital',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const Gap(12),
-                  Text(
-                    'You need to connect to a hospital first to view their doctors and book appointments.',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: theme.colorScheme.onSurface.withOpacity(0.7),
-                      height: 1.5,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const Gap(32),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        _hasNavigatedAway = true;
-                        await context.push('/hospital');
-                        // Refresh data when returning from hospital browsing
-                        _refreshData();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.kprimaryColor500,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: const Text(
-                        'Browse Hospitals',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildConnectedHospitalHeader(ThemeData theme) {
-    return GestureDetector(
-      onTap: () {
-        context.push('/hospital/more-detail',
-            extra: {"hospital": connectedHospital, "homeref": ref});
-      },
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: theme.colorScheme.shadow.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: AppColors.kprimaryColor500.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                Icons.local_hospital,
-                color: AppColors.kprimaryColor500,
-                size: 24,
-              ),
-            ),
-            const Gap(12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Connected to',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: theme.colorScheme.onSurface.withOpacity(0.6),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const Gap(2),
-                  Text(
-                    connectedHospital?.hospitalName ?? 'Unknown Hospital',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                  if (connectedHospital?.city != null) ...[
-                    const Gap(2),
-                    Text(
-                      '${connectedHospital!.city}, ${connectedHospital!.country}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: theme.colorScheme.onSurface.withOpacity(0.6),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: const Text(
-                'Connected',
-                style: TextStyle(
-                  fontSize: 10,
-                  color: Colors.green,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSearchField(ThemeData theme) {
-    return TextField(
-      decoration: InputDecoration(
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        prefixIcon: Icon(
-          Icons.search,
-          color: theme.colorScheme.onSurface.withOpacity(0.5),
-        ),
-        hintText: 'Search doctors by name or specialization',
-        hintStyle: TextStyle(
-          color: theme.colorScheme.onSurface.withOpacity(0.5),
-        ),
-        filled: true,
-        fillColor: theme.colorScheme.surface,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: AppColors.kprimaryColor500,
-            width: 2,
-          ),
-        ),
-      ),
-      onChanged: _filterDoctors,
-    );
-  }
-
-  Widget _buildDoctorsList(hospitalProvider, ThemeData theme) {
-    if (hospitalProvider.doctorResult.state == DoctorResultStates.isLoading) {
-      return _buildDoctorsListShimmer();
-    }
-
-    if (hospitalProvider.doctorResult.state == DoctorResultStates.isError) {
-      return _buildErrorState(theme);
-    }
-
-    if (filteredDoctors.isEmpty) {
-      return _buildEmptyState(theme);
-    }
-
-    return ListView.builder(
-      itemCount: filteredDoctors.length,
-      itemBuilder: (context, index) {
-        final doctor = filteredDoctors[index];
-        return _buildDoctorCard(doctor, theme);
+    return NoConnectedHospitalView(
+      onHospitalBrowse: () async {
+        _hasNavigatedAway = true;
+        await context.push('/hospital');
+        // Refresh data when returning from hospital browsing
+        _refreshData();
       },
     );
   }
 
-  Widget _buildErrorState(ThemeData theme) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.error_outline,
-            size: 64,
-            color: theme.colorScheme.error,
-          ),
-          const Gap(16),
-          Text(
-            'Failed to load doctors',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: theme.colorScheme.onSurface,
-            ),
-          ),
-          const Gap(8),
-          Text(
-            'Please check your connection and try again',
-            style: TextStyle(
-              fontSize: 14,
-              color: theme.colorScheme.onSurface.withOpacity(0.7),
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const Gap(24),
-          ElevatedButton(
-            onPressed: () {
-              if (connectedHospital != null) {
-                ref
-                    .read(hospitalprovider)
-                    .callDoctorsbyhospitalid(connectedHospital!.id);
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.kprimaryColor500,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text('Retry'),
-          ),
-        ],
-      ),
-    );
-  }
+}
 
-  Widget _buildEmptyState(ThemeData theme) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.person_search,
-            size: 64,
-            color: theme.colorScheme.onSurface.withOpacity(0.5),
-          ),
-          const Gap(16),
-          Text(
-            searchQuery.isEmpty ? 'No Doctors Available' : 'No Doctors Found',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: theme.colorScheme.onSurface,
-            ),
-          ),
-          const Gap(8),
-          Text(
-            searchQuery.isEmpty
-                ? 'This hospital hasn\'t added any doctors yet'
-                : 'Try adjusting your search terms',
-            style: TextStyle(
-              fontSize: 14,
-              color: theme.colorScheme.onSurface.withOpacity(0.7),
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
+class DoctorsListShimmer extends StatelessWidget {
+  const DoctorsListShimmer({super.key});
 
-  Widget _buildDoctorCard(Doctor doctor, ThemeData theme) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: theme.colorScheme.shadow.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: InkWell(
-        onTap: () {
-          context.push('/doctor/detail', extra: {"doctor": doctor});
-          // Navigate to doctor detail page
-          // You can implement this based on your existing doctor detail navigation
-        },
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              // Doctor Avatar
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: AppColors.kprimaryColor500.withOpacity(0.1),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: doctor.profileUrl != null &&
-                          doctor.profileUrl!.isNotEmpty
-                      ? CachedNetworkImage(
-                          imageUrl: doctor.profileUrl!,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(
-                            color: AppColors.kprimaryColor500.withOpacity(0.1),
-                            child: Icon(
-                              Icons.person,
-                              color: AppColors.kprimaryColor500,
-                              size: 30,
-                            ),
-                          ),
-                          errorWidget: (context, url, error) => Container(
-                            color: AppColors.kprimaryColor500.withOpacity(0.1),
-                            child: Icon(
-                              Icons.person,
-                              color: AppColors.kprimaryColor500,
-                              size: 30,
-                            ),
-                          ),
-                        )
-                      : Icon(
-                          Icons.person,
-                          color: AppColors.kprimaryColor500,
-                          size: 30,
-                        ),
-                ),
-              ),
-              const Gap(16),
-              // Doctor Info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      doctor.fullName,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                    ),
-                    if (doctor.specialization != null) ...[
-                      const Gap(4),
-                      Text(
-                        doctor.specialization!,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: AppColors.kprimaryColor500,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                    if (doctor.experienceYears != null) ...[
-                      const Gap(4),
-                      Text(
-                        '${doctor.experienceYears} years experience',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: theme.colorScheme.onSurface.withOpacity(0.6),
-                        ),
-                      ),
-                    ],
-                    if (doctor.qualification != null) ...[
-                      const Gap(4),
-                      Text(
-                        doctor.qualification!,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: theme.colorScheme.onSurface.withOpacity(0.6),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              // Action Button
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: AppColors.kprimaryColor500.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  'View',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.kprimaryColor500,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHospitalShimmer() {
-    final theme = Theme.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Hospital info shimmer
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: theme.colorScheme.shadow.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const ShimmerWidget(height: 20, width: 150),
-                const Gap(8),
-                const ShimmerWidget(height: 16, width: 200),
-                const Gap(16),
-                const ShimmerWidget(height: 40, width: double.infinity),
-              ],
-            ),
-          ),
-          const Gap(24),
-          // Search bar shimmer
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: const ShimmerWidget(height: 50, width: double.infinity),
-          ),
-          const Gap(16),
-          // Doctors list shimmer
-          Expanded(child: _buildDoctorsListShimmer()),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDoctorsListShimmer() {
-    final theme = Theme.of(context);
-
+  @override
+  Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: 6, // Show 6 shimmer items
+      itemCount: 6,
       itemBuilder: (context, index) {
         return Container(
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
+            color: Colors.white,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: theme.colorScheme.shadow.withOpacity(0.1),
+                color: Colors.grey.withOpacity(0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),
@@ -742,13 +310,8 @@ class _ConnectedHospitalDoctorsPageState
           ),
           child: Row(
             children: [
-              // Avatar shimmer
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: const ShimmerWidget(height: 60, width: 60),
-              ),
+              const ShimmerWidget(height: 60, width: 60),
               const Gap(16),
-              // Doctor info shimmer
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -761,11 +324,7 @@ class _ConnectedHospitalDoctorsPageState
                   ],
                 ),
               ),
-              // Action button shimmer
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: const ShimmerWidget(height: 30, width: 50),
-              ),
+              const ShimmerWidget(height: 30, width: 50),
             ],
           ),
         );

@@ -1,25 +1,19 @@
 // lib/main.dart
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:go_router/go_router.dart';
 import 'package:h_smart/core/approuter.dart';
 import 'package:h_smart/core/theme/theme_provider.dart';
 import 'package:h_smart/core/theme/text_scale_provider.dart';
 
 import 'core/service/locator.dart';
-import 'core/service/token_refresh_service.dart';
 import 'core/service/app_lifecycle_service.dart';
 import 'package:h_smart/features/auth/presentation/provider/auth_provider.dart';
-import 'package:h_smart/features/auth/domain/usecases/authStates.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'features/auth/presentation/controller/accesstokenrefresh.dart';
 
 void main() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();

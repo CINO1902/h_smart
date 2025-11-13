@@ -51,21 +51,32 @@ class _HomePageState extends ConsumerState<HomePage>
     _prescriptionController = ScrollController();
     _appointmentController = PageController();
 
-    final isInitialized = ref.read(authProvider).isHomePageInitialized;
-    if (!isInitialized) {
-      // Schedule your async calls after first frame
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        await _initializeHomePage();
-      });
-    }
+    // Schedule initialization after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _initializeHomePage();
+    });
   }
 
   /// Initialize HomePage with token refresh check
   Future<void> _initializeHomePage() async {
     ref.read(authProvider.notifier).loadSavedPayload();
-    // Check if token refresh is needed before running initialization functions
 
-    // Proceed with normal initialization
+    // Check if user is actually logged in with valid tokens
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('jwt_token');
+    final refreshToken = prefs.getString('refresh_token');
+
+    if (token != null &&
+        refreshToken != null &&
+        token.isNotEmpty &&
+        refreshToken.isNotEmpty) {
+      // User is logged in, proceed with initialization
+      if (!ref.read(authProvider).isHomePageInitialized) {
+        ref.read(authProvider.notifier).fetchUserInfo();
+        ref.read(medicalRecordProvider.notifier).getOverview();
+        ref.read(authProvider.notifier).markhometarget(true);
+      }
+    }
   }
 
   @override
@@ -151,7 +162,17 @@ class _HomePageState extends ConsumerState<HomePage>
   Widget build(BuildContext context) {
     ref.listen<AuthProvider>(authProvider, (previous, next) async {
       await Future.delayed(const Duration(seconds: 1));
-      if (next.loginResult.state == LoginResultStates.isData) {
+
+      // Check if user is actually logged in with valid tokens
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('jwt_token');
+      final refreshToken = prefs.getString('refresh_token');
+
+      if (token != null &&
+          refreshToken != null &&
+          token.isNotEmpty &&
+          refreshToken.isNotEmpty &&
+          next.loginResult.state == LoginResultStates.isData) {
         if (!ref.watch(authProvider).isHomePageInitialized) {
           ref.read(authProvider.notifier).fetchUserInfo();
           ref.read(medicalRecordProvider.notifier).getOverview();

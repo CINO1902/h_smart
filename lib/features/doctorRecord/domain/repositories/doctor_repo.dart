@@ -2,57 +2,22 @@ import 'dart:developer';
 
 import 'package:h_smart/features/doctorRecord/data/repositories/doctorRepo.dart';
 import 'package:h_smart/features/doctorRecord/domain/entities/mydoctor.dart';
+import 'package:h_smart/features/doctorRecord/domain/entities/appointmentBooking.dart';
 
 import '../../../../core/exceptions/network_exception.dart';
+import '../entities/doctorBooking.dart';
 import '../usecases/doctorStates.dart';
 
 abstract class DoctorRepository {
-  Future<List<dynamic>> getDoctorCategory();
-  Future<List<dynamic>> addtofav(id);
+  Future<DoctorBookingResult> getdoctorBookings(String doctorId);
   Future<CallMyDoctorResult> mydoctor();
-  Future<List<dynamic>> removefav(id);
+  Future<AppointmentBookingResult> bookAppointment(AppointmentBookingRequest request);
 }
 
 class DoctorRepoImpl implements DoctorRepository {
   final DoctorDatasource doctorDatasource;
 
   DoctorRepoImpl(this.doctorDatasource);
-
-
-
-  @override
-  Future<List> getDoctorCategory() async {
-    List<dynamic> returnresponse = [];
-
-    try {
-      returnresponse = await doctorDatasource.getDoctorCategory();
-    } catch (e) {
-      NetworkException exp = e as NetworkException;
-
-      returnresponse.add('1');
-      returnresponse.add(exp.message);
-
-      log(e.toString());
-    }
-    return returnresponse;
-  }
-
-  @override
-  Future<List> addtofav(id) async {
-    List<dynamic> returnresponse = [];
-
-    try {
-      returnresponse = await doctorDatasource.addtofav(id);
-    } catch (e) {
-      NetworkException exp = e as NetworkException;
-
-      returnresponse.add('1');
-      returnresponse.add(exp.message);
-
-      log(e.toString());
-    }
-    return returnresponse;
-  }
 
   @override
   Future<CallMyDoctorResult> mydoctor() async {
@@ -80,19 +45,74 @@ class DoctorRepoImpl implements DoctorRepository {
   }
 
   @override
-  Future<List> removefav(id) async {
-    List<dynamic> returnresponse = [];
-
+  Future<DoctorBookingResult> getdoctorBookings(String doctorId) async {
+    DoctorBookingResult doctorBookingResult = DoctorBookingResult(
+        DoctorBookingResultState.isLoading, DoctorBooking());
     try {
-      returnresponse = await doctorDatasource.removefav(id);
+      doctorBookingResult = await doctorDatasource.getdoctorBookings(doctorId);
     } catch (e) {
-      NetworkException exp = e as NetworkException;
+      if (e.runtimeType == NetworkException) {
+        NetworkException exp = e as NetworkException;
+        final message = exp.errorMessage ?? e.message;
 
-      returnresponse.add('1');
-      returnresponse.add(exp.message);
+        doctorBookingResult = DoctorBookingResult(
+            DoctorBookingResultState.isError, DoctorBooking(message: message));
+      } else {
+        doctorBookingResult = DoctorBookingResult(
+            DoctorBookingResultState.isError,
+            DoctorBooking(message: "something went wrong"));
+      }
 
       log(e.toString());
     }
-    return returnresponse;
+    return doctorBookingResult;
+  }
+
+  @override
+  Future<AppointmentBookingResult> bookAppointment(AppointmentBookingRequest request) async {
+    AppointmentBookingResult appointmentBookingResult = AppointmentBookingResult(
+        AppointmentBookingResultState.isLoading, 
+        AppointmentBookingResponse(
+          data: AppointmentBookingData(
+            id: '', doctorId: '', userId: '', reason: '', type: '', 
+            status: '', slotBookedStartTime: '', slotBookedEndTime: '', 
+            createdAt: '', updatedAt: ''
+          ), 
+          message: ''
+        ));
+    
+    try {
+      appointmentBookingResult = await doctorDatasource.bookAppointment(request);
+    } catch (e) {
+      if (e.runtimeType == NetworkException) {
+        NetworkException exp = e as NetworkException;
+        final message = exp.errorMessage ?? exp.message;
+        
+        appointmentBookingResult = AppointmentBookingResult(
+            AppointmentBookingResultState.isError, 
+            AppointmentBookingResponse(
+              data: AppointmentBookingData(
+                id: '', doctorId: '', userId: '', reason: '', type: '', 
+                status: '', slotBookedStartTime: '', slotBookedEndTime: '', 
+                createdAt: '', updatedAt: ''
+              ), 
+              message: message
+            ));
+      } else {
+        appointmentBookingResult = AppointmentBookingResult(
+            AppointmentBookingResultState.isError,
+            AppointmentBookingResponse(
+              data: AppointmentBookingData(
+                id: '', doctorId: '', userId: '', reason: '', type: '', 
+                status: '', slotBookedStartTime: '', slotBookedEndTime: '', 
+                createdAt: '', updatedAt: ''
+              ), 
+              message: "Something went wrong"
+            ));
+      }
+      
+      log(e.toString());
+    }
+    return appointmentBookingResult;
   }
 }

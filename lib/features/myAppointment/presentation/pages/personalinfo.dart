@@ -37,6 +37,13 @@ class _PersonalInfoState extends ConsumerState<PersonalInfo> {
   bool _isEditing = false;
   PhoneNumber? _phoneNumber;
 
+  // Store original values to track changes
+  String _originalFirstName = '';
+  String _originalLastName = '';
+  String _originalAddress = '';
+  String _originalPhone = '';
+  File? _originalImage;
+
   @override
   void initState() {
     super.initState();
@@ -47,6 +54,12 @@ class _PersonalInfoState extends ConsumerState<PersonalInfo> {
     _emailController = TextEditingController();
     _addressController = TextEditingController();
     _phoneController = TextEditingController();
+
+    // Add listeners to detect changes
+    _firstNameController.addListener(() => setState(() {}));
+    _lastNameController.addListener(() => setState(() {}));
+    _addressController.addListener(() => setState(() {}));
+    _phoneController.addListener(() => setState(() {}));
 
     // After first frame, read existing user data and split phone number
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -66,6 +79,13 @@ class _PersonalInfoState extends ConsumerState<PersonalInfo> {
         // Read the split phone into our local controller
         final splitPhone = ref.read(appointmentProvider).phoneNumber;
         _phoneController.text = splitPhone;
+
+        // Store original values
+        _originalFirstName = userData.firstName ?? '';
+        _originalLastName = userData.lastName ?? '';
+        _originalAddress = userData.patientMetadata?.address ?? '';
+        _originalPhone = splitPhone;
+        _originalImage = null; // No original image file
       }
     });
   }
@@ -78,6 +98,21 @@ class _PersonalInfoState extends ConsumerState<PersonalInfo> {
     _addressController.dispose();
     _phoneController.dispose();
     super.dispose();
+  }
+
+  bool _hasChanges() {
+    final uploadProv = ref.read(appointmentProvider);
+
+    // Check if image has changed
+    if (uploadProv.image != _originalImage) {
+      return true;
+    }
+
+    // Check if any text field has changed
+    return _firstNameController.text.trim() != _originalFirstName ||
+        _lastNameController.text.trim() != _originalLastName ||
+        _addressController.text.trim() != _originalAddress ||
+        _phoneController.text.trim() != _originalPhone;
   }
 
   Future<void> _saveChanges() async {
@@ -119,7 +154,7 @@ class _PersonalInfoState extends ConsumerState<PersonalInfo> {
       address,
     );
     await ref.read(authProvider).fetchUserInfo();
-    ref.read(authProvider).loadSavedPayload();
+    await ref.read(authProvider).loadSavedPayload();
     SmartDialog.dismiss();
 
     if (uploadProv.updateProfileResult.state ==
@@ -133,7 +168,19 @@ class _PersonalInfoState extends ConsumerState<PersonalInfo> {
           status: SnackbarStatus.success,
           title: 'Error',
           body: 'Profile has been updated successfully');
+      setState(() {
+        _isEditing = false;
 
+        final authState = ref.read(authProvider);
+        final userData = authState.userData;
+        final splitPhone = ref.read(appointmentProvider).phoneNumber;
+        _originalFirstName = userData?.firstName ?? '';
+        print(_originalFirstName);
+        _originalLastName = userData?.lastName ?? '';
+        _originalAddress = userData?.patientMetadata?.address ?? '';
+        _originalPhone = splitPhone;
+        _originalImage = null; // No original image file
+      });
       // Optionally refresh auth provider data here:
     }
   }
@@ -419,8 +466,17 @@ class _PersonalInfoState extends ConsumerState<PersonalInfo> {
               child: SizedBox(
                 height: 50,
                 child: InkWell(
-                  onTap: _saveChanges,
-                  child: InkButton(title: 'Update Changes'),
+                  onTap: _hasChanges()
+                      ? _saveChanges
+                      : () => SnackBarService.notifyAction(
+                            context,
+                            message: 'You haven\'t made any change',
+                            status: SnackbarStatus.fail,
+                          ),
+                  child: InkButton(
+                    title: 'Update Changes',
+                    active: !_hasChanges(),
+                  ),
                 ),
               ),
             ),

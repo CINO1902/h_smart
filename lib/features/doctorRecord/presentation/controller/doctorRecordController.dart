@@ -2,7 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:h_smart/features/doctorRecord/domain/entities/mydoctor.dart';
 import 'package:h_smart/features/doctorRecord/domain/repositories/doctor_repo.dart';
 import 'package:h_smart/features/doctorRecord/domain/usecases/doctorStates.dart';
+import 'package:h_smart/features/doctorRecord/domain/entities/appointmentBooking.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../domain/entities/doctorBooking.dart';
 
 class Doctorprovider extends ChangeNotifier {
   final DoctorRepository doctorRepository;
@@ -16,54 +19,20 @@ class Doctorprovider extends ChangeNotifier {
   bool mydocloading = true;
   CallMyDoctorResult callMyDoctorResult =
       CallMyDoctorResult(CallMyDoctorResultState.isLoading, Mydoctor());
+  DoctorBookingResult doctorBookingResult =
+      DoctorBookingResult(DoctorBookingResultState.isLoading, DoctorBooking());
+  AppointmentBookingResult appointmentBookingResult =
+      AppointmentBookingResult(AppointmentBookingResultState.idle, 
+          AppointmentBookingResponse(
+            data: AppointmentBookingData(
+              id: '', doctorId: '', userId: '', reason: '', type: '', 
+              status: '', slotBookedStartTime: '', slotBookedEndTime: '', 
+              createdAt: '', updatedAt: ''
+            ), 
+            message: ''
+          ));
   String favdoctorid = '';
   List<PayloadDoc> mydoctorlist = [];
-
-
-
-
-
-
-
-  Future<void> addtoFavourite(doctorid) async {
-    loadfav = true;
-    notifyListeners();
-    final response = await doctorRepository.addtofav(doctorid);
-    loadfav = false;
-    if (response[0].contains('1')) {
-      error = true;
-      msg = response[1];
-    } else {
-      error = false;
-
-      msg = response[1]['message'];
-      final pref = await SharedPreferences.getInstance();
-      pref.setString('favdoctorid', doctorid);
-      favdoctorid = doctorid;
-    }
-    callmydoctor();
-    loadfav = false;
-    notifyListeners();
-  }
-
-  Future<void> removefromFavourite(doctorid) async {
-    loadfav = true;
-    notifyListeners();
-    final response = await doctorRepository.removefav(favdoctorid);
-    loadfav = false;
-    if (response[0].contains('1')) {
-      error = true;
-      msg = response[1];
-    } else {
-      error = false;
-      msg = 'Remove Succesfully';
-      final pref = await SharedPreferences.getInstance();
-      pref.setString('favdoctorid', '');
-      favdoctorid = '';
-    }
-    notifyListeners();
-  }
-
 
   Future<void> callmydoctor() async {
     callMyDoctorResult =
@@ -78,19 +47,33 @@ class Doctorprovider extends ChangeNotifier {
       favdoctorid = doctorid;
     }
 
-    // if (response[0].contains('1')) {
-    //   error = true;
-    //   msg = response[1];
-    // } else {
-    //   error = false;
+    notifyListeners();
+  }
 
-    //   final decodedres = Mydoctor.fromJson(response[1] as Map<String, dynamic>);
-    //   mydoctorlist = decodedres.payload;
-    //   final doctorid = mydoctorlist[0].doctor.user.id;
-    //   final pref = await SharedPreferences.getInstance();
-    //   pref.setString('favdoctorid', doctorid);
-    //   favdoctorid = doctorid;
-    // }
+  Future<void> getdoctorBookings(String doctorId) async {
+    doctorBookingResult = DoctorBookingResult(
+        DoctorBookingResultState.isLoading, DoctorBooking());
+    notifyListeners();
+    final response = await doctorRepository.getdoctorBookings(doctorId);
+    doctorBookingResult = response;
+    notifyListeners();
+  }
+
+  Future<void> bookAppointment(AppointmentBookingRequest request) async {
+    appointmentBookingResult = AppointmentBookingResult(
+        AppointmentBookingResultState.isLoading, 
+        AppointmentBookingResponse(
+          data: AppointmentBookingData(
+            id: '', doctorId: '', userId: '', reason: '', type: '', 
+            status: '', slotBookedStartTime: '', slotBookedEndTime: '', 
+            createdAt: '', updatedAt: ''
+          ), 
+          message: ''
+        ));
+    notifyListeners();
+    
+    final response = await doctorRepository.bookAppointment(request);
+    appointmentBookingResult = response;
     notifyListeners();
   }
 }
